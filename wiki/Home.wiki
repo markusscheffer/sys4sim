@@ -1,4 +1,5 @@
 #summary Wiki home page
+#labels Featured
 
 = sys4sim: SysML for Simulation =
 
