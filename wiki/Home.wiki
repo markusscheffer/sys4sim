@@ -8,6 +8,6 @@ Add your content here.
 
 = Important Links =
 
-  * [Development Guidelines]
-  * [Development Documentation]
-  * [User Guide]
+  * [Development_Guidelines]
+  * [Development_Documentation]
+  * [User_Guide]
