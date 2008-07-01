@@ -1,4 +1,4 @@
-#Wiki home page
+#summary Wiki home page
 
 = sys4sim: SysML for Simulation =
 
