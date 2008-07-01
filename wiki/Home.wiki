@@ -1,4 +1,4 @@
-# Wiki home page
+#Wiki home page
 
 = sys4sim: SysML for Simulation =
 
@@ -7,6 +7,6 @@ Add your content here.
 
 = Important Links =
 
-* [Development Guidelines]
-* [Development Documentation]
-* [User Guide]
+  * [Development Guidelines]
+  * [Development Documentation]
+  * [User Guide]
