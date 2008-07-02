@@ -9,5 +9,3 @@ public interface ExportInterface {
 }
 
 
-https://sys4sim.googlecode.com/svn/trunk/
-	cm2wg2Tq2Sj2
