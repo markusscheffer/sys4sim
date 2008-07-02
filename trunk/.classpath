@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/swt-3"/>
+	<classpathentry kind="lib" path="/Users/einbecker/Documents/uni/Beleg/Software/xerces-2_9_1/serializer.jar"/>
+	<classpathentry kind="lib" path="/Users/einbecker/Documents/uni/Beleg/Software/xerces-2_9_1/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="/Users/einbecker/Documents/uni/Beleg/Software/xerces-2_9_1/xml-apis.jar"/>
+	<classpathentry kind="lib" path="/Users/einbecker/Documents/uni/Beleg/Software/xerces-2_9_1/resolver.jar"/>
+	<classpathentry kind="lib" path="/Users/einbecker/Documents/uni/Beleg/Software/xerces-2_9_1/xercesSamples.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
