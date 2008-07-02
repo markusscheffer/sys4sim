@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<editmodel:ClassDiagramEditModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:editmodel="editmodel.xmi" xmlns:options="options.xmi" name="Classes" foregroundRGB="255,255,255" id="{UMLID=_Xv3YYEgvEd2tNagEcsj_JQ,JavaID=}" metadata="uml2-1.0" initialized="true" tag="1000" key="3230303730363239207379733473696D2F65696E6265636B6572">
+  <children xsi:type="editmodel:PackageEditModel" name="sys4sim.export" location="149,154" size="202,144" id="{UMLID=_mjiBAEgvEd2tNagEcsj_JQ,JavaID=sys4sim.export}">
+    <children xsi:type="editmodel:InterfaceEditModel" name="ExportInterface" location="67,65" size="115,74" id="{UMLID=_mkFaoEgvEd2tNagEcsj_JQ,JavaID=sys4sim.export/ExportInterface}" runTimeClassModel="writeFile(Lsys4sim.internal_model.Model;Ljava.io.File;)">
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <children xsi:type="editmodel:CompartmentEditModel" size="66,18">
+        <children xsi:type="editmodel:MethodEditModel" name="writeFile" id="{UMLID=_mkg4cEgvEd2tNagEcsj_JQ,JavaID=sys4sim.export/ExportInterface#writeFile(Lsys4sim.internal_model.Model;Ljava.io.File;)}"/>
+      </children>
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showMethods="true" showAttributes="true"/>
+    </children>
+    <packagePreferences xsi:type="editmodel:UMLClassDiagramPackagePreference" showStereotype="true"/>
+  </children>
+  <children xsi:type="editmodel:PackageEditModel" name="sys4sim.gui" location="45,63" size="98,73" id="{UMLID=_kI4jgEgvEd2tNagEcsj_JQ,JavaID=sys4sim.gui}">
+    <packagePreferences xsi:type="editmodel:UMLClassDiagramPackagePreference" showStereotype="true"/>
+  </children>
+  <children xsi:type="editmodel:PackageEditModel" name="sys4sim.internal_model" location="92,364" size="156,117" id="{UMLID=_mkj7wEgvEd2tNagEcsj_JQ,JavaID=sys4sim.internal_model}">
+    <children xsi:type="editmodel:ClassEditModel" name="Machine" location="61,79" size="82,27" stereotype="" id="{UMLID=_H1gYAEgwEd2tNagEcsj_JQ,JavaID=sys4sim.internal_model/Machine}" runTimeClassModel="">
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showMethods="true" showAttributes="true"/>
+    </children>
+    <children xsi:type="editmodel:ClassEditModel" name="Model" location="13,53" size="70,27" stereotype="" id="{UMLID=_mklw8EgvEd2tNagEcsj_JQ,JavaID=sys4sim.internal_model/Model}" runTimeClassModel="">
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <children xsi:type="editmodel:CompartmentEditModel"/>
+      <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showMethods="true" showAttributes="true"/>
+    </children>
+    <packagePreferences xsi:type="editmodel:UMLClassDiagramPackagePreference" showStereotype="true"/>
+  </children>
+  <children xsi:type="editmodel:PackageEditModel" name="sys4sim.xmi_import" location="551,37" size="138,103" id="{UMLID=_kWMmwEgvEd2tNagEcsj_JQ,JavaID=sys4sim.xmi_import}">
+    <packagePreferences xsi:type="editmodel:UMLClassDiagramPackagePreference" showStereotype="true"/>
+  </children>
+  <diagramOptions xsi:type="options:ClassDiagramOptions" properties="wireOptions=1" autoName="false"/>
+  <boardSetting snapToGeometry="true" gridEnabled="true" gridSpacing="10,10" gridOrigin="0,0" rulerUnit="pixel">
+    <leftRuler/>
+    <topRuler/>
+  </boardSetting>
+  <classDiagramPreferences xsi:type="editmodel:UMLClassDiagramPreference" attributeSorter="Natural" methodSorter="Natural" showClassStereotype="true" showPackageStereotype="true" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showInterfaceStereotype="true" showMethods="true" showAttributes="true" showLiterlas="true" showInnerEntity="true"/>
+</editmodel:ClassDiagramEditModel>
