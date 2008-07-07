@@ -2,6 +2,7 @@ package sys4sim.xmi_import;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -25,13 +26,16 @@ public class ParsingHandler extends DefaultHandler {
 	public void startElement (String uri, String name,
 		      String qName, Attributes atts) {
 			String methodName = "".equals(uri) ? qName : name;
-			
-		try {
-			Class<?> cls = getClass ();
+		if(!(elementStack.peek().getClass().equals(DeepIgnoreXmiObject.class))) {
+			elementStack.push(new DeepIgnoreXmiObject());
+		}
+		else {	
+			try {
+				Class<?> cls = getClass ();
 	      
-			Method method = cls.getMethod (methodName, String.class, String.class, Attributes.class);
-			// elementStack.push((XmiObject) 
-			elementStack.push((XmiObject) method.invoke(this, methodName, uri, atts));
+				Method method = cls.getMethod (methodName, String.class, String.class, Attributes.class);
+				// elementStack.push((XmiObject) 
+				elementStack.push((XmiObject) method.invoke(this, methodName, uri, atts));
 			
 			} catch (NoSuchMethodException e) {
 		      System.out.println ("Method does not exist!" + methodName);
@@ -46,6 +50,7 @@ public class ParsingHandler extends DefaultHandler {
 		      Throwable methodException = e.getTargetException ();
 		      methodException.printStackTrace ();
 		    }
+		}
 	      
 		
 	}
@@ -80,11 +85,30 @@ public class ParsingHandler extends DefaultHandler {
   }
   
   public XmiObject packagedElement(String name, String uri, Attributes atts) {
-	  PackagedElement pe = new PackagedElement();
-	  pe.setName(atts.getValue("name"));
-	  pe.setXmiID(atts.getValue("xmi:id"));
-	  pe.setXmiType(atts.getValue("xmi:type"));
-	  return (XmiObject) pe; 
+	  String type = atts.getValue("xmi.type");
+	  if (type.equals("uml:Package") || 
+			  type.equals("uml:Stereotype") ||
+			  type.equals("uml:Extension")) {
+		  return new DeepIgnoreXmiObject();
+	  } else if (type.equals("uml:Class")) {
+		  return umlClass(name, uri, atts);
+	  } else if (type.equals("uml:Activity")) {
+		  return activity(name, uri, atts);
+	  }
+	  
+	  else {
+		  return new VoidXmiObject();
+	  }
+	  
+  }
+  
+  public XmiObject umlClass(String name, String uri, Attributes atts) {
+
+	  UmlClass uc = new UmlClass();
+	  uc.setName(atts.getValue("name"));
+	  uc.setXmiID(atts.getValue("xmi:id"));
+	  uc.setXmiType(atts.getValue("xmi:type"));
+	  return (XmiObject) uc; 
   }
   
   public XmiObject generalization(String name, String uri, Attributes atts) {
@@ -108,44 +132,88 @@ public class ParsingHandler extends DefaultHandler {
   }
   
   public XmiObject ownedConnector(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  OwnedConnector oc = new OwnedConnector();
+	  oc.setXmiID(atts.getValue("xmi:id"));
+	  oc.setName(atts.getValue("name"));
+	  PackagedElement pe = (PackagedElement) elementStack.peek();
+	  pe.getConnectors().add(oc);
+	  return (XmiObject) oc; 
+  }
   
   public XmiObject end(String name, String uri, Attributes atts) {
+	  End end = new End();
+	  end.setXmiID(atts.getValue("xmi:id"));
+	  end.setPartWithPort(atts.getValue("partWithPort"));
+	  end.setRole(atts.getValue("role"));
+	  OwnedConnector oc = (OwnedConnector) elementStack.peek();
+	  oc.getEnds().add(end);
+	  return (XmiObject) end; 
+  }
+  
+  public XmiObject activity(String name, String uri, Attributes atts) {
+	  Activity act = new Activity();
+	  act.setXmiID(atts.getValue("xmi:id"));
+	  act.setXmiType(atts.getValue("xmi:type"));
+	  act.setName(atts.getValue("name"));
+	  act.setPartitions(splitMultiple(atts.getValue("partition")));
 	  
-  return (XmiObject) new VoidXmiObject(); }
+	  return (XmiObject) act;
+  }
+  
+  
+  public ArrayList<String> splitMultiple(String string) {
+	  ArrayList<String> list = new ArrayList<String>();
+	  String[] temp = string.split(" ");
+	  for (String sub : temp) {
+		  list.add(sub);
+	  }
+	  return list;
+  }
   
   public XmiObject general(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
   public XmiObject type(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
   public XmiObject icon(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
   public XmiObject ownedEnd(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
   public XmiObject upperValue(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
   public XmiObject lowerValue(String name, String uri, Attributes atts) {
-	  
-  return (XmiObject) new VoidXmiObject(); }
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
   public XmiObject nestedClassifier(String name, String uri, Attributes atts) {
+	  // done: this does not need anything done to it.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
 	  
-  return (XmiObject) new VoidXmiObject(); }
-  
   public XmiObject node(String name, String uri, Attributes atts) {
+	  Node node = new Node();
 	  
-  return (XmiObject) new VoidXmiObject(); }
+	  
+	  Activity act = (Activity) elementStack.peek();
+	  act.getNodes().add(node);
+	  
+	  return (XmiObject) node; 
+  }
   
   public XmiObject result(String name, String uri, Attributes atts) {
 	  
