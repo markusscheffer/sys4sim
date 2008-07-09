@@ -10,7 +10,7 @@ public class End extends XmiObject {
 	private OwnedAttribute partWithPort;
 	private Port role;
 	
-	public void destringRelations (Hashtable<String, XmiObject> hash) {
+	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		partWithPort = (OwnedAttribute) hash.get(partWithPortString);
 		role = (Port) hash.get(roleString);
 	}

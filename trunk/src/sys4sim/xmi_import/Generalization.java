@@ -6,7 +6,7 @@ public class Generalization extends XmiObject{
 	private String extendedString;
 	private PackagedElement extended;
 	
-	public void destringRelations (Hashtable<String, XmiObject> hash) {
+	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		extended = (PackagedElement) hash.get(extendedString);
 	}
 	
@@ -25,4 +25,6 @@ public class Generalization extends XmiObject{
 	public void setExtendedString(String extended) {
 		this.extendedString = extended;
 	}
+	
+
 }

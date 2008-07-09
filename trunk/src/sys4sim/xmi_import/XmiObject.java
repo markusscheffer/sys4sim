@@ -16,6 +16,6 @@ public class XmiObject {
 	}
 	
 	public void unstringRelations(Hashtable<String, XmiObject> hash) {
-		System.out.println("no specialized unstring code found.");
+		System.out.println("no specialized unstring code found: " + this.getClass().toString());
 	}
 }

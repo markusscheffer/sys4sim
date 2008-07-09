@@ -14,7 +14,7 @@ public class Edge extends XmiObjectWithName {
 	private Node target;
 	private ActivityPartition inPartition;
 	
-	public void destringRelations (Hashtable<String, XmiObject> hash) {
+	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		source = (Node) hash.get(sourceString);
 		target = (Node) hash.get(targetString);
 		inPartition = (ActivityPartition) hash.get(inPartitionString);

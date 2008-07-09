@@ -7,7 +7,7 @@ public class Argument extends XmiObjectWithName {
 	private String incomingString;
 	private Edge incoming;
 	
-	public void destringRelations(Hashtable<String, XmiObject> hash) {
+	public void unstringRelations(Hashtable<String, XmiObject> hash) {
 		incoming = (Edge) hash.get(incomingString);
 	}
 	
