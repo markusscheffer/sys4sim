@@ -1,16 +1,50 @@
 package sys4sim.xmi_import;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Node extends XmiObjectWithName {
 	private String xmiType;
 	private String visibility;
-	private ArrayList<String> outgoing;
-	private ArrayList<String> incoming;
-	private String inPartition;
+	private ArrayList<String> outgoingStrings;
+	private ArrayList<String> incomingStrings;
+	private String inPartitionString;
 	private Argument argument;
 	private Result result;
+	private ArrayList<Edge> outgoing = new ArrayList<Edge>();
+	private ArrayList<Edge> incoming = new ArrayList<Edge>();
+	private ActivityPartition inPartition;
 	
+	public void destringRelations (Hashtable<String, XmiObject> hash) {
+		for (String outgoingString : outgoingStrings) {
+			Edge edge = (Edge) hash.get(outgoingString);
+			outgoing.add(edge);
+		}
+		for (String incomingString : incomingStrings) {
+			Edge edge = (Edge) hash.get(incomingString);
+			incoming.add(edge);
+		}
+		inPartition = (ActivityPartition) hash.get(inPartitionString);
+	}
+	
+	public ArrayList<Edge> getOutgoing() {
+		return outgoing;
+	}
+	public void setOutgoing(ArrayList<Edge> outgoing) {
+		this.outgoing = outgoing;
+	}
+	public ArrayList<Edge> getIncoming() {
+		return incoming;
+	}
+	public void setIncoming(ArrayList<Edge> incoming) {
+		this.incoming = incoming;
+	}
+	public ActivityPartition getInPartition() {
+		return inPartition;
+	}
+	public void setInPartition(ActivityPartition inPartition) {
+		this.inPartition = inPartition;
+	}
 	public String getXmiType() {
 		return xmiType;
 	}
@@ -23,23 +57,23 @@ public class Node extends XmiObjectWithName {
 	public void setVisibility(String visibility) {
 		this.visibility = visibility;
 	}
-	public void setOutgoing(ArrayList<String> outgoing) {
-		this.outgoing = outgoing;
+	public void setOutgoingStrings(ArrayList<String> outgoing) {
+		this.outgoingStrings = outgoing;
 	}
-	public void setIncoming(ArrayList<String> incoming) {
-		this.incoming = incoming;
+	public void setIncomingStrings(ArrayList<String> incoming) {
+		this.incomingStrings = incoming;
 	}
-	public ArrayList<String> getOutgoing() {
-		return outgoing;
+	public ArrayList<String> getOutgoingStrings() {
+		return outgoingStrings;
 	}
-	public ArrayList<String> getIncoming() {
-		return incoming;
+	public ArrayList<String> getIncomingStrings() {
+		return incomingStrings;
 	}
-	public String getInPartition() {
-		return inPartition;
+	public String getInPartitionString() {
+		return inPartitionString;
 	}
-	public void setInPartition(String inPartition) {
-		this.inPartition = inPartition;
+	public void setInPartitionString(String inPartition) {
+		this.inPartitionString = inPartition;
 	}
 	public Argument getArgument() {
 		return argument;
