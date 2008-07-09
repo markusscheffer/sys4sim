@@ -1,19 +1,32 @@
 package sys4sim.xmi_import;
 
+import java.util.Hashtable;
+
 public class Argument extends XmiObjectWithName {
 	private String visibility;
-	private String incoming;
+	private String incomingString;
+	private Edge incoming;
 	
+	public void destringRelations(Hashtable<String, XmiObject> hash) {
+		incoming = (Edge) hash.get(incomingString);
+	}
+	
+	public Edge getIncoming() {
+		return incoming;
+	}
+	public void setIncoming(Edge incoming) {
+		this.incoming = incoming;
+	}
 	public String getVisibility() {
 		return visibility;
 	}
 	public void setVisibility(String visibility) {
 		this.visibility = visibility;
 	}
-	public String getIncoming() {
-		return incoming;
+	public String getIncomingString() {
+		return incomingString;
 	}
-	public void setIncoming(String incoming) {
-		this.incoming = incoming;
+	public void setIncomingString(String incoming) {
+		this.incomingString = incoming;
 	}
 }

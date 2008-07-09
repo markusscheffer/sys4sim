@@ -3,6 +3,8 @@ package sys4sim.xmi_import;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -12,14 +14,24 @@ public class ParsingHandler extends DefaultHandler {
 	
 	private Stack<XmiObject> elementStack = new Stack<XmiObject>();
 	
+	private Hashtable<String,XmiObject> objectHash = new Hashtable<String,XmiObject>();
+	
 	public ParsingHandler () {
 		super();
+	}
+	
+	public void setXmiID(XmiObject obj, String id) {
+		obj.setXmiID(id);
+		objectHash.put(id, obj);
 	}
 	public void startDocument () {
 		System.out.println("Start document");
 	}
 
 	public void endDocument () {
+		for (XmiObject obj : objectHash.values()) {
+			obj.unstringRelations(objectHash);
+		}
 		System.out.println("End document");
 	}
 	    
@@ -114,25 +126,25 @@ public class ParsingHandler extends DefaultHandler {
 
 	  UmlClass uc = new UmlClass();
 	  uc.setName(atts.getValue("name"));
-	  uc.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(uc, atts.getValue("xmi:id"));
 	  uc.setXmiType(atts.getValue("xmi:type"));
 	  return (XmiObject) uc; 
   }
   
   public XmiObject generalization(String name, String uri, Attributes atts) {
 	  Generalization gen = new Generalization();
-	  gen.setXmiID(atts.getValue("xmi:id"));
-	  gen.setExtended(atts.getValue("general"));
+	  setXmiID(gen, atts.getValue("xmi:id"));
+	  gen.setExtendedString(atts.getValue("general"));
 	  PackagedElement pe = (PackagedElement) elementStack.peek();
 	  pe.getGeneralizations().add(gen);
   return (XmiObject) gen; }
   
   public XmiObject ownedAttribute(String name, String uri, Attributes atts) {
 	  OwnedAttribute oa = new OwnedAttribute();
-	  oa.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(oa, atts.getValue("xmi:id"));
 	  oa.setXmiType(atts.getValue("xmi:type"));
 	  oa.setName(atts.getValue("name"));
-	  oa.setType(atts.getValue("type"));
+	  oa.setTypeString(atts.getValue("type"));
 	  oa.setAggregation(atts.getValue("aggregation"));
 	  PackagedElement pe = (PackagedElement) elementStack.peek();
 	  pe.getAttributes().add(oa);
@@ -141,7 +153,7 @@ public class ParsingHandler extends DefaultHandler {
   
   public XmiObject ownedConnector(String name, String uri, Attributes atts) {
 	  OwnedConnector oc = new OwnedConnector();
-	  oc.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(oc, atts.getValue("xmi:id"));
 	  oc.setName(atts.getValue("name"));
 	  XmiObject stackTop = elementStack.peek();
 	  PackagedElement pe = (PackagedElement) stackTop;
@@ -151,9 +163,9 @@ public class ParsingHandler extends DefaultHandler {
   
   public XmiObject end(String name, String uri, Attributes atts) {
 	  End end = new End();
-	  end.setXmiID(atts.getValue("xmi:id"));
-	  end.setPartWithPort(atts.getValue("partWithPort"));
-	  end.setRole(atts.getValue("role"));
+	  setXmiID(end, atts.getValue("xmi:id"));
+	  end.setPartWithPortString(atts.getValue("partWithPort"));
+	  end.setRoleString(atts.getValue("role"));
 	  XmiObject stackTop = elementStack.peek();
 	  OwnedConnector oc = (OwnedConnector) stackTop;
 	  oc.getEnds().add(end);
@@ -162,7 +174,7 @@ public class ParsingHandler extends DefaultHandler {
   
   public XmiObject activity(String name, String uri, Attributes atts) {
 	  Activity act = new Activity();
-	  act.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(act, atts.getValue("xmi:id"));
 	  act.setXmiType(atts.getValue("xmi:type"));
 	  act.setName(atts.getValue("name"));
 	  act.setPartitionStrings(splitMultiple(atts.getValue("partition")));
@@ -231,21 +243,21 @@ public class ParsingHandler extends DefaultHandler {
 		  System.out.println("Node Class not supplied!");
 	  }
 	  
-	  node.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(node, atts.getValue("xmi:id"));
 	  node.setXmiType(atts.getValue("xmi:type"));
 	  node.setName(atts.getValue("name"));
 	  node.setVisibility(atts.getValue("visibility"));
 	  String incoming = atts.getValue("incoming");
 	  String outgoing = atts.getValue("outgoing");
 	  if (incoming != null) {
-		  node.setIncoming(splitMultiple(incoming));
+		  node.setIncomingStrings(splitMultiple(incoming));
 	  } else {
-		  node.setIncoming(new ArrayList<String>());
+		  node.setIncomingStrings(new ArrayList<String>());
 	  }
 	  if (outgoing != null) {
-		  node.setOutgoing(splitMultiple(outgoing));
+		  node.setOutgoingStrings(splitMultiple(outgoing));
 	  } else {
-		  node.setOutgoing(new ArrayList<String>());
+		  node.setOutgoingStrings(new ArrayList<String>());
 	  }
 	  
 	  XmiObject stackTop = elementStack.peek();
@@ -277,10 +289,10 @@ public class ParsingHandler extends DefaultHandler {
   
   public XmiObject result(String name, String uri, Attributes atts) {
 	  Result result = new Result();
-	  result.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(result, atts.getValue("xmi:id"));
 	  result.setName(atts.getValue("name"));
 	  result.setVisibility(atts.getValue("visibility"));
-	  result.setOutgoing(atts.getValue("outgoing"));
+	  result.setOutgoingString(atts.getValue("outgoing"));
 	  
 	  XmiObject stackTop = elementStack.peek();
 	  if (stackTop.getClass().equals(CallBehaviorAction.class)) {
@@ -294,10 +306,10 @@ public class ParsingHandler extends DefaultHandler {
   
   public XmiObject argument(String name, String uri, Attributes atts) {
 	  Argument argument  = new Argument();
-	  argument.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(argument, atts.getValue("xmi:id"));
 	  argument.setName(atts.getValue("name"));
 	  argument.setVisibility(atts.getValue("visibility"));
-	  argument.setIncoming(atts.getValue("incoming"));
+	  argument.setIncomingString(atts.getValue("incoming"));
 	  CallBehaviorAction cba = (CallBehaviorAction) elementStack.peek();
 	  cba.setArgument(argument);
 	  
@@ -316,12 +328,12 @@ public class ParsingHandler extends DefaultHandler {
 		  System.out.println("Edge Class not supplied! : " + type);
 	  }
 	  
-	  edge.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(edge, atts.getValue("xmi:id"));
 	  edge.setXmiType(atts.getValue("xmi:type"));
 	  edge.setName(atts.getValue("name"));
 	  edge.setVisibility(atts.getValue("visibility"));
-	  edge.setSource(atts.getValue("source"));
-	  edge.setTarget(atts.getValue("target"));
+	  edge.setSourceString(atts.getValue("source"));
+	  edge.setTargetString(atts.getValue("target"));
 	  
 	  Activity act = (Activity) elementStack.peek();
 	  act.getEdges().add(edge);
@@ -350,11 +362,11 @@ public class ParsingHandler extends DefaultHandler {
 	  if (xmiType.equals("uml:ActivityPartition")) {
 		  ActivityPartition ap = new ActivityPartition();
 		  ap.setXmiType(xmiType);
-		  ap.setXmiID(atts.getValue("xmi:id"));
+		  setXmiID(ap, atts.getValue("xmi:id"));
 		  ap.setVisibility(atts.getValue("visibility"));
-		  ap.setNodes(splitMultiple(atts.getValue("node")));
-		  ap.setRepresents(atts.getValue("represents"));
-		  ap.setEdges(splitMultiple(atts.getValue("edge")));
+		  ap.setNodeStrings(splitMultiple(atts.getValue("node")));
+		  ap.setRepresentsString(atts.getValue("represents"));
+		  ap.setEdgeStrings(splitMultiple(atts.getValue("edge")));
 		  return ap;
 	  } else {
 		  System.out.println("Group type not known: " + xmiType);

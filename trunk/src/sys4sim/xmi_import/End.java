@@ -1,20 +1,42 @@
 package sys4sim.xmi_import;
 
+import java.util.Hashtable;
+
 
 public class End extends XmiObject {
-	private String partWithPort;
-	private String role;
+	private String partWithPortString;
+	private String roleString;
 	
-	public String getPartWithPort() {
+	private OwnedAttribute partWithPort;
+	private Port role;
+	
+	public void destringRelations (Hashtable<String, XmiObject> hash) {
+		partWithPort = (OwnedAttribute) hash.get(partWithPortString);
+		role = (Port) hash.get(roleString);
+	}
+	
+	public String getPartWithPortString() {
+		return partWithPortString;
+	}
+	public void setPartWithPortString(String partWithPort) {
+		this.partWithPortString = partWithPort;
+	}
+	public String getRoleString() {
+		return roleString;
+	}
+	public void setRoleString(String role) {
+		this.roleString = role;
+	}
+	public OwnedAttribute getPartWithPort() {
 		return partWithPort;
 	}
-	public void setPartWithPort(String partWithPort) {
+	public void setPartWithPort(OwnedAttribute partWithPort) {
 		this.partWithPort = partWithPort;
 	}
-	public String getRole() {
+	public Port getRole() {
 		return role;
 	}
-	public void setRole(String role) {
+	public void setRole(Port role) {
 		this.role = role;
 	}
 }
