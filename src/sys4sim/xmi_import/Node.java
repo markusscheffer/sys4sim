@@ -15,7 +15,7 @@ public class Node extends XmiObjectWithName {
 	private ArrayList<Edge> incoming = new ArrayList<Edge>();
 	private ActivityPartition inPartition;
 	
-	public void destringRelations (Hashtable<String, XmiObject> hash) {
+	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		for (String outgoingString : outgoingStrings) {
 			Edge edge = (Edge) hash.get(outgoingString);
 			outgoing.add(edge);

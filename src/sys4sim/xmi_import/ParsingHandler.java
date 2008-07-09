@@ -29,10 +29,18 @@ public class ParsingHandler extends DefaultHandler {
 	}
 
 	public void endDocument () {
-		for (XmiObject obj : objectHash.values()) {
-			obj.unstringRelations(objectHash);
-		}
+
 		System.out.println("End document");
+		int i = 0;
+		for (XmiObject obj : objectHash.values()) {
+			System.out.println("Schleifendurchlauf: " 
+					+ String.valueOf(i) + ", Klasse: " 
+					+ obj.getClass().toString() + ", xmiid: "
+					+ obj.getXmiID());
+			obj.unstringRelations(objectHash);
+			i++;
+		}
+		System.out.println("Finished parsing.");
 	}
 	    
 	public void startElement (String uri, String name,

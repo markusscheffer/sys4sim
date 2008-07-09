@@ -7,7 +7,7 @@ public class Result extends XmiObjectWithName {
 	private String outgoingString;
 	private Edge outgoing;
 	
-	public void destringRelations (Hashtable<String, XmiObject> hash) {
+	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		outgoing = (Edge) hash.get(outgoingString);
 	}
 	

@@ -14,7 +14,7 @@ public class Group extends XmiObjectWithName {
 	private ArrayList<Edge> edges = new ArrayList<Edge>();
 	private OwnedAttribute represents;
 	
-	public void destringRelations (Hashtable<String, XmiObject> hash) {
+	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		for (String nodeString : nodeStrings) {
 			Node node = (Node) hash.get(nodeString);
 			nodes.add(node);
