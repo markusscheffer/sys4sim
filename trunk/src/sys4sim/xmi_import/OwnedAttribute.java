@@ -20,7 +20,7 @@ public class OwnedAttribute extends XmiObjectWithNameAndType {
 	}
 	
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
-		//nothing needed for this one.
+		super.unstringRelations(hash);
 	}
 
 }

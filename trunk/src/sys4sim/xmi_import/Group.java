@@ -23,7 +23,9 @@ public class Group extends XmiObjectWithName {
 			Edge edge = (Edge) hash.get(edgeString);
 			edges.add(edge);
 		}
-		represents = (OwnedAttribute) hash.get(representsString);
+		if (representsString != null) {
+			represents = (OwnedAttribute) hash.get(representsString);
+		}
 	}
 	
 	public ArrayList<Node> getNodes() {

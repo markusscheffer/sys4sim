@@ -31,14 +31,14 @@ public class ParsingHandler extends DefaultHandler {
 	public void endDocument () {
 
 		System.out.println("End document");
-		int i = 0;
+		//int i = 0;
 		for (XmiObject obj : objectHash.values()) {
-			System.out.println("Schleifendurchlauf: " 
+			/*System.out.println("Schleifendurchlauf: " 
 					+ String.valueOf(i) + ", Klasse: " 
 					+ obj.getClass().toString() + ", xmiid: "
-					+ obj.getXmiID());
+					+ obj.getXmiID());*/
 			obj.unstringRelations(objectHash);
-			i++;
+			//i++;
 		}
 		System.out.println("Finished parsing.");
 	}
@@ -148,7 +148,15 @@ public class ParsingHandler extends DefaultHandler {
   return (XmiObject) gen; }
   
   public XmiObject ownedAttribute(String name, String uri, Attributes atts) {
-	  OwnedAttribute oa = new OwnedAttribute();
+	  OwnedAttribute oa;
+	  String type = atts.getValue("xmi:type");
+	  if (type != null && type.equals("uml:Port")) {
+		  oa = new Port();
+	  }
+	  else {
+		  oa = new OwnedAttribute();
+	  }
+	  
 	  setXmiID(oa, atts.getValue("xmi:id"));
 	  oa.setXmiType(atts.getValue("xmi:type"));
 	  oa.setName(atts.getValue("name"));
@@ -592,9 +600,24 @@ public class ParsingHandler extends DefaultHandler {
 	  return (XmiObject) new VoidXmiObject(); 
   }
 
+  public XmiObject details(String name, String uri, Attributes atts) {
+	  //nothing needed here.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
+  public XmiObject importedProfile(String name, String uri, Attributes atts) {
+	  //nothing needed here.
+	  return (XmiObject) new VoidXmiObject(); 
+  }
   
-
+  public XmiObject Rate(String name, String uri, Attributes atts) {
+	  Rate rate = new Rate();
+	  rate.setXmiID(atts.getValue("xmi:id"));
+	  rate.setRate(atts.getValue("rate"));
+	  rate.setBaseActivityEdgeString(atts.getValue("base_ActivityEdge"));
+	  
+	  return (XmiObject) rate;
+  }
 
 
 

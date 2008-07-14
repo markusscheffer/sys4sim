@@ -2,13 +2,15 @@ package sys4sim.xmi_import;
 
 import java.util.Hashtable;
 
-public class Result extends XmiObjectWithName {
+public class Result extends GeneralNode {
 	private String visibility;
 	private String outgoingString;
 	private Edge outgoing;
 	
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
-		outgoing = (Edge) hash.get(outgoingString);
+		if (outgoingString != null) {
+			outgoing = (Edge) hash.get(outgoingString);
+		}
 	}
 	
 	public Edge getOutgoing() {
