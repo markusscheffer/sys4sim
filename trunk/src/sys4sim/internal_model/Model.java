@@ -1,23 +1,13 @@
 package sys4sim.internal_model;
 
-import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Model {
-	private ArrayList<ModelBlock> elements;
-	private ArrayList<Connector> connectors;
+	private Hashtable<String, ModelElement> elements = new Hashtable<String, ModelElement>();
 	private Source source;
 	
-	public ArrayList<ModelBlock> getElements() {
+	public Hashtable<String, ModelElement> getElements() {
 		return elements;
-	}
-	public void setElements(ArrayList<ModelBlock> elements) {
-		this.elements = elements;
-	}
-	public ArrayList<Connector> getConnectors() {
-		return connectors;
-	}
-	public void setConnectors(ArrayList<Connector> connectors) {
-		this.connectors = connectors;
 	}
 	public Source getSource() {
 		return source;
