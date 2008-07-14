@@ -3,14 +3,14 @@ package sys4sim.internal_model;
 import java.util.ArrayList;
 
 public class Model {
-	private ArrayList<ModelElement> elements;
+	private ArrayList<ModelBlock> elements;
 	private ArrayList<Connector> connectors;
 	private Source source;
 	
-	public ArrayList<ModelElement> getElements() {
+	public ArrayList<ModelBlock> getElements() {
 		return elements;
 	}
-	public void setElements(ArrayList<ModelElement> elements) {
+	public void setElements(ArrayList<ModelBlock> elements) {
 		this.elements = elements;
 	}
 	public ArrayList<Connector> getConnectors() {
