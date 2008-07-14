@@ -1,6 +1,6 @@
 package sys4sim.internal_model;
 
-public class Sink extends ModelElement{
+public class Sink extends ModelBlock{
 	public boolean hasOut () {
 		return false;
 	}

@@ -1,6 +1,6 @@
 package sys4sim.internal_model;
 
-public class ModelElement {
+public class ModelBlock extends ModelElement {
 	private Connector in;
 	private Connector out;
 	private Rate rate;
