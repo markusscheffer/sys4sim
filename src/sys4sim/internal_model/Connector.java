@@ -1,6 +1,6 @@
 package sys4sim.internal_model;
 
-public class Connector {
+public class Connector extends ModelElement {
 	private Resource source;
 	private Resource target;
 	private String sourceName;
