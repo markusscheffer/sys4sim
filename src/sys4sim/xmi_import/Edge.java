@@ -10,14 +10,23 @@ public class Edge extends XmiObjectWithName {
 	private String inPartitionString;
 	private int weight;
 	
-	private Node source;
-	private Node target;
+	private GeneralNode source;
+	private GeneralNode target;
 	private ActivityPartition inPartition;
 	
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
-		source = (Node) hash.get(sourceString);
-		target = (Node) hash.get(targetString);
-		inPartition = (ActivityPartition) hash.get(inPartitionString);
+		if (sourceString != null) {
+			//System.out.println(sourceString);
+			source = (GeneralNode) hash.get(sourceString);
+		}
+		if (targetString != null) {
+			//System.out.println(targetString);
+			target = (GeneralNode) hash.get(targetString);
+		}
+		if (inPartitionString != null) {
+			//System.out.println(inPartitionString);
+			inPartition = (ActivityPartition) hash.get(inPartitionString);
+		}
 	}
 	
 	public String getXmiType() {
@@ -56,13 +65,13 @@ public class Edge extends XmiObjectWithName {
 	public void setWeight(int weight) {
 		this.weight = weight;
 	}
-	public Node getSource() {
+	public GeneralNode getSource() {
 		return source;
 	}
 	public void setSource(Node source) {
 		this.source = source;
 	}
-	public Node getTarget() {
+	public GeneralNode getTarget() {
 		return target;
 	}
 	public void setTarget(Node target) {

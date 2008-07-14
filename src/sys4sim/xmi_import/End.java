@@ -11,8 +11,14 @@ public class End extends XmiObject {
 	private Port role;
 	
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
-		partWithPort = (OwnedAttribute) hash.get(partWithPortString);
-		role = (Port) hash.get(roleString);
+		if (partWithPortString != null) {
+			//System.out.println(partWithPortString);
+			partWithPort = (OwnedAttribute) hash.get(partWithPortString);
+		}
+		if (roleString != null) {
+			//System.out.println(roleString);
+			role = (Port) hash.get(roleString);
+		}
 	}
 	
 	public String getPartWithPortString() {

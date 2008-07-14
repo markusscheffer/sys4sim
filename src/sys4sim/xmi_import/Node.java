@@ -3,7 +3,7 @@ package sys4sim.xmi_import;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class Node extends XmiObjectWithName {
+public class Node extends GeneralNode {
 	private String xmiType;
 	private String visibility;
 	private ArrayList<String> outgoingStrings;
@@ -24,7 +24,9 @@ public class Node extends XmiObjectWithName {
 			Edge edge = (Edge) hash.get(incomingString);
 			incoming.add(edge);
 		}
-		inPartition = (ActivityPartition) hash.get(inPartitionString);
+		if (inPartitionString != null) {
+			inPartition = (ActivityPartition) hash.get(inPartitionString);
+		}
 	}
 	
 	public ArrayList<Edge> getOutgoing() {

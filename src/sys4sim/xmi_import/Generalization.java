@@ -7,7 +7,9 @@ public class Generalization extends XmiObject{
 	private PackagedElement extended;
 	
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
-		extended = (PackagedElement) hash.get(extendedString);
+		if (extendedString != null) {
+			extended = (PackagedElement) hash.get(extendedString);
+		}
 	}
 	
 	public PackagedElement getExtended() {

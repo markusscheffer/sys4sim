@@ -8,7 +8,9 @@ public class XmiObjectWithNameAndType extends XmiObjectWithName {
 	private UmlClass type;
 
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
-		type = (UmlClass) hash.get(typeString);
+		if (typeString != null) {
+			type = (UmlClass) hash.get(typeString);
+		}
 	}
 	
 	public UmlClass getType() {
