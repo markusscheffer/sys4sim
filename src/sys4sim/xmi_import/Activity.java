@@ -41,4 +41,34 @@ public class Activity extends PackagedElement {
 	public void setEdges(ArrayList<Edge> edges) {
 		this.edges = edges;
 	}
+
+	public static Activity getFirst(ArrayList<Activity> activities) {
+		Activity first = activities.get(0);
+		return getFirst(first, activities);
+	}
+	
+	public static Activity getFirst(Activity activity, ArrayList<Activity> activities) {
+		Activity first = activity;
+		for (Activity activity2 : activities) {
+			if (activity2.contains(first)) {
+				first = activity2;
+			}
+		}
+		if (first.equals(activity)) {
+			return activity;
+		} else {
+			return getFirst(first, activities);
+		}
+	}
+	
+	public boolean contains (Activity activity) {
+		for (Node node : getNodes()) {
+			if (node.getName().equals(activity.getName())) {
+				return true;
+			}
+		}
+		return false;
+		
+	}
+	
 }

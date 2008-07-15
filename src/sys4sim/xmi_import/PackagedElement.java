@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class PackagedElement extends XmiObjectWithName {
 
 	private String xmiType;
-	private ArrayList<Port> ports;
+	private ArrayList<Port> ports = new ArrayList<Port>();
 	private ArrayList<Generalization> generalizations = new ArrayList<Generalization>();
 	private ArrayList<OwnedAttribute> attributes = new ArrayList<OwnedAttribute>();
 	private ArrayList<OwnedConnector> connectors = new ArrayList<OwnedConnector>();
@@ -39,5 +39,20 @@ public class PackagedElement extends XmiObjectWithName {
 	}
 	public void setConnectors(ArrayList<OwnedConnector> connectors) {
 		this.connectors = connectors;
+	}
+	public void copyPorts (PackagedElement element) {
+		for (Port port : element.getPorts()) {
+			this.getPorts().add(port.copy());
+		}
+	}
+	public void copyAttributes (PackagedElement element) {
+		for (OwnedAttribute attribute : element.getAttributes()) {
+			this.getAttributes().add(attribute.copy());
+		}
+	}
+	public void copyConnectors (PackagedElement element) {
+		for (OwnedConnector connector : element.getConnectors()) {
+			this.getConnectors().add(connector.copy());
+		}
 	}
 }

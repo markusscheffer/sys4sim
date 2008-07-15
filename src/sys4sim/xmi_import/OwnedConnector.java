@@ -17,4 +17,16 @@ public class OwnedConnector extends XmiObjectWithName{
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		//nothing needed for this one.
 	}
+	public OwnedConnector copy() {
+		OwnedConnector  connector = new OwnedConnector();
+		ArrayList<End> newEnds = new ArrayList<End>();
+		for (End end : getEnds()) {
+			newEnds.add(end);
+		}
+		connector.setEnds(newEnds);
+		connector.setName(this.getName());
+		connector.setXmiID(this.getXmiID());
+		return connector;
+	}
+	
 }

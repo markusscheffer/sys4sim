@@ -29,17 +29,38 @@ public class ParsingHandler extends DefaultHandler {
 	}
 
 	public void endDocument () {
-
+		ArrayList<UmlClass> classes = new ArrayList<UmlClass>();
+		ArrayList<Activity> activities = new ArrayList<Activity>();
 		System.out.println("End document");
-		//int i = 0;
+		
 		for (XmiObject obj : objectHash.values()) {
-			/*System.out.println("Schleifendurchlauf: " 
-					+ String.valueOf(i) + ", Klasse: " 
-					+ obj.getClass().toString() + ", xmiid: "
-					+ obj.getXmiID());*/
+			
+			// turn string-ids into objects
 			obj.unstringRelations(objectHash);
-			//i++;
+			
+			// collect all classes 
+			if (obj.getClass().equals(UmlClass.class)) {
+				classes.add((UmlClass) obj);
+			}
+			
+			// collect all activities
+			if (obj.getClass().equals(Activity.class)) {
+				activities.add((Activity) obj);
+			}
 		}
+		System.out.println("Parsed all Classes and Activities.");
+		
+		// import attributes, ports, and connectors from above
+		for (UmlClass class1 : classes) {
+			for (Generalization gen : class1.getGeneralizations()) {
+				class1.importGeneralization(gen);
+			}
+		}
+		System.out.println("Imported Attributes, Ports and Connectors.");
+		
+		// get the first Activity
+		Activity firstActivity = Activity.getFirst(activities);
+		
 		System.out.println("Finished parsing.");
 	}
 	    

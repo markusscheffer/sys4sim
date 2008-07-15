@@ -22,5 +22,15 @@ public class OwnedAttribute extends XmiObjectWithNameAndType {
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		super.unstringRelations(hash);
 	}
+	
+	public OwnedAttribute copy () {
+		OwnedAttribute attribute = new OwnedAttribute();
+		attribute.setName(this.getName());
+		attribute.setXmiType(this.getXmiType());
+		attribute.setXmiID(this.getXmiID());
+		attribute.setAggregation(this.getAggregation());
+		attribute.setType(this.getType());
+		return attribute;
+	}
 
 }
