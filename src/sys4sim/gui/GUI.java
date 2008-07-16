@@ -24,9 +24,12 @@ public class GUI {
 	 private Shell shell; 
 	 private Label messageLabel;
 	 private Button importButton;
+	 private Button anylogicExportButton;
 	 private FileDialog importFileDialog;
 	 private Importer importer;
 	 private Model model;
+	 private FileDialog anylogicExportFileDialog;
+	 private sys4sim.export.anylogic.Exporter anylogicExporter;
 	 
 	 public GUI(){
 		 display = new Display();
@@ -36,6 +39,8 @@ public class GUI {
 		 messageLabel = new Label(shell, SWT.BORDER);
 		 importFileDialog = new FileDialog(shell, SWT.OPEN);
 		 importButton = new Button(shell, SWT.PUSH);
+		 anylogicExportButton = new Button(shell, SWT.PUSH);
+		 anylogicExportFileDialog = new FileDialog(shell, SWT.SAVE);
 		 
 		 shell.setText("SysML Simulation Converter");
 		 shell.setSize(800,400);
@@ -58,6 +63,17 @@ public class GUI {
 				  }
 		 });
 		 
+		 anylogicExportButton.setText("Anylogic exportieren...");
+		 anylogicExportButton.setSize(220,30);
+		 anylogicExportButton.setLocation(350, 100);
+		 anylogicExportButton.addSelectionListener(new SelectionAdapter() { 
+			  public void widgetSelected(SelectionEvent e) { 
+				   exportAnylogic(new File(anylogicExportFileDialog.open())); 
+				  }
+		 });
+		 
+		 
+		 
 		 shell.open ();
 		 while (!shell.isDisposed()) {
 			 if (!display.readAndDispatch())
@@ -78,5 +94,10 @@ public class GUI {
 	public void importSysML(File filepath) {
 		model = importer.importSysML(filepath);
 	}
+	
+	public void exportAnylogic(File filepath) {
+		anylogicExporter.writeFile(model, filepath);
+	}
+	
 }
 

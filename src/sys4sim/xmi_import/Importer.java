@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 
@@ -68,30 +69,33 @@ public class Importer extends DefaultHandler{
 			Importer.addObject(model, attribute);
 		}
 		int i = 0;
+		ArrayList<ForkNode> forkNodes = new ArrayList<ForkNode>();
+		ArrayList<Edge> forkEdges = new ArrayList<Edge>();
 		for (Edge edge : first.getEdges()) {
 			if (edge.getXmiType().equals("uml:ControlFlow")) {
 				
-				//TODO: Fork nodes!
-				
-				System.out.println("between here");
-				OwnedAttribute source = ((Node)edge.getSource()).getInPartition().getRepresents();
-				System.out.println("between here");
-				System.out.println(((Node)edge.getTarget()).getXmiID());
-				OwnedAttribute target = ((Node)edge.getTarget()).getInPartition().getRepresents();
-				System.out.println("between here");
-				if (!source.equals(target)) {
-					Connector connector = new Connector();
-					connector.setSource((Resource)model.getElements().get(source.getXmiID()));
-					connector.setTarget((Resource)model.getElements().get(target.getXmiID()));
-					connector.setId("connector_" + i);
-					i++;
-					System.out.println("Generating connector between " + 
-							source.getName() + " and " + target.getName());
+				if (edge.getSource().getClass().equals(ForkNode.class)) {
+					forkNodes.add((ForkNode)edge.getSource());
+					forkEdges.add(edge);
+				} else if (edge.getTarget().getClass().equals(ForkNode.class)) {
+					forkNodes.add((ForkNode)edge.getTarget());
+					forkEdges.add(edge);
+				} else {
+					OwnedAttribute source = ((Node)edge.getSource()).getInPartition().getRepresents();
+					OwnedAttribute target = ((Node)edge.getTarget()).getInPartition().getRepresents();
+					if (!source.equals(target)) {
+						Connector connector = new Connector();
+						connector.setSource((Resource)model.getElements().get(source.getXmiID()));
+						connector.setTarget((Resource)model.getElements().get(target.getXmiID()));
+						connector.setId("connector_" + i);
+						i++;
+						System.out.println("Generating connector between " + 
+								source.getName() + " and " + target.getName());
+					}
 				}
 				
-				System.out.println("and here.");
 			}
-
+			//TODO: Generate Edges for forknodes
 			
 		}
 		
