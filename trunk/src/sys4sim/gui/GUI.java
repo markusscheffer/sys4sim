@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import sys4sim.internal_model.Model;
 import sys4sim.xmi_import.Importer;
 
 public class GUI {
@@ -25,6 +26,7 @@ public class GUI {
 	 private Button importButton;
 	 private FileDialog importFileDialog;
 	 private Importer importer;
+	 private Model model;
 	 
 	 public GUI(){
 		 display = new Display();
@@ -74,7 +76,7 @@ public class GUI {
 	}
 	
 	public void importSysML(File filepath) {
-		importer.importSysML(filepath);
+		model = importer.importSysML(filepath);
 	}
 }
 

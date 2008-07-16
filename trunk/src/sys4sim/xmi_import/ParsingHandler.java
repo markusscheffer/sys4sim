@@ -60,7 +60,11 @@ public class ParsingHandler extends DefaultHandler {
 		
 		// get the first Activity
 		Activity firstActivity = Activity.getFirst(activities);
-		
+		System.out.println("First Activity: " + firstActivity.getName());
+		UmlClass system = UmlClass.getSystem(classes);
+		System.out.println("System: " + system.getName());
+		System.out.println("Generating Java Model.");
+		Importer.generateModel(system, firstActivity);
 		System.out.println("Finished parsing.");
 	}
 	    
@@ -284,6 +288,7 @@ public class ParsingHandler extends DefaultHandler {
 	  node.setXmiType(atts.getValue("xmi:type"));
 	  node.setName(atts.getValue("name"));
 	  node.setVisibility(atts.getValue("visibility"));
+	  node.setInPartitionString(atts.getValue("inPartition"));
 	  String incoming = atts.getValue("incoming");
 	  String outgoing = atts.getValue("outgoing");
 	  if (incoming != null) {
