@@ -1,8 +1,8 @@
 package sys4sim.internal_model;
 
 public class Connector extends ModelElement {
-	private Resource source;
-	private Resource target;
+	private ModelBlock source;
+	private ModelBlock target;
 	private String sourceName;
 	private String targetName;
 	
@@ -18,16 +18,16 @@ public class Connector extends ModelElement {
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
 	}
-	public Resource getSource() {
+	public ModelBlock getSource() {
 		return source;
 	}
-	public void setSource(Resource source) {
+	public void setSource(ModelBlock source) {
 		this.source = source;
 	}
-	public Resource getTarget() {
+	public ModelBlock getTarget() {
 		return target;
 	}
-	public void setTarget(Resource target) {
+	public void setTarget(ModelBlock target) {
 		this.target = target;
 	}
 }
