@@ -68,13 +68,13 @@ public class Edge extends XmiObjectWithName {
 	public GeneralNode getSource() {
 		return source;
 	}
-	public void setSource(Node source) {
+	public void setSource(GeneralNode source) {
 		this.source = source;
 	}
 	public GeneralNode getTarget() {
 		return target;
 	}
-	public void setTarget(Node target) {
+	public void setTarget(GeneralNode target) {
 		this.target = target;
 	}
 	public ActivityPartition getInPartition() {

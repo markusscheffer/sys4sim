@@ -68,39 +68,77 @@ public class Importer extends DefaultHandler{
 		for (OwnedAttribute attribute : system.getAttributes()) {
 			Importer.addObject(model, attribute);
 		}
-		int i = 0;
-		ArrayList<ForkNode> forkNodes = new ArrayList<ForkNode>();
-		ArrayList<Edge> forkEdges = new ArrayList<Edge>();
-		for (Edge edge : first.getEdges()) {
+		ArrayList<Edge> edges = eliminateForkNodes(first.getEdges());
+		for (Edge edge : edges) {
 			if (edge.getXmiType().equals("uml:ControlFlow")) {
+				Connector connector = connect(edge.getSource(), edge.getTarget(), model);
 				
-				if (edge.getSource().getClass().equals(ForkNode.class)) {
-					forkNodes.add((ForkNode)edge.getSource());
-					forkEdges.add(edge);
-				} else if (edge.getTarget().getClass().equals(ForkNode.class)) {
-					forkNodes.add((ForkNode)edge.getTarget());
-					forkEdges.add(edge);
-				} else {
-					OwnedAttribute source = ((Node)edge.getSource()).getInPartition().getRepresents();
-					OwnedAttribute target = ((Node)edge.getTarget()).getInPartition().getRepresents();
-					if (!source.equals(target)) {
-						Connector connector = new Connector();
-						connector.setSource((Resource)model.getElements().get(source.getXmiID()));
-						connector.setTarget((Resource)model.getElements().get(target.getXmiID()));
-						connector.setId("connector_" + i);
-						i++;
-						System.out.println("Generating connector between " + 
-								source.getName() + " and " + target.getName());
-					}
+				if (!connector.getName().equals("void")) {
+					model.getElements().put(connector.getId(), connector);
 				}
-				
 			}
-			//TODO: Generate Edges for forknodes
-			
 		}
-		
 		Importer.setModel(model);
 	}
+
+	private static int connectorCounter = 0;
+
+	public static Connector connect (GeneralNode source, GeneralNode target, Model model){
+		
+		OwnedAttribute sourceAtt = ((Node) source).getInPartition().getRepresents();
+		OwnedAttribute targetAtt = ((Node) target).getInPartition().getRepresents();
+		
+		if (!sourceAtt.equals(targetAtt)) {
+			Connector connector = new Connector();
+			connector.setSource((ModelBlock)model.getElements().get(sourceAtt.getXmiID()));
+			connector.setTarget((ModelBlock)model.getElements().get(targetAtt.getXmiID()));
+			connector.setId("connector_" + connectorCounter);
+			connectorCounter++;
+			System.out.println("Generating Connector between " + 
+					sourceAtt.getName() + " and " + targetAtt.getName());
+			return connector;
+		}
+		
+		Connector connector = new Connector();
+		connector.setId("void");
+		return connector;
+	}
+	
+	public static ArrayList<Edge> eliminateForkNodes (ArrayList<Edge> edges) {
+		ArrayList<Edge> cleanEdges = new ArrayList<Edge>();
+		for (Edge edge : edges) {
+			if (edge.getSource().getClass().equals(ForkNode.class)) {
+				ArrayList<Edge> newEdges = new ArrayList<Edge>();
+				for (Edge incoming : ((ForkNode) edge.getSource()).getIncoming()) {
+					Edge newEdge = new Edge();
+					newEdge.setSource(incoming.getSource());
+					newEdge.setTarget(edge.getTarget());
+					newEdge.setXmiType(edge.getXmiType());
+					newEdges.add(newEdge);
+				}
+				for (Edge newEdge : eliminateForkNodes(newEdges)) {
+					cleanEdges.add(newEdge);
+				}
+			} else if (edge.getTarget().getClass().equals(ForkNode.class)) {
+				ArrayList<Edge> newEdges = new ArrayList<Edge>();
+				for (Edge outgoing : ((ForkNode) edge.getTarget()).getOutgoing()) {
+					Edge newEdge = new Edge();
+					newEdge.setSource(edge.getSource()); 
+					newEdge.setTarget(outgoing.getTarget());
+					newEdge.setXmiType(edge.getXmiType());
+					newEdges.add(newEdge);
+				}
+				for (Edge newEdge : eliminateForkNodes(newEdges)) {
+					cleanEdges.add(newEdge);
+				}
+			} else {
+				cleanEdges.add(edge);
+			}
+		}	
+		
+		return cleanEdges;
+	}
+
 	public static void addObject (Model model, OwnedAttribute attribute) {
 		String id = attribute.getXmiID();
 		ModelBlock block;

@@ -3,7 +3,6 @@ package sys4sim.xmi_import;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -278,7 +277,7 @@ public class ParsingHandler extends DefaultHandler {
 	  } else if (type.equals("uml:ActivityFinalNode")) {
 		  node = (Node) activityFinalNode(atts);
 	  } else if (type.equals("uml:ForkNode")) {
-		  node = (Node) activityFinalNode(atts);
+		  node = (Node) forkNode(atts);
 	  } else {
 		  node = new Node();
 		  System.out.println("Node Class not supplied!");

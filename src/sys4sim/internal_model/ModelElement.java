@@ -2,7 +2,7 @@ package sys4sim.internal_model;
 
 public class ModelElement {
 	private String id;
-	private String name;
+	private String name = "";
 
 	public String getName() {
 		return name;
