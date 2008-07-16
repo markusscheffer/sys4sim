@@ -47,12 +47,34 @@ public class PackagedElement extends XmiObjectWithName {
 	}
 	public void copyAttributes (PackagedElement element) {
 		for (OwnedAttribute attribute : element.getAttributes()) {
-			this.getAttributes().add(attribute.copy());
+			if (isNotMeta(attribute)) {
+				this.getAttributes().add(attribute.copy());	
+			} 
+		}
+		
+	}
+	
+	public boolean isNotMeta (OwnedAttribute attribute) {
+		if (attribute.getType() == null) {
+			return true;
+		} else if (attribute.getType().getName().equals("SimulationSingleProcess")) {
+			return false;
+		} else if (attribute.getType().getName().equals("SimulationArrivalProcess")) {
+			return false;
+		} else if (attribute.getType().getName().equals("SimulationDepartureProcess")) {
+			return false;
+		} else if (attribute.getType().getName().equals("SimulationQueue")) {
+			return false;
+		} else {
+			return true;
 		}
 	}
+	
 	public void copyConnectors (PackagedElement element) {
 		for (OwnedConnector connector : element.getConnectors()) {
 			this.getConnectors().add(connector.copy());
 		}
 	}
+	
+	
 }
