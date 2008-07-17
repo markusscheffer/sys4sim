@@ -17,5 +17,8 @@ public class PoissonDistribution extends Distribution {
 		this.expectedUnit = expectedUnit;
 	}
 	
+	public String toString() {
+		return ("Poisson Distribution (Mean: " + getExpectedValue() + getExpectedUnit() +")");
+	}
 	
 }
