@@ -72,13 +72,26 @@ public class Importer extends DefaultHandler{
 		for (Edge edge : edges) {
 			if (edge.getXmiType().equals("uml:ControlFlow")) {
 				Connector connector = connect(edge.getSource(), edge.getTarget(), model);
-				
 				if (!connector.getName().equals("void")) {
-					model.getElements().put(connector.getId(), connector);
+					boolean add = true;
+					for (ModelElement con : model.getElements().values()) {
+						if (con.getClass().equals(Connector.class)) {
+							if (((Connector)con).getSource().equals(connector.getSource()) &&
+									((Connector)con).getTarget().equals(connector.getTarget())) {
+								add = false;
+							}
+						}
+					}
+					if (add) {
+						System.out.println("Generating Connector between " + 
+								connector.getSource().getName() + " and " 
+								+ connector.getTarget().getName());
+						
+						model.getElements().put(connector.getId(), connector);
+					}
 				}
 			}
 		}
-		Importer.setModel(model);
 	}
 
 	private static int connectorCounter = 0;
@@ -94,13 +107,11 @@ public class Importer extends DefaultHandler{
 			connector.setTarget((ModelBlock)model.getElements().get(targetAtt.getXmiID()));
 			connector.setId("connector_" + connectorCounter);
 			connectorCounter++;
-			System.out.println("Generating Connector between " + 
-					sourceAtt.getName() + " and " + targetAtt.getName());
 			return connector;
 		}
 		
 		Connector connector = new Connector();
-		connector.setId("void");
+		connector.setName("void");
 		return connector;
 	}
 	
@@ -155,7 +166,7 @@ public class Importer extends DefaultHandler{
 			block = new ModelBlock();
 			System.out.println("Suitable ModelBlock not found: " + classOfAtt.getName());
 		}
-		System.out.println("Generating Block for: " + attribute.getName());
+		System.out.println("Generating Block (" + block.getClass().getName().substring(23) + ") for: " + attribute.getName());
 		block.setId(id);
 		block.setName(attribute.getName());
 		model.getElements().put(id, block);
