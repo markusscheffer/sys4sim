@@ -61,9 +61,10 @@ public class Importer extends DefaultHandler{
 	    return getModel();
 	}
 	
-	public static void generateModel (UmlClass system, Activity first) {
+	public static void generateModel (UmlClass system, Activity first, ArrayList<Rate> rates) {
 		Model model = new Model();
 		model.setName(system.getName());
+		System.out.println("rates: "+ rates.size());
 		System.out.println("attributes: " + system.getAttributes().size());
 		for (OwnedAttribute attribute : system.getAttributes()) {
 			Importer.addObject(model, attribute);
@@ -91,6 +92,21 @@ public class Importer extends DefaultHandler{
 					}
 				}
 			}
+		}
+		for (Rate rate : rates) {
+			Node source = (Node) rate.getBaseActivityEdge().getSource();
+			
+			while (source.getClass().equals(ForkNode.class)) {
+				
+				//TODO: Hack - why first?
+				source = (Node) source.getIncoming().get(0).getSource();
+			}
+			
+			String idOfOwner = source.getInPartition().getRepresents().getXmiID();
+			ModelBlock block = (ModelBlock) model.getElements().get(idOfOwner);
+			block.setRate(rate.getRate());
+			System.out.println("Setting Rate of " + block.getName() + " to: " +
+					rate.getRate().toString());
 		}
 	}
 

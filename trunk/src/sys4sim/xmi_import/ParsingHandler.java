@@ -24,14 +24,16 @@ public class ParsingHandler extends DefaultHandler {
 		objectHash.put(id, obj);
 	}
 	public void startDocument () {
-		System.out.println("Start document");
+		System.out.println("Starting to parse the document.");
 	}
 
 	public void endDocument () {
 		ArrayList<UmlClass> classes = new ArrayList<UmlClass>();
 		ArrayList<Activity> activities = new ArrayList<Activity>();
-		System.out.println("End document");
+		ArrayList<Rate> rates = new ArrayList<Rate>();
 		
+		System.out.println("Finished reading of file.");
+	
 		for (XmiObject obj : objectHash.values()) {
 			
 			// turn string-ids into objects
@@ -45,6 +47,11 @@ public class ParsingHandler extends DefaultHandler {
 			// collect all activities
 			if (obj.getClass().equals(Activity.class)) {
 				activities.add((Activity) obj);
+			}
+			
+			//collect all rates
+			if (obj.getClass().equals(Rate.class)) {
+				rates.add((Rate) obj);
 			}
 		}
 		System.out.println("Parsed all Classes and Activities.");
@@ -63,7 +70,7 @@ public class ParsingHandler extends DefaultHandler {
 		UmlClass system = UmlClass.getSystem(classes);
 		System.out.println("System: " + system.getName());
 		System.out.println("Generating Java Model.");
-		Importer.generateModel(system, firstActivity);
+		Importer.generateModel(system, firstActivity, rates);
 		System.out.println("Finished parsing.");
 	}
 	    
@@ -145,6 +152,8 @@ public class ParsingHandler extends DefaultHandler {
 		  return umlClass(name, uri, atts);
 	  } else if (type.equals("uml:Activity")) {
 		  return activity(name, uri, atts);
+	  } else if (type.equals("uml:Association")) {
+		  return new VoidXmiObject();
 	  }
 	  
 	  else {
@@ -637,9 +646,13 @@ public class ParsingHandler extends DefaultHandler {
   
   public XmiObject Rate(String name, String uri, Attributes atts) {
 	  Rate rate = new Rate();
-	  rate.setXmiID(atts.getValue("xmi:id"));
+	  setXmiID(rate, atts.getValue("xmi:id"));
 	  rate.setRate(atts.getValue("rate"));
 	  rate.setBaseActivityEdgeString(atts.getValue("base_ActivityEdge"));
+	  
+	  if (rate.getRate() == null) {
+		  return  (XmiObject) new VoidXmiObject();
+	  }
 	  
 	  return (XmiObject) rate;
   }
