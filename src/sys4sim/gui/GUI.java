@@ -29,7 +29,7 @@ public class GUI {
 	 private Importer importer;
 	 private Model model;
 	 private FileDialog anylogicExportFileDialog;
-	 private sys4sim.export.anylogic.Exporter anylogicExporter;
+	 private sys4sim.export.anylogic.Exporter anylogicExporter = new sys4sim.export.anylogic.Exporter();
 	 
 	 public GUI(){
 		 display = new Display();
