@@ -657,9 +657,23 @@ public class ParsingHandler extends DefaultHandler {
 	  return (XmiObject) rate;
   }
 
+  public XmiObject TODO_Owner(String name, String uri, Attributes atts) {
+	  return new VoidXmiObject();
+  }
+
+  public XmiObject Info(String name, String uri, Attributes atts) {
+	  return new VoidXmiObject();
+  }
 
 
+  public XmiObject validationRule(String name, String uri, Attributes atts) {
+	  return new VoidXmiObject();
+  }
 
+
+  public XmiObject activeValidationSuite(String name, String uri, Attributes atts) {
+	  return new VoidXmiObject();
+  }
   
 
 
