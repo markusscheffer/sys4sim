@@ -62,7 +62,7 @@ public class Importer extends DefaultHandler{
 	}
 	
 	public static void generateModel (UmlClass system, Activity first, ArrayList<Rate> rates) {
-		Model model = new Model();
+		model = new Model();
 		model.setName(system.getName());
 		System.out.println("rates: "+ rates.size());
 		System.out.println("attributes: " + system.getAttributes().size());
