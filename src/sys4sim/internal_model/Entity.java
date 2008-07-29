@@ -1,6 +1,6 @@
 package sys4sim.internal_model;
 
-public class Part {
+public class Entity extends ModelElement {
 	private String type;
 
 	public String getType() {
