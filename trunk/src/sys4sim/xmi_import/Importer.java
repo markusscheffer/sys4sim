@@ -18,6 +18,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import sys4sim.gui.GUI;
 import sys4sim.internal_model.*;
+import sys4sim.internal_model.Process;
 
 public class Importer extends DefaultHandler{
 	private GUI gui;
@@ -177,7 +178,7 @@ public class Importer extends DefaultHandler{
 		} else if (classOfAtt.isSubclassOf("SimulationArrivalProcess")){
 			block = new Source();
 		} else if (classOfAtt.isSubclassOf("SimulationSingleProcess")){
-			block = new Machine();
+			block = new Process();
 		} else {
 			block = new ModelBlock();
 			System.out.println("Suitable ModelBlock not found: " + classOfAtt.getName());
