@@ -88,7 +88,8 @@ public class Importer extends DefaultHandler{
 						System.out.println("Generating Connector between " + 
 								connector.getSource().getName() + " and " 
 								+ connector.getTarget().getName());
-						
+						connector.getSource().getOut().add(connector);
+						connector.getTarget().getIn().add(connector);
 						model.getElements().put(connector.getId(), connector);
 					}
 				}
@@ -105,7 +106,13 @@ public class Importer extends DefaultHandler{
 			
 			String idOfOwner = source.getInPartition().getRepresents().getXmiID();
 			ModelBlock block = (ModelBlock) model.getElements().get(idOfOwner);
-			block.setRate(rate.getRate());
+			if (block.getClass().equals(Process.class)) {
+				((Process)block).setProcessingRate(rate.getRate());
+			} else if (block.getClass().equals(Source.class)) {
+				Entity entity = new Entity();
+				//TODO: Check for entity types
+				((Source)block).getEntities().put(entity, rate.getRate());
+			}
 			System.out.println("Setting Rate of " + block.getName() + " to: " +
 					rate.getRate().toString());
 		}

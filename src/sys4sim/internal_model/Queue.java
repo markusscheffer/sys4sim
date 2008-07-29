@@ -1,6 +1,6 @@
 package sys4sim.internal_model;
 
-public class Queue extends Resource {
+public class Queue extends ModelBlock {
 	int capacity;
 
 	public int getCapacity() {
