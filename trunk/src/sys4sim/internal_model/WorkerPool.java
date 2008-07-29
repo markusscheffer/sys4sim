@@ -4,14 +4,27 @@ import java.util.ArrayList;
 
 public class WorkerPool extends ResourcePool {
 
-	private ArrayList<Worker> elements = new ArrayList<Worker>();
-
-	public ArrayList<Worker> getElements() {
-		return elements;
+	ArrayList<WorkerPool> subPools = new ArrayList<WorkerPool>();
+	
+	public ArrayList<WorkerPool> getSubPools() {
+		return subPools;
 	}
 
-	public void setElements(ArrayList<Worker> elements) {
-		this.elements = elements;
+	ArrayList<Worker> elements = new ArrayList<Worker>();
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<Worker> getElements() {
+		ArrayList<Worker> temp = (ArrayList<Worker>) elements.clone();
+		for (WorkerPool pool : subPools) {
+			for (Worker worker : pool.getElements()) {
+				temp.add(worker);
+			}
+		}
+		return temp;
+	}
+
+	public void add (Worker worker) {
+		elements.add(worker);
 	}
 
 }
