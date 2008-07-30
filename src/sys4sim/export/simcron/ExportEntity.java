@@ -27,7 +27,7 @@ public class ExportEntity {
 		return name+" date leave 0";
 	}
 	
-	public String getMpSampleString(){
+	public String getMpString(){
 		return name+" sample tech1 1";
 	}
 

@@ -31,7 +31,6 @@ public class ExportToSimcron implements ExportInterface{
 	private String maFileOutput="";
 	private File file;
 	
-	private ArrayList aList = new ArrayList();
 	
 	public void writeFile(Model model, File file) {
 		this.file=file;
@@ -44,10 +43,11 @@ public class ExportToSimcron implements ExportInterface{
 
 		ExportTech et = null;
 		ExportSink eSi = null;
+		ExportSource eSo = null;
 		
 		for (ModelElement element : model.getElements().values()){
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process")){
-				String name="process"+(processCount);
+				String name="machine"+(processCount);
 				element.setName(name);
 				ExportProcess eP = new ExportProcess((Process)element,name,processCount);			
 				mcFileOutput=mcFileOutput+eP.getMcString()+"\n";
@@ -76,7 +76,7 @@ public class ExportToSimcron implements ExportInterface{
 					et= new ExportTech((Connector)element,name,techCount);
 					mcFileOutput=mcFileOutput+et.getMcString()+"\n";
 					maFileOutput=maFileOutput+et.getMaString()+"\n";
-					aList.add(et);
+					
 				}
 				
 				techCount++;
@@ -92,7 +92,7 @@ public class ExportToSimcron implements ExportInterface{
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Source")){
 				String name="source"+(queueCount);
 				element.setName(name);
-				ExportSource eSo= new ExportSource((Source)element,name, queueCount);	
+				eSo= new ExportSource((Source)element,name, queueCount);	
 				mcFileOutput=mcFileOutput+eSo.getMcString()+"\n";
 				maFileOutput=maFileOutput+eSo.getMaString()+"\n";
 				for (Entity entity : ((Source) element).getEntities().keySet()) {
@@ -109,55 +109,62 @@ public class ExportToSimcron implements ExportInterface{
 					maFileOutput=maFileOutput+eJ.getMaString()+"\n";
 					rateCount++;
 					entityCount++;
+					eSo.addEntity(eJ, eRate);
 		    	}
-				aList.add(eSo);
 				queueCount++;
 			}
 			
 			
 		}
-		int i=0;
-		while (i<aList.size()){
-			ExportTech tech1 = (ExportTech) aList.get(i);
-			Hashtable<String, ModelElement> table = (Hashtable<String, ModelElement>) tech1.getconnectorTable();
-			int j =0;
-			String status ="sys4sim.internal_model.Source";
-			while (status!=null){
+		
+		//alle nötige für das mp-File berechen
+		// hier wird die Technologieausgaben ermittelt
+		Hashtable<String, ModelElement> table = (Hashtable<String, ModelElement>) et.getconnectorTable();
+		int j =0;
+		String status ="sys4sim.internal_model.Source";
+		while (status!=null){
 				
-				boolean gefunden=false;
-				int conValue=0;
+			boolean gefunden=false;
+			int conValue=0;
 				
-				while(gefunden==false){
-				 String s="connector_"+conValue;
-				 Connector conn = (Connector) table.get(s);
-				  if (conn.getSource().getClass().getName().equalsIgnoreCase(status)){
-						String st= tech1.getMpString(conn.getSource().getName());
+			while(gefunden==false){
+				String s="connector_"+conValue;
+				Connector conn = (Connector) table.get(s);
+				if (conn.getSource().getClass().getName().equalsIgnoreCase(status)){
+					String st= et.getMpString(conn.getSource().getName());
+					mpFileOutput=mpFileOutput+ et.getMpString(conn.getSource().getName())+"\n";
+					System.out.println(st);
+					status=conn.getTarget().getClass().getName();
+					if (conn.getTarget().getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink")){
+						st= et.getMpString(conn.getTarget().getName());
+						mpFileOutput=mpFileOutput+ et.getMpString(conn.getTarget().getName())+"\n";
 						System.out.println(st);
-						status=conn.getTarget().getClass().getName();
-						if (conn.getTarget().getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink")){
-							st= tech1.getMpString(conn.getTarget().getName());
-							System.out.println(st);
-							status=null;
-						}
-					    gefunden=true;
-				 } else{
-					 
-				 }
-				  conValue++;
-				 
+						status=null;
+					}
+					gefunden=true;
+				} else{		 
 				}
-			
-			
-			//	System.out.println(test);
-		//		Connector conn = (Connector) table.get(s);
-				j++;
-				
+				conValue++;	 
 			}
-		    i++;
+			j++;
+		}
+		for (int i =1; i<=connectorCount;i++){
+			mpFileOutput=mpFileOutput+"tech1 pass "+i+" spec 0 tag 0"+"\n";
+			
+		}
+		
+		for (ExportEntity entity : eSo.getEntityTable().keySet()) {
+			ExportRate rate = (ExportRate) eSo.getEntityTable().get(entity);
+			mpFileOutput=mpFileOutput+ rate.getMpString()+"\n";
+			mpFileOutput=mpFileOutput+ entity.getMpString()+"\n";
+			mpFileOutput=mpFileOutput+ eSo.getMpSampleString(rate.getName())+"\n";
+			mpFileOutput=mpFileOutput+ eSo.getMpSourceString()+"\n";
+			
 		}
 		
 		writeMcFile();
 		writeMaFile();
+		writeMpFile();
 		
 		
 	}
@@ -188,6 +195,53 @@ public class ExportToSimcron implements ExportInterface{
 			pw.println("cost create cost103");
 			pw.println("cost create cost104");
 			pw.println("cost create cost105");
+			pw.flush();
+			pw.close();
+		} catch (FileNotFoundException e) {
+			
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void writeMpFile() {
+		try {
+			PrintWriter pw = new PrintWriter(new FileWriter(file+".mp"));
+			pw.println("stop inf");
+			pw.println("watch 0");
+			pw.print(mpFileOutput);
+			pw.println("cost100 name Zykluszeit");
+			pw.println("namespace eval ::cost100 {");
+			pw.println("variable this cost100}");
+			pw.println("cost100 type makespan");
+			pw.println("cost100 all 1");
+			pw.println("cost100 name Durchlaufzeit");
+			pw.println("namespace eval ::cost101 {");
+			pw.println("variable this cost101}");
+			pw.println("cost101 type jobtimeavrg");
+			pw.println("cost101 all 1");
+			pw.println("cost102 name Liegezeit");
+			pw.println("namespace eval ::cost102 {");
+			pw.println("variable this cost102}");
+			pw.println("cost102 type jobwaitavrgon");
+			pw.println("cost102 all 1");
+			pw.println("cost103 name Verspätung");
+			pw.println("namespace eval ::cost103 {");
+			pw.println("variable this cost103}");
+			pw.println("cost103 type datelate");
+			pw.println("cost103 all 1");
+			pw.println("cost104 name Auslastung");
+			pw.println("namespace eval ::cost104 {");
+			pw.println("variable this cost104}");
+			pw.println("cost104 type machworkrateon");
+			pw.println("cost104 all 1");
+			pw.println("cost105 name Bestand");
+			pw.println("namespace eval ::cost105 {");
+			pw.println("variable this cost105}");
+			pw.println("cost105 type contavrg");
+			pw.println("cost105 all 1");
 			pw.flush();
 			pw.close();
 		} catch (FileNotFoundException e) {

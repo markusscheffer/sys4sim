@@ -11,6 +11,7 @@ public class ExportQueue {
 	public ExportQueue(Queue queue, String name,int count){
 		this.queue=queue;
 		this.count=count;
+		this.name=name;
 	}
 	
 	public String getMcString(){
