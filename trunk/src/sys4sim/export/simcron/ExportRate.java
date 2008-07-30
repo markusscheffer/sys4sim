@@ -11,18 +11,18 @@ public class ExportRate {
 	private int count;
 	private String name;
 	
-	public ExportRate(Rate rate, int count) {
+	public ExportRate(Rate rate,String name, int count) {
 		this.rate=rate;
 		this.count= count;
-		name = "distrib"+count;
+		this.name = name;
 	}
 	
 	public String getMcString(){
-		return "distrib create distrib"+count;
+		return "distrib create "+name;
 	}
 	
 	public String getMaString(){
-		return "appear distrib"+count+" 0 0";
+		return "appear "+name+" 0 0";
 	}
 	
 	public String getMpString(){

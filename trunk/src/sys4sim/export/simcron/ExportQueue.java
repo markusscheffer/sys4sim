@@ -6,18 +6,19 @@ public class ExportQueue {
 	
 	private Queue queue;
 	private int count;
+	private String name;
 	
-	public ExportQueue(Queue queue, int count){
+	public ExportQueue(Queue queue, String name,int count){
 		this.queue=queue;
 		this.count=count;
 	}
 	
 	public String getMcString(){
-		return "queue create queue"+count;
+		return "queue create "+name;
 	}
 	
 	public String getMaString(){
-		return "appear queue"+count+" 0 0";
+		return "appear "+name+" 0 0";
 	}
 
 }
