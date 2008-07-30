@@ -10,21 +10,21 @@ public class ExportSource {
 	private boolean containsRate=false;
 	private String name, rateName;
 	
-	public ExportSource(Source source, int count){
+	public ExportSource(Source source,String name, int count){
 		this.source=source;
 		this.count=count;
-		name="queue"+count;
-		if (source.getRate()!=null) {
+		this.name=name;
+	/*	if (source.getRate()!=null) {
 			containsRate=true;
-		}
+		}*/
 	}
 	
 	public String getMcString(){
-		return "queue create queue"+count;
+		return "queue create "+name;
 	}
 	
 	public String getMaString(){
-		return "appear queue"+count+" 0 0";
+		return "appear "+name+" 0 0";
 	}
 	
 	public String getMpString(){
