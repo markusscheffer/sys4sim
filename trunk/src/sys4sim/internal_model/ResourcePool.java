@@ -1,6 +1,5 @@
 package sys4sim.internal_model;
 
-import java.util.ArrayList;
 
 public abstract class ResourcePool {
 	private int capacity = 1000000; // "infinite" capacity
