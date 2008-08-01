@@ -44,7 +44,7 @@ public class Exporter implements ExportInterface {
               .addContent(new Element("ID").setText("1213174774547"))//bea
               .addContent(new Element("Name").setText("![CDATA[MM1]]"))//bea
               .addContent(new Element("ExcludeFromBuild").setText("false"))
-              .addContent(new Element("ClientAreaTopLeft").setText("'<'X>0</X><Y>0</Y>"))//hoffe mal das geht so
+              .addContent(new Element("ClientAreaTopLeft").addContent("<X>0</X><Y>0</Y>"))//hoffe mal das geht so
               .addContent(new Element("PresentationTopGroupPersistent").setText("true"))
               .addContent(new Element("IconTopGroupPersistent").setText("true"))
               .addContent(new Element("Generic").setText("false"))
@@ -384,7 +384,7 @@ public class Exporter implements ExportInterface {
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
 				Element Parameter10 = new Element("Parameter"); 
 				Parameters.addContent(Parameter10);
-				Parameter10
+				Parameter10  
 				.addContent(new Element("Name").setText("<![CDATA[animationForward]]>"))//bleibt aussen vor
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
 				Element Parameter11 = new Element("Parameter"); 
