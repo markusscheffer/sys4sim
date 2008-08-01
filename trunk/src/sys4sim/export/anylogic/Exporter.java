@@ -128,7 +128,7 @@ public class Exporter implements ExportInterface {
    	// definierte XML Struktur in festgelegte Outputdatei übertragen
    	 try {
    		 FileOutputStream out =  new  FileOutputStream("test.xml");
-   		  XMLOutputter serializer = new XMLOutputter(Format.getPrettyFormat());
+   		  XMLOutputter serializer = new XMLOutputter(Format.getRawFormat());
    		  serializer.output(doc,out);
    		  out.flush();
    		  out.close();
