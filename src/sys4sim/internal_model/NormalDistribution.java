@@ -30,4 +30,8 @@ public class NormalDistribution extends Distribution {
 	public void setStandardDeviationUnit(String standardDeviationUnit) {
 		this.standardDeviationUnit = standardDeviationUnit;
 	}
+	public String toString () {
+		return "Normal [" + getMeanValue() + getMeanUnit() + "±" + 
+		getStandardDeviationValue() + getStandardDeviationUnit() + "]";
+	}
 }

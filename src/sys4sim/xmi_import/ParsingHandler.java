@@ -15,6 +15,7 @@ public class ParsingHandler extends DefaultHandler {
 	
 	private Hashtable<String,XmiObject> objectHash = new Hashtable<String,XmiObject>();
 	
+	@SuppressWarnings("unused")
 	private boolean saveText = false;
 	private String savedText = "";
 	
@@ -122,13 +123,19 @@ public class ParsingHandler extends DefaultHandler {
 	 
 	 // This might just be some cruel hack...
 	 if (newName.equals("guard")) {
+		 saveText = false;
 		 ((Edge)elementStack.peek()).setGuard(savedText);
 		 savedText = "";
 	 }
   }
 	  
   public void characters (char ch[], int start, int length) {
+	  if (saveText) {
+		  for (char chr : ch) {
+			  savedText += chr;
+		  }
 	  }
+  }
   
   public XmiObject XMI(String name, String uri, Attributes atts) {
 	  // done: this does not need anything to it.
@@ -320,7 +327,7 @@ public class ParsingHandler extends DefaultHandler {
 	  } else if (type.equals("uml:CentralBufferNode")) {
 		  return new VoidXmiObject();
 	  } else if (type.equals("uml:FlowFinalNode")) {
-		  return new FlowFinalNode();
+		  node = (Node) new FlowFinalNode();
 	  } else {
 	  
 		  node = new Node();
@@ -700,14 +707,15 @@ public class ParsingHandler extends DefaultHandler {
   }
   
   public XmiObject Rate(String name, String uri, Attributes atts) {
+	  if  (atts.getValue("rate") == null) {
+		  return new VoidXmiObject();
+	  }
 	  Rate rate = new Rate();
 	  setXmiID(rate, atts.getValue("xmi:id"));
 	  rate.setRate(atts.getValue("rate"));
 	  rate.setBaseActivityEdgeString(atts.getValue("base_ActivityEdge"));
 	  
-	  if (rate.getRate() == null) {
-		  return  (XmiObject) new VoidXmiObject();
-	  }
+	  
 	  
 	  return (XmiObject) rate;
   }
