@@ -45,5 +45,9 @@ public class TriangularDistribution extends Distribution {
 		this.maxUnit = maxUnit;
 	}
 	
+	public String toString () {
+		return "Triangular [" + getMinValue() + getMinUnit() + "//" + getModeValue() 
+		+  "//" + getMaxValue() + getMaxUnit() + "]";
+	}
 	
 }

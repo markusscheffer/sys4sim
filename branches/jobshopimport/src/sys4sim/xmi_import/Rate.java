@@ -113,7 +113,7 @@ public class Rate extends XmiObject {
 				if (matcher.find()) {
 					rate = new ConstantRate();
 					((ConstantRate)rate).setValue(Double.parseDouble(matcher.group(1)));
-					((ConstantRate)rate).setUnit(matcher.group(1));
+					((ConstantRate)rate).setUnit(matcher.group(2));
 					return;
 				}
 			}

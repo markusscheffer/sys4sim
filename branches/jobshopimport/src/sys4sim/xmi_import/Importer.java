@@ -85,11 +85,20 @@ public class Importer extends DefaultHandler{
 						}
 					}
 					if (add) {
-						System.out.println("Generating Connector between " + 
+						if (edge.getGuard() != null) {
+							connector.setConditionString(edge.getGuard());
+							System.out.println("Generating Connector between " + 
+									connector.getSource().getName() + " and " + 
+									connector.getTarget().getName() + 
+									" [condition: " + connector.getConditionString() + "]");
+						} else {
+							System.out.println("Generating Connector between " + 
 								connector.getSource().getName() + " and " 
 								+ connector.getTarget().getName());
+						}
 						connector.getSource().getOut().add(connector);
 						connector.getTarget().getIn().add(connector);
+						
 						model.getElements().put(connector.getId(), connector);
 					}
 				}
@@ -154,6 +163,8 @@ public class Importer extends DefaultHandler{
 				for (Edge newEdge : eliminateForkNodes(newEdges)) {
 					cleanEdges.add(newEdge);
 				}
+			} else if (edge.getTarget() == null) {
+				System.out.println("foo");
 			} else if (edge.getTarget().getClass().equals(ForkNode.class)) {
 				ArrayList<Edge> newEdges = new ArrayList<Edge>();
 				for (Edge outgoing : ((ForkNode) edge.getTarget()).getOutgoing()) {

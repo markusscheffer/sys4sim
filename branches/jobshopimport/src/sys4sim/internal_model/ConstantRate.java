@@ -16,5 +16,7 @@ public class ConstantRate extends Rate {
 		this.unit = unit;
 	}
 	
-	
+	public String toString() {
+		return "Constant [" + getValue() + getUnit() + "]";
+	}
 }
