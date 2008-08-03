@@ -15,6 +15,10 @@ public class ParsingHandler extends DefaultHandler {
 	
 	private Hashtable<String,XmiObject> objectHash = new Hashtable<String,XmiObject>();
 	
+	@SuppressWarnings("unused")
+	private boolean saveText = false;
+	private String savedText = "";
+	
 	public ParsingHandler () {
 		super();
 	}
@@ -110,9 +114,29 @@ public class ParsingHandler extends DefaultHandler {
 
   public void endElement (String uri, String name, String qName) {
 	  //System.out.println("Elemente vor Pop: " + elementStack.size());
-	 elementStack.pop();
+	 XmiObject obj = elementStack.pop();
+	 if (obj instanceof SaveTextVoidXmiObject) {
+		 saveText = false;
+	 } 
+	 
+	 String newName = "".equals(uri) ? qName : name;
+	 
+	 // This might just be some cruel hack...
+	 if (newName.equals("guard")) {
+		 saveText = false;
+		 ((Edge)elementStack.peek()).setGuard(savedText);
+		 savedText = "";
+	 }
   }
 	  
+  public void characters (char ch[], int start, int length) {
+	  if (saveText) {
+		  for (char chr : ch) {
+			  savedText += chr;
+		  }
+	  }
+  }
+  
   public XmiObject XMI(String name, String uri, Attributes atts) {
 	  // done: this does not need anything to it.
   return (XmiObject) new VoidXmiObject(); 
@@ -144,8 +168,7 @@ public class ParsingHandler extends DefaultHandler {
 		  System.out.println("pe-typ nicht gefunden");
 		  return new VoidXmiObject();
 		  }
-	  else if (type.equals("uml:Package") || 
-			  type.equals("uml:Stereotype") ||
+	  else if (type.equals("uml:Stereotype") ||
 			  type.equals("uml:Extension")) {
 		  return new DeepIgnoreXmiObject();
 	  } else if (type.equals("uml:Class")) {
@@ -153,6 +176,10 @@ public class ParsingHandler extends DefaultHandler {
 	  } else if (type.equals("uml:Activity")) {
 		  return activity(name, uri, atts);
 	  } else if (type.equals("uml:Association")) {
+		  return new VoidXmiObject();
+	  } else if (type.equals("uml:Package")) {
+		  return new VoidXmiObject();
+	  } else if (type.equals("uml:DataType")) {
 		  return new VoidXmiObject();
 	  }
 	  
@@ -226,8 +253,16 @@ public class ParsingHandler extends DefaultHandler {
 	  setXmiID(act, atts.getValue("xmi:id"));
 	  act.setXmiType(atts.getValue("xmi:type"));
 	  act.setName(atts.getValue("name"));
-	  act.setPartitionStrings(splitMultiple(atts.getValue("partition")));
+	  if (atts.getValue("partition") != null) {
+		  act.setPartitionStrings(splitMultiple(atts.getValue("partition")));
+	  }
 	  
+	  return (XmiObject) act;
+  }
+  
+  public XmiObject ownedBehavior(String name, String uri, Attributes atts) {
+	  Activity act = (Activity) activity(name, uri, atts);
+	  act.setOwner((PackagedElement)elementStack.peek());
 	  return (XmiObject) act;
   }
   
@@ -287,9 +322,16 @@ public class ParsingHandler extends DefaultHandler {
 		  node = (Node) activityFinalNode(atts);
 	  } else if (type.equals("uml:ForkNode")) {
 		  node = (Node) forkNode(atts);
+	  } else if (type.equals("uml:DecisionNode")) {
+		  node = (Node) decisionNode(atts);
+	  } else if (type.equals("uml:CentralBufferNode")) {
+		  return new VoidXmiObject();
+	  } else if (type.equals("uml:FlowFinalNode")) {
+		  node = (Node) new FlowFinalNode();
 	  } else {
+	  
 		  node = new Node();
-		  System.out.println("Node Class not supplied!");
+		  System.out.println("Node Class not supplied: " + type);
 	  }
 	  
 	  setXmiID(node, atts.getValue("xmi:id"));
@@ -335,6 +377,10 @@ public class ParsingHandler extends DefaultHandler {
   
   public ForkNode forkNode (Attributes atts) {
 	  return new ForkNode();
+  }
+  
+  public DecisionNode decisionNode (Attributes atts) {
+	  return new DecisionNode();
   }
   
   public XmiObject result(String name, String uri, Attributes atts) {
@@ -391,6 +437,17 @@ public class ParsingHandler extends DefaultHandler {
 	  return (XmiObject) edge; 
   }
   
+  public XmiObject guard (String name, String uri, Attributes atts) {
+	  // we do not need the guard element. however, look at the body element
+	  return new VoidXmiObject();
+  }
+  
+  public XmiObject body (String name, String uri, Attributes atts) {
+	  saveText = true;
+	  return new SaveTextVoidXmiObject();
+  }
+  
+  
   public ControlFlow controlFlow (Attributes atts) {
 	  return new ControlFlow();
   }
@@ -422,6 +479,11 @@ public class ParsingHandler extends DefaultHandler {
 		  System.out.println("Group type not known: " + xmiType);
 		  return (XmiObject) new VoidXmiObject(); 
 	  }
+  }
+  
+  public XmiObject Allocated(String name, String uri, Attributes atts) {
+	  //TODO Possibly, this should not be ignored
+	  return (XmiObject) new VoidXmiObject();
   }
   
   public XmiObject profileApplication(String name, String uri, Attributes atts) {
@@ -645,14 +707,15 @@ public class ParsingHandler extends DefaultHandler {
   }
   
   public XmiObject Rate(String name, String uri, Attributes atts) {
+	  if  (atts.getValue("rate") == null) {
+		  return new VoidXmiObject();
+	  }
 	  Rate rate = new Rate();
 	  setXmiID(rate, atts.getValue("xmi:id"));
 	  rate.setRate(atts.getValue("rate"));
 	  rate.setBaseActivityEdgeString(atts.getValue("base_ActivityEdge"));
 	  
-	  if (rate.getRate() == null) {
-		  return  (XmiObject) new VoidXmiObject();
-	  }
+	  
 	  
 	  return (XmiObject) rate;
   }
@@ -671,6 +734,18 @@ public class ParsingHandler extends DefaultHandler {
   }
 
 
+  public XmiObject ownedRule(String name, String uri, Attributes atts) {
+	  return new DeepIgnoreXmiObject();
+  }
+  
+  public XmiObject constrainedElement(String name, String uri, Attributes atts) {
+	  return new VoidXmiObject();
+  }
+  
+  public XmiObject specification(String name, String uri, Attributes atts) {
+	  return new DeepIgnoreXmiObject();
+  }
+  
   public XmiObject activeValidationSuite(String name, String uri, Attributes atts) {
 	  return new VoidXmiObject();
   }

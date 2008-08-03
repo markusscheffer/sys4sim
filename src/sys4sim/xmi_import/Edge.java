@@ -9,7 +9,15 @@ public class Edge extends XmiObjectWithName {
 	private String targetString;
 	private String inPartitionString;
 	private int weight;
+	private String guard;
 	
+	public String getGuard() {
+		return guard;
+	}
+
+	public void setGuard(String guard) {
+		this.guard = guard;
+	}
 	private GeneralNode source;
 	private GeneralNode target;
 	private ActivityPartition inPartition;
