@@ -5,7 +5,14 @@ public class Connector extends ModelElement {
 	private ModelBlock target;
 	private String sourceName;
 	private String targetName;
+	private String conditionString;
 	
+	public String getConditionString() {
+		return conditionString;
+	}
+	public void setConditionString(String conditionString) {
+		this.conditionString = conditionString;
+	}
 	public String getSourceName() {
 		return sourceName;
 	}

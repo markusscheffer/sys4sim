@@ -9,7 +9,16 @@ public class Activity extends PackagedElement {
 	private ArrayList<Node> nodes = new ArrayList<Node>();
 	private ArrayList<Edge> edges = new ArrayList<Edge>();
 	private ArrayList<ActivityPartition> partitions = new ArrayList<ActivityPartition>();
+	private PackagedElement owner;
 	
+	public PackagedElement getOwner() {
+		return owner;
+	}
+
+	public void setOwner(PackagedElement owner) {
+		this.owner = owner;
+	}
+
 	public void unstringRelations(Hashtable<String, XmiObject> hash) {
 		for (String partitionString : partitionStrings) {
 			ActivityPartition partition = (ActivityPartition) hash.get(partitionString);
