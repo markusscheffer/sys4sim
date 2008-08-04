@@ -20,6 +20,7 @@ import sys4sim.gui.GUI;
 import sys4sim.internal_model.*;
 import sys4sim.internal_model.Process;
 
+
 public class Importer extends DefaultHandler{
 	private GUI gui;
 	private static Model model;
@@ -62,7 +63,11 @@ public class Importer extends DefaultHandler{
 	    return getModel();
 	}
 	
-	public static void generateModel (UmlClass system, Activity first, ArrayList<Rate> rates) {
+	public static void generateModel (
+			UmlClass system, 
+			Activity first, 
+			ArrayList<Rate> rates,
+			ArrayList<Association> associations) {
 		model = new Model();
 		model.setName(system.getName());
 		System.out.println("rates: "+ rates.size());
@@ -70,6 +75,10 @@ public class Importer extends DefaultHandler{
 		for (OwnedAttribute attribute : system.getAttributes()) {
 			Importer.addObject(model, attribute);
 		}
+		for (Association association : associations) {
+			addIfEntityDescription(model, association);
+		}
+		
 		ArrayList<Edge> edges = eliminateForkNodes(first.getEdges());
 		for (Edge edge : edges) {
 			if (edge.getXmiType().equals("uml:ControlFlow")) {
@@ -195,6 +204,7 @@ public class Importer extends DefaultHandler{
 			block = new Sink();
 		} else if (classOfAtt.isSubclassOf("SimulationArrivalProcess")){
 			block = new Source();
+			((Source) block).setTypeID(classOfAtt.getXmiID());
 		} else if (classOfAtt.isSubclassOf("SimulationSingleProcess")){
 			block = new Process();
 		} else {
@@ -205,5 +215,47 @@ public class Importer extends DefaultHandler{
 		block.setId(id);
 		block.setName(attribute.getName());
 		model.getElements().put(id, block);
+	}
+	
+	public static void addIfEntityDescription (Model model, Association association) {
+		if (association.getEnds().get(0).isSubclassOf("SimulationArrivalProcess")) {
+			addIfEntityDescription(
+					model, 
+					association.getEnds().get(0), 
+					association.getEnds().get(1));
+		} else if (association.getEnds().get(1).isSubclassOf("SimulationArrivalProcess")) {
+			addIfEntityDescription(
+					model, 
+					association.getEnds().get(1), 
+					association.getEnds().get(0));
+		} else {
+			System.out.println("Could not generate Entity Description for Association: " + association.getXmiID());
+		}
+	}
+
+	private static void addIfEntityDescription(Model model, UmlClass source,
+			UmlClass umlEntity) {
+		if (umlEntity.isSubclassOf("SimulationEntity")) {
+			Entity entity = new Entity();
+			entity.setName(umlEntity.getName());
+			entity.setSource(findSource(model, source));
+			model.getEntities().add(entity);
+			System.out.println("Adding entity: " + entity.getName() + " [Source: " + entity.getSource().getName() + "]");
+		} else {
+			System.out.println("Could not generate Entity Description for: " + source.getXmiID());
+		}
+	}
+
+	private static Source findSource(Model model, UmlClass source) {
+		for (ModelElement element : model.getElements().values()) {
+			if (element instanceof Source) {
+				if (source.getXmiID().equals(((Source) element).getTypeID())) {
+					return (Source) element;
+				}
+			}
+		}
+		System.out.println("Could not find source.");
+		return null;
+
 	}
 }

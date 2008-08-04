@@ -5,6 +5,13 @@ import java.util.Hashtable;
 public class Source extends ModelBlock{
 	private int batchSize = 1;
 	private int capacity;
+	private String typeID;
+	
+	public void setTypeID(String typeID) {
+		this.typeID = typeID;
+	}
+
+
 	private Hashtable<Entity, Rate> entities = new Hashtable<Entity, Rate>();
 
 
@@ -40,6 +47,12 @@ public class Source extends ModelBlock{
 
 	public boolean hasIn () {
 		return false;
+	}
+
+
+	public String getTypeID() {
+		// TODO Auto-generated method stub
+		return typeID;
 	}
 	
 	

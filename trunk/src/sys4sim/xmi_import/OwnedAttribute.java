@@ -5,7 +5,14 @@ import java.util.Hashtable;
 public class OwnedAttribute extends XmiObjectWithNameAndType {
 	private String aggregation;
 	private String xmiType;
+	private PackagedElement owner;
 	
+	public PackagedElement getOwner() {
+		return owner;
+	}
+	public void setOwner(PackagedElement pe) {
+		this.owner = pe;
+	}
 	public String getAggregation() {
 		return aggregation;
 	}

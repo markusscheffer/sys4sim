@@ -15,7 +15,6 @@ public class ParsingHandler extends DefaultHandler {
 	
 	private Hashtable<String,XmiObject> objectHash = new Hashtable<String,XmiObject>();
 	
-	@SuppressWarnings("unused")
 	private boolean saveText = false;
 	private String savedText = "";
 	
@@ -35,6 +34,7 @@ public class ParsingHandler extends DefaultHandler {
 		ArrayList<UmlClass> classes = new ArrayList<UmlClass>();
 		ArrayList<Activity> activities = new ArrayList<Activity>();
 		ArrayList<Rate> rates = new ArrayList<Rate>();
+		ArrayList<Association> associations = new ArrayList<Association>();
 		
 		System.out.println("Finished reading of file.");
 	
@@ -44,18 +44,23 @@ public class ParsingHandler extends DefaultHandler {
 			obj.unstringRelations(objectHash);
 			
 			// collect all classes 
-			if (obj.getClass().equals(UmlClass.class)) {
+			if (obj instanceof UmlClass) {
 				classes.add((UmlClass) obj);
 			}
 			
 			// collect all activities
-			if (obj.getClass().equals(Activity.class)) {
+			if (obj instanceof Activity) {
 				activities.add((Activity) obj);
 			}
 			
 			//collect all rates
-			if (obj.getClass().equals(Rate.class)) {
+			if (obj instanceof Rate) {
 				rates.add((Rate) obj);
+			}
+			
+			// collect all Associations
+			if (obj instanceof Association) {
+				associations.add((Association) obj);
 			}
 		}
 		System.out.println("Parsed all Classes and Activities.");
@@ -74,7 +79,7 @@ public class ParsingHandler extends DefaultHandler {
 		UmlClass system = UmlClass.getSystem(classes);
 		System.out.println("System: " + system.getName());
 		System.out.println("Generating Java Model.");
-		Importer.generateModel(system, firstActivity, rates);
+		Importer.generateModel(system, firstActivity, rates, associations);
 		System.out.println("Finished parsing.");
 	}
 	    
@@ -176,7 +181,13 @@ public class ParsingHandler extends DefaultHandler {
 	  } else if (type.equals("uml:Activity")) {
 		  return activity(name, uri, atts);
 	  } else if (type.equals("uml:Association")) {
-		  return new VoidXmiObject();
+		  Association association = new Association();
+		  setXmiID(association, atts.getValue("xmi:id"));
+		  for (String end : splitMultiple(atts.getValue("memberEnd"))) {
+			  association.getEndStrings().add(end);
+		  }
+		  return (XmiObject) association;
+		  
 	  } else if (type.equals("uml:Package")) {
 		  return new VoidXmiObject();
 	  } else if (type.equals("uml:DataType")) {
@@ -224,6 +235,7 @@ public class ParsingHandler extends DefaultHandler {
 	  oa.setAggregation(atts.getValue("aggregation"));
 	  PackagedElement pe = (PackagedElement) elementStack.peek();
 	  pe.getAttributes().add(oa);
+	  oa.setOwner(pe);
 	  return (XmiObject) oa;
   }
   
