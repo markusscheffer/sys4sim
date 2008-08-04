@@ -218,6 +218,9 @@ public class Importer extends DefaultHandler{
 	}
 	
 	public static void addIfEntityDescription (Model model, Association association) {
+		if (association.getEnds().size() < 2) {
+			return;
+		}
 		if (association.getEnds().get(0).isSubclassOf("SimulationArrivalProcess")) {
 			addIfEntityDescription(
 					model, 
