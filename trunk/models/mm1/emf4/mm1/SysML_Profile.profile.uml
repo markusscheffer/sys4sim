@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:MagicDrawProfile="http:///schemas/MagicDrawProfile/_PFVmwFPsEd2tL4GECopKcQ/0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.0.0/UML" xsi:schemaLocation="http:///schemas/MagicDrawProfile/_PFVmwFPsEd2tL4GECopKcQ/0 UML_Standard_Profile.MagicDraw_Profile.profile.uml#_PGJfc1PsEd2tL4GECopKcQ">
+<xmi:XMI xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:MagicDrawProfile="http:///schemas/MagicDrawProfile/_dML6MGIlEd2IE73s0jaLxw/0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.0.0/UML" xsi:schemaLocation="http:///schemas/MagicDrawProfile/_dML6MGIlEd2IE73s0jaLxw/0 UML_Standard_Profile.MagicDraw_Profile.profile.uml#_eMbPMmIlEd2IE73s0jaLxw">
   <uml:Profile xmi:id="_11_5EAPbeta_be00301_1147434586638_637562_1900" name="SysML Profile" metamodelReference="_0metamodelReferenceSysML_Profile">
-    <eAnnotations xmi:id="_PGVFQVPsEd2tL4GECopKcQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-      <contents xmi:type="ecore:EPackage" xmi:id="_PGVFQlPsEd2tL4GECopKcQ" name="SysMLProfile" nsURI="http:///schemas/SysMLProfile/_PE13gFPsEd2tL4GECopKcQ/0" nsPrefix="SysMLProfile"/>
+    <eAnnotations xmi:id="_eMgvbGIlEd2IE73s0jaLxw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <contents xmi:type="ecore:EPackage" xmi:id="_eMgvbWIlEd2IE73s0jaLxw" name="SysMLProfile" nsURI="http:///schemas/SysMLProfile/_dMp0QGIlEd2IE73s0jaLxw/0" nsPrefix="SysMLProfile"/>
     </eAnnotations>
-    <ownedComment xmi:id="_12_5_1_62a020a_1183548039674_723_914" body="version=1.1sp1" annotatedElement="_11_5EAPbeta_be00301_1147434586638_637562_1900"/>
+    <ownedComment xmi:id="_12_5_1_62a020a_1183548039674_723_914" body="version=15.5" annotatedElement="_11_5EAPbeta_be00301_1147434586638_637562_1900"/>
     <packageImport xmi:id="_0metamodelReferenceSysML_Profile">
       <importedPackage xmi:type="uml:Model" href="pathmap://UML_METAMODELS/UML.metamodel.uml#_0"/>
     </packageImport>
@@ -15,11 +15,11 @@
       <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#_0"/>
     </packageImport>
     <profileApplication xmi:id="_be00301_1073394351331_445580_2profileApplicationSysML_Profile">
-      <eAnnotations xmi:id="_POuMQlPsEd2tL4GECopKcQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-        <references xmi:type="ecore:EPackage" href="UML_Standard_Profile.MagicDraw_Profile.profile.uml#_PGJfc1PsEd2tL4GECopKcQ"/>
+      <eAnnotations xmi:id="_eVMws2IlEd2IE73s0jaLxw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="UML_Standard_Profile.MagicDraw_Profile.profile.uml#_eMbPMmIlEd2IE73s0jaLxw"/>
       </eAnnotations>
       <appliedProfile href="UML_Standard_Profile.MagicDraw_Profile.profile.uml#_be00301_1073394351331_445580_2"/>
     </profileApplication>
   </uml:Profile>
-  <MagicDrawProfile:auxiliaryResource xmi:id="_POuMQ1PsEd2tL4GECopKcQ" base_Element="_11_5EAPbeta_be00301_1147434586638_637562_1900" base_Package="_11_5EAPbeta_be00301_1147434586638_637562_1900"/>
+  <MagicDrawProfile:auxiliaryResource xmi:id="_eVNXwGIlEd2IE73s0jaLxw" base_Element="_11_5EAPbeta_be00301_1147434586638_637562_1900" base_Package="_11_5EAPbeta_be00301_1147434586638_637562_1900"/>
 </xmi:XMI>
