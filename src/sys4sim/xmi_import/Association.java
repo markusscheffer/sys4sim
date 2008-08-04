@@ -24,9 +24,13 @@ public class Association extends XmiObject {
 	}
 	
 	public void unstringRelations(Hashtable<String, XmiObject> hash) {
-		for (String classString : getEndStrings()) {
-			XmiObject owner = ((OwnedAttribute) hash.get(classString)).getOwner();
-			ends.add((UmlClass) owner);
+		if (endStrings != null) {
+			for (String classString : getEndStrings()) {
+				if (hash.get(classString) != null) {
+					XmiObject owner = ((OwnedAttribute) hash.get(classString)).getOwner();
+					ends.add((UmlClass) owner);
+				}
+			}
 		}
 	}
 	
