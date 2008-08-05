@@ -15,8 +15,7 @@ public class ParsingHandler extends DefaultHandler {
 	
 	private Hashtable<String,XmiObject> objectHash = new Hashtable<String,XmiObject>();
 	
-	private boolean saveText = false;
-	private String savedText = "";
+	private StringBuffer chars = new StringBuffer();
 	
 	public ParsingHandler () {
 		super();
@@ -85,17 +84,14 @@ public class ParsingHandler extends DefaultHandler {
 	    
 	public void startElement (String uri, String name,
 		      String qName, Attributes atts) {
-		splitMultiple("test");
-			String methodName = "".equals(uri) ? qName : name;
+		String methodName = "".equals(uri) ? qName : name;
 		if(elementStack.isEmpty() || !elementStack.peek().getClass().equals(DeepIgnoreXmiObject.class)) {
 			try {
 				Class<?> cls = getClass ();
 	      
 				Method method = cls.getMethod (methodName, String.class, String.class, Attributes.class);
-				// elementStack.push((XmiObject) 
 				elementStack.push((XmiObject) method.invoke(this, methodName, uri, atts));
-				//System.out.println("Elemente nach Push: " + elementStack.size());
-			
+				
 			} catch (NoSuchMethodException e) {
 		      System.out.println ("Method does not exist!" + methodName);
 		    } catch (IllegalAccessException e) {
@@ -110,35 +106,31 @@ public class ParsingHandler extends DefaultHandler {
 		      methodException.printStackTrace ();
 		    }
 		} else {
-			//System.out.println("im here");
 			elementStack.push(new DeepIgnoreXmiObject());
 		}
-	     // System.out.println("Auf den Stack gewandert: <" + qName + "> als " + elementStack.peek().getClass().toString());
-		
+	     
 	}
 
   public void endElement (String uri, String name, String qName) {
-	  //System.out.println("Elemente vor Pop: " + elementStack.size());
-	 XmiObject obj = elementStack.pop();
-	 if (obj instanceof SaveTextVoidXmiObject) {
-		 saveText = false;
-	 } 
+	 elementStack.pop();
 	 
 	 String newName = "".equals(uri) ? qName : name;
 	 
 	 // This might just be some cruel hack...
 	 if (newName.equals("guard")) {
-		 saveText = false;
-		 ((Edge)elementStack.peek()).setGuard(savedText);
-		 savedText = "";
-	 }
+		 ((Edge)elementStack.peek()).setGuard(getChars());
+		 }
   }
 	  
-  public void characters (char ch[], int start, int length) {
-	  if (saveText) {
-		  for (char chr : ch) {
-			  savedText += chr;
-		  }
+  private String getChars() {
+	  String ch = chars.toString ();
+	  chars.setLength (0);
+	  return ch;
+  }
+
+public void characters (char ch[], int start, int length) {
+	  if (elementStack.peek() instanceof SaveTextVoidXmiObject) {
+		  chars.append(ch, start, length);
 	  }
   }
   
@@ -457,7 +449,6 @@ public class ParsingHandler extends DefaultHandler {
   }
   
   public XmiObject body (String name, String uri, Attributes atts) {
-	  saveText = true;
 	  return new SaveTextVoidXmiObject();
   }
   
