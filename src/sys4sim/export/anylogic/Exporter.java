@@ -1,12 +1,17 @@
 package sys4sim.export.anylogic;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-import org.jdom.Document;
-import org.jdom.Element;
+import java.lang.String;
+
+
+import org.jdom.*;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
@@ -28,21 +33,22 @@ public class Exporter implements ExportInterface {
    	 root.addContent(Model);
    	 
    	 // definiere allgemeine Modelleigenschafften 
+   
        Model
        .addContent(new Element ("ID").setText("1213174774546"))
-   	   .addContent(new Element("Name").setText("![CDATA[Main]]"))
+   	   .addContent(new Element("Name").setText("<![CDATA[MM1]]>"))//einsetzen
    	   .addContent(new Element("ExcludeFromBuild").setText("false"))
    	   .addContent(new Element("EngineVersion").setText("6"))
-   	   .addContent(new Element("JavaPackageName").setText("![CDATA[mm1]]"));
-       char cTest = (char) 13;
+   	   .addContent(new Element("JavaPackageName").setText("<![CDATA[mm1]]>"));//einsetzen
+       
       
        Element ActiveObjectClasses = new Element("ActiveObjectClasses");
        Model.addContent(ActiveObjectClasses);
             Element ActiveObjectClass = new Element("ActiveObjectClass");
             ActiveObjectClasses.addContent(ActiveObjectClass);
               ActiveObjectClass
-              .addContent(new Element("ID").setText("1213174774547"))//bea
-              .addContent(new Element("Name").setText("![CDATA[MM1]]"))//bea
+              .addContent(new Element("Id").setText("1213174774547"))//bea
+              .addContent(new Element("Name").setText("<![CDATA[MM1]]>"))//bea
               .addContent(new Element("ExcludeFromBuild").setText("false"))
               .addContent(new Element("ClientAreaTopLeft").addContent("<X>0</X><Y>0</Y>"))//hoffe mal das geht so
               .addContent(new Element("PresentationTopGroupPersistent").setText("true"))
@@ -66,13 +72,13 @@ public class Exporter implements ExportInterface {
                 .addContent(new Element("FirstUpdateDate").setText("1213174774859"))//bea
                 .addContent(new Element("RecurrenceCode").setText("<![CDATA[1]]>"));//bea
                    
-                Element Connectors = new Element("Connectors");
-                ActiveObjectClass.addContent(Connectors);
+               Element Connectors = new Element("Connectors");
+               ActiveObjectClass.addContent(Connectors);
                 
         //Erzeugen der anylogic IDs
         for (ModelElement element : model.getElements().values()) 
         {
-        	element.setId(IDErzeugen(8, 9));
+        	element.setId(IDErzeugen(8,9));
         }
                 
 		//FOR für die Erzeugung der Connectoren	
@@ -87,40 +93,256 @@ public class Exporter implements ExportInterface {
 			}
 		}
 		
-		      Element EmbeddedObjects = new Element("EmbeddedObjects");
-              ActiveObjectClass.addContent(EmbeddedObjects);
+		Element EmbeddedObjects = new Element("EmbeddedObjects");
+        ActiveObjectClass.addContent(EmbeddedObjects);
        //FOR für die Erzeugung der Elemente	
         int zaehlerSink = 0;int zaehlerSource = 0;int zaehlerMachine = 0;int zaehlerQueue = 0;
 		for (ModelElement element : model.getElements().values()) 
 		{   
-			System.out.println(element.getClass().toString());
+			
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink"))
 				{
 				zaehlerSink=zaehlerSink+1;
-				CreateSink(Connectors,element,zaehlerSink);
+				CreateSink(EmbeddedObjects,element,zaehlerSink);
 				}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Source"))
 				{
 				zaehlerSource=zaehlerSource+1;
-				CreateSource(Connectors,element,zaehlerSource);
+				CreateSource(EmbeddedObjects,element,zaehlerSource);
 				}
-			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Machine"))
+			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
 				{
 				zaehlerMachine=zaehlerMachine+1;
-				CreateMachine(Connectors,element,zaehlerMachine);
+				CreateProcess(EmbeddedObjects,element,zaehlerMachine);
 				}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Queue"))
 				{
 				zaehlerQueue=zaehlerQueue+1;
-				CreateQueue(Connectors,element,zaehlerQueue);
+				CreateQueue(EmbeddedObjects,element,zaehlerQueue);
 				}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Worker"))
-				CreateWorker(Connectors,element);
+				CreateWorker(EmbeddedObjects,element);
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Transporter"))
-				CreateTransporter(Connectors,element);
+				CreateTransporter(EmbeddedObjects,element);
 		}
-
 		
+	
+	// erzeugen des Experiments
+		
+		Element Experiments = new Element("Experiments");
+	    Model.addContent(Experiments);
+	      Element Experiment = new Element("SimulationExperiment");
+	      Experiments.addContent(Experiment);
+	      Experiment.setAttribute("ActiveObjectClassId","1213174774547")
+	      .addContent(new Element("Id").setText("1213174774548"))
+	      .addContent(new Element("Name").setText("<![CDATA[Simulation]]>"))
+	      .addContent(new Element("ExcludeFromBuild").setText("false"))
+	      .addContent(new Element("ClientAreaTopLeft").setText("<X>0</X><Y>0</Y>"))
+	      .addContent(new Element("PresentationTopGroupPersistent").setText("true"))
+	      .addContent(new Element("IconTopGroupPersistent").setText("true"));
+	      Element Frame = new Element("Frame");
+	      Experiment.addContent(Frame);
+	      Frame
+	      .addContent(new Element("X").setText("0"))
+	      .addContent(new Element("Y").setText("0"))
+	      .addContent(new Element("Width").setText("800"))
+	      .addContent(new Element("Height").setText("600"));
+	      Experiment
+	      .addContent(new Element("CommandLineArguments").setText("<![CDATA[]]>"))
+	      .addContent(new Element("MaximumMemory").setText("64"))
+	      .addContent(new Element("RandomSeed").setText("false"))
+	      .addContent(new Element("SeedValue").setText("1"))
+	      .addContent(new Element("VmArgs").setText("<![CDATA[]]>"))
+	      .addContent(new Element("AbsoluteAccuracy").setText("1.0E-5"))
+	      .addContent(new Element("RelativeAccuracy").setText("1.0E-5"))
+	      .addContent(new Element("TimeAccuracy").setText("1.0E-5"))
+	      .addContent(new Element("FixedTimeStep").setText("0.0010"))
+	      .addContent(new Element("LoadRootFromSnapshot").setText("false"))
+	      .addContent(new Element("SnapshotFile").setText(""));//
+	      Element Shapes = new Element("Shapes");
+	      Experiment.addContent(Shapes);
+	        Element Text = new Element("Text");
+	        Shapes.addContent(Text);
+	        Text
+	          .addContent(new Element("Id").setText("0"))
+	          .addContent(new Element("Name").setText("<![CDATA[text]]>"))
+	          .addContent(new Element("ExcludeFromBuild").setText("false"))
+	          .addContent(new Element("X").setText("40"))
+	          .addContent(new Element("Y").setText("30"))
+	          .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))
+	          .addContent(new Element("PublicFlag").setText("true"))
+	          .addContent(new Element("PresentationFlag").setText("true"))
+	          .addContent(new Element("ShowLabel").setText("false"))
+	          .addContent(new Element("AsObject").setText("true"))
+	          .addContent(new Element("EmbeddedIcon").setText("false"))
+	          .addContent(new Element("Rotation").setText("0.0"))
+	          .addContent(new Element("Color").setText("-16777216"))
+	          .addContent(new Element("Text").setText("<![CDATA[MM1]]>"));//ändern dynamisch
+	          Element Font = new Element("Font");
+	          Text.addContent(Font);
+	          Font
+	            .addContent(new Element("Name").setText("Times New Roman"))
+	            .addContent(new Element("Size").setText("28"))
+	            .addContent(new Element("Style").setText("1"));
+	          Text
+	          .addContent(new Element("Alignment").setText("LEFT"));
+	        Element Text2 = new Element("Text");
+		    Shapes.addContent(Text2);
+		    Text2
+		      .addContent(new Element("Id").setText("0"))
+	          .addContent(new Element("Name").setText("<![CDATA[text]]>"))
+	          .addContent(new Element("ExcludeFromBuild").setText("false"))
+	          .addContent(new Element("X").setText("40"))
+	          .addContent(new Element("Y").setText("63"))
+	          .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))
+	          .addContent(new Element("PublicFlag").setText("true"))
+	          .addContent(new Element("PresentationFlag").setText("true"))
+	          .addContent(new Element("ShowLabel").setText("false"))
+	          .addContent(new Element("AsObject").setText("true"))
+	          .addContent(new Element("EmbeddedIcon").setText("false"))
+	          .addContent(new Element("Rotation").setText("0.0"))
+	          .addContent(new Element("Color").setText("-16777216"))
+	          .addContent(new Element("Text").setText("<![CDATA[Experiment setup page]]>"));
+	          Element Font2 = new Element("Font");
+	          Text.addContent(Font2);
+	          Font2
+	            .addContent(new Element("Name").setText("Times New Roman"))
+	            .addContent(new Element("Size").setText("16"))
+	            .addContent(new Element("Style").setText("2"));
+	          Text
+	          .addContent(new Element("Alignment").setText("LEFT"));
+	      Element Controls = new Element("Controls");
+		  Experiment.addContent(Controls);
+		    Element Control = new Element("Control");
+		    Controls.addContent(Control);
+		    Control.setAttribute("Type","Button")
+		    .addContent(new Element("EmbeddedIcon").setText("false"))
+		    .addContent(new Element("Id").setText("0"))
+		    .addContent(new Element("Name").setText("<![CDATA[button]]>"))
+		    .addContent(new Element("ExcludeFromBuild").setText("false"))
+		    .addContent(new Element("X").setText("40"))
+		    .addContent(new Element("Y").setText("120"))
+		    .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))
+		    .addContent(new Element("PublicFlag").setText("true"))
+		    .addContent(new Element("PresentationFlag").setText("true"))
+		    .addContent(new Element("ShowLabel").setText("false"));
+		    Element BasicProperties  = new Element("BasicProperties");
+		    Control.addContent(BasicProperties );
+		    BasicProperties
+		    .setAttribute("Width","220")
+		    .setAttribute("Height","30")
+		    .setAttribute("AsObject","true")
+		    .addContent(new Element("EmbeddedIcon").setText("false"))
+		    .addContent(new Element("FillColor").setText(""))//
+		    .addContent(new Element("TextColor").setText(""))//
+		    .addContent(new Element("EnableExpression").setText("<![CDATA[getState() == IDLE]]>"))
+		    .addContent(new Element("ActionCode").setText("<![CDATA[run();" +
+		    		"getEngine().getPresentation().setPresentable( getEngine().getRoot() );]]>"));//
+		    Element ExtendedProperties  = new Element("ExtendedProperties");
+		    Control.addContent(ExtendedProperties );
+		      Element Font3   = new Element("Font");
+		      ExtendedProperties.addContent(Font3);
+		      Font3.setAttribute("Name","Tahoma")
+		           .setAttribute("Size","11")
+		           .setAttribute("Style","0");
+		      ExtendedProperties.addContent(new Element("LabelText").setText("<![CDATA[Run the model and switch to Main view]]>"));
+	 Element Parameters = new Element("Parameters");//
+	 Experiment.addContent(Parameters);//
+	 Element PresentationProperties  = new Element("PresentationProperties");
+	 Experiment.addContent(PresentationProperties);
+	   PresentationProperties 
+	   .setAttribute("EnableAdaptiveFrameManagement","true")
+	   .setAttribute("EnableAntiAliasing","true")
+	   .setAttribute("EnablePanning","true")
+	   .setAttribute("EnableZoom","true")
+	   .addContent(new Element("ExecutionMode").setText("<![CDATA[realTime]]>"))
+	   .addContent(new Element("CpuRatio").setText("<![CDATA[ratio_1_2]]>"))
+	   .addContent(new Element("Title").setText("<![CDATA[MM1 : Simulation]]>"))
+	   .addContent(new Element("FramesPerSecond").setText("<![CDATA[20.0]]>"))
+	   .addContent(new Element("RealTimeScale").setText("SCALE_1"));
+	   Element UIProperty   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty);
+	   UIProperty
+	   .setAttribute("Experiment Progress","false");
+	   Element UIProperty2   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty2);
+	   UIProperty2
+	   .setAttribute("Simulation Progress","true");
+	   Element UIProperty3   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty3);
+	   UIProperty3
+	   .setAttribute("Statusbar Events Per Second","false");
+	   Element UIProperty4   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty4);
+	   UIProperty4
+	   .setAttribute("Statusbar Frames Per Second","false");
+	   Element UIProperty5   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty5);
+	   UIProperty5
+	   .setAttribute("Statusbar Memory","true");
+	   Element UIProperty6   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty6);
+	   UIProperty6
+	   .setAttribute("Statusbar Model Date","false");
+	   Element UIProperty7   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty7);
+	   UIProperty7
+	   .setAttribute("Statusbar Model Step","false");
+	   Element UIProperty8   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty8);
+	   UIProperty8
+	   .setAttribute("Statusbar Model Time","true");
+	   Element UIProperty9   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty9);
+	   UIProperty9
+	   .setAttribute("Statusbar Real Time Of Simulation","true");
+	   Element UIProperty10   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty10);
+	   UIProperty10
+	   .setAttribute("Statusbar Status","true");
+	   Element UIProperty11   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty11);
+	   UIProperty11
+	   .setAttribute("Toolbar Animation setup","false");
+	   Element UIProperty12   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty12);
+	   UIProperty12
+	   .setAttribute("Toolbar Execution control","true");
+	   Element UIProperty13   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty13);
+	   UIProperty13
+	   .setAttribute("Toolbar File","false");
+	   Element UIProperty14   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty14);
+	   UIProperty14
+	   .setAttribute("Toolbar Model navigation","true");
+	   Element UIProperty15   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty15);
+	   UIProperty15
+	   .setAttribute("Toolbar Time scale setup","true");
+	   Element UIProperty16   = new Element("UIProperty");
+	   PresentationProperties.addContent(UIProperty16);
+	   UIProperty16
+	   .setAttribute("Toolbar View","false");
+	 Element ModelTimeProperties   = new Element("ModelTimeProperties ");
+	 Experiment.addContent(ModelTimeProperties );
+	 ModelTimeProperties 
+	 .setAttribute("UseCalendar","false")
+	 .addContent(new Element("StopOption").setText("<![CDATA[Stop at specified time]]>"))
+	 .addContent(new Element("InitialDate").setText("<![CDATA[1213174774546]]>"))
+	 .addContent(new Element("InitialTime").setText("<![CDATA[0.0]]>"))
+	 .addContent(new Element("FinalDate").setText("<![CDATA[1221814774546]]>"))
+	 .addContent(new Element("FinalTime").setText("<![CDATA[100.0]]>"))
+	 .addContent(new Element("ModelTimeUnit").setText("<![CDATA[Day]]>"));
+    Element RequiredLibraryReference   = new Element("RequiredLibraryReference ");
+    Model.addContent(RequiredLibraryReference );
+    RequiredLibraryReference
+    .addContent(new Element("LibraryName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))
+    .addContent(new Element("VersionMajor").setText("6"))
+    .addContent(new Element("VersionMinor").setText("0"))
+    .addContent(new Element("VersionBuild").setText("1"));
+    
+	      
 	// neues Dok. benötigt nur Wurzel
    	 Document doc = new Document(root);     
    	 doc.setRootElement(root);  	
@@ -128,7 +350,7 @@ public class Exporter implements ExportInterface {
    	// definierte XML Struktur in festgelegte Outputdatei übertragen
    	 try {
    		 FileOutputStream out =  new  FileOutputStream("test.xml");
-   		  XMLOutputter serializer = new XMLOutputter(Format.getRawFormat());
+   		  XMLOutputter serializer = new XMLOutputter(Format.getPrettyFormat());
    		  serializer.output(doc,out);
    		  out.flush();
    		  out.close();
@@ -136,6 +358,8 @@ public class Exporter implements ExportInterface {
    	 catch (IOException e) {
    		 
    	 }
+   	 
+   	 Sonderzeichen();
 			 
 	}
 	
@@ -155,6 +379,7 @@ public class Exporter implements ExportInterface {
         Connector
         .addContent(new Element("Id").setText(ID))//
         .addContent(new Element("Name").setText(name))//
+        .addContent(new Element("ExcludeFromBuild").setText("false"))
         .addContent(new Element("X").setText("170"))//Koordinaten
         .addContent(new Element("Y").setText("150"))                
         .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))// bea ob das so geht
@@ -169,7 +394,7 @@ public class Exporter implements ExportInterface {
         Connector.addContent(Points);
           Points
           .addContent(new Element("Point").setText("<X>0</X><Y>0</Y>"))    //bea
-          .addContent(new Element("Point").setText("<X>30</X><Y>0</Y>"));    //bea
+          .addContent(new Element("Point").setText("<X>30</X><Y>0</Y>"));   //bea
         return Connectors;		
 	}
 	
@@ -178,7 +403,7 @@ public class Exporter implements ExportInterface {
 	//Methode zur Erzeugung der einzelnen Senken
 	private static Element CreateSink(Element EmbeddedObjects, ModelElement element,int zaehlerElement) 
 	{
-		String zname = "Sink"+String.valueOf(zaehlerElement);
+		String zname = "sink"+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
 		String ID = element.getId();
 		
@@ -197,10 +422,10 @@ public class Exporter implements ExportInterface {
 			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
 			EmbeddedObject.addContent(ActiveObjectClass2);
 				ActiveObjectClass2
-				.addContent(new Element("PackageName").setText("![CDATA[com.xj.anylogic.libraries.enterprise]]"))//
-				.addContent(new Element("ClassName").setText("![CDATA[Sink]]"));//bea name des Objekts in der Bibliothek
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[Sink]]>"));//bea name des Objekts in der Bibliothek
 			EmbeddedObject
-			.addContent(new Element("GenericParametersSubstitute").setText("![CDATA[Entity]]"));//ba
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[Entity]]>"));//ba
 			Element Parameters = new Element("Parameters"); 
 			EmbeddedObject.addContent(Parameters);
 				Element Parameter = new Element("Parameter"); 
@@ -208,14 +433,14 @@ public class Exporter implements ExportInterface {
 				Parameter
 				.addContent(new Element("Name").setText("<![CDATA[onEnter]]>"))//bei jeden Element anders für vollständigkeit müssen elemente der Bibliothek angeguckt werden
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
-			return(EmbeddedObjects);
+			return EmbeddedObjects;
 		
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
 	private static Element CreateSource(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
 	{
-		String zname = "Source"+String.valueOf(zaehlerElement);
+		String zname = "source"+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
 		String ID = element.getId();
 		
@@ -234,10 +459,10 @@ public class Exporter implements ExportInterface {
 			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
 			EmbeddedObject.addContent(ActiveObjectClass2);
 				ActiveObjectClass2
-				.addContent(new Element("PackageName").setText("![CDATA[com.xj.anylogic.libraries.enterprise]]"))//
-				.addContent(new Element("ClassName").setText("![CDATA[Source]]"));//
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[Source]]>"));//
 			EmbeddedObject
-			.addContent(new Element("GenericParametersSubstitute").setText("![CDATA[Entity]]"));//
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[Entity]]>"));//
 			Element Parameters = new Element("Parameters"); 
 			EmbeddedObject.addContent(Parameters);
 				Element Parameter = new Element("Parameter"); 
@@ -305,14 +530,14 @@ public class Exporter implements ExportInterface {
 				Parameter13
 				.addContent(new Element("Name").setText("<![CDATA[enableRotation]]>"))//bleibt aussen vor
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
-			return(EmbeddedObjects);
+			return EmbeddedObjects;
 		
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
-	private static Element CreateMachine(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
+	private static Element CreateProcess(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
 	{
-		String zname = "delay"+String.valueOf(zaehlerElement);
+		String zname = "elay"+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
 		String ID = element.getId();
 		
@@ -331,10 +556,10 @@ public class Exporter implements ExportInterface {
 			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
 			EmbeddedObject.addContent(ActiveObjectClass2);
 				ActiveObjectClass2
-				.addContent(new Element("PackageName").setText("![CDATA[com.xj.anylogic.libraries.enterprise]]"))//
-				.addContent(new Element("ClassName").setText("![CDATA[Delay]]"));//
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[Delay]]>"));//
 			EmbeddedObject
-			.addContent(new Element("GenericParametersSubstitute").setText("![CDATA[Entity]]"));//
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[Entity]]>"));//
 			Element Parameters = new Element("Parameters"); 
 			EmbeddedObject.addContent(Parameters);
 				Element Parameter = new Element("Parameter"); 
@@ -392,13 +617,13 @@ public class Exporter implements ExportInterface {
 				Parameter11
 				.addContent(new Element("Name").setText("<![CDATA[enableStats]]>"))//bleibt aussen vor
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
-		return(EmbeddedObjects);
+		return EmbeddedObjects;
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
 	private static Element CreateQueue(Element EmbeddedObjects, ModelElement element, int zaehlerElement)
 	{
-		String zname = "Queue"+String.valueOf(zaehlerElement);
+		String zname = "queue"+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
 		String ID = element.getId();
 		
@@ -417,16 +642,16 @@ public class Exporter implements ExportInterface {
 			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
 			EmbeddedObject.addContent(ActiveObjectClass2);
 				ActiveObjectClass2
-				.addContent(new Element("PackageName").setText("![CDATA[com.xj.anylogic.libraries.enterprise]]"))//
-				.addContent(new Element("ClassName").setText("![CDATA[queue]]"));//
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[Queue]]>"));//
 			EmbeddedObject
-			.addContent(new Element("GenericParametersSubstitute").setText("![CDATA[Entity]]"));//
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[Entity]]>"));//
 			Element Parameters = new Element("Parameters"); 
 			EmbeddedObject.addContent(Parameters);
 				Element Parameter = new Element("Parameter"); 
 				Parameters.addContent(Parameter);
 				Parameter
-				.addContent(new Element("Name").setText("<![CDATA[capacity]]"))//muss dann gemacht werden aus dem modell
+				.addContent(new Element("Name").setText("<![CDATA[capacity]]>"))//muss dann gemacht werden aus dem modell
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));//gleiches
 				Element Parameter2 = new Element("Parameter"); 
 				Parameters.addContent(Parameter2);
@@ -498,7 +723,7 @@ public class Exporter implements ExportInterface {
 				Parameter15
 				.addContent(new Element("Name").setText("<![CDATA[enableStats]]>"))//bleibt aussen vor
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
-		return(EmbeddedObjects);
+		return EmbeddedObjects;
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
@@ -526,5 +751,88 @@ public class Exporter implements ExportInterface {
         }
         return b;
     }
+	
+    private static void Sonderzeichen()
+    {
+    	try
+		 {
+			File oldFile = new File("C:/Dokumente und Einstellungen/Administrator/workspace/sys4sim/test.xml");
+		    File newFile = new File("C:/Dokumente und Einstellungen/Administrator/Desktop/SammlungModelle/test.xml");
+		    newFile.createNewFile();
+		    String sb =readFileContent(oldFile);
+		    FileWriter writer = new FileWriter(newFile);
+		    writer.write(sb);
+		    writer.flush();
+		    writer.close();
+		    oldFile.delete();
+		 }
+		 catch (IOException e) {
+	   		 
+	   	 }
+    	
+    	
+    }
+    
+    public static String readFileContent (File oldFile) {
+	    StringBuilder sb = new StringBuilder();
+	    try {   
+	            FileReader reader = new FileReader(oldFile);
+	            int character;
+	            while ((character=reader.read()) >-1) 
+	            {
+	            	// filtern der Sonderzeichen 
+	            	if (character == 38)
+	            	{   
+	            		character=reader.read();
+	            		if (character == 108)
+	            		{
+	            			character=reader.read();
+	            			if (character == 116)
+	            			{   
+	            				character=reader.read();
+	            				if (character == 59)
+	            				{
+	            					character=60;
+	            				}
+	            				else {   sb.append((char) 38);
+	            			             sb.append((char) 108);
+	            				         sb.append((char) 116);}
+	            			}
+	            			else 	{   sb.append((char) 38);
+	            			            sb.append((char) 108);}
+	            		}
+	            		
+	            		else if (character == 103)
+	            		{   
+	            			character=reader.read();
+	            			if (character == 116)
+	            			{   
+	            				character=reader.read();
+	            				if (character == 59)
+	            				{
+	            					character=62;
+	            				}
+	            				else {sb.append((char) 38);
+	            				      sb.append((char) 103);
+	            				      sb.append((char) 116);}
+	            			}
+	            			else 	   {sb.append((char) 38);
+	            			            sb.append((char) 103);}
+	            		}
+	            		
+	            		else sb.append((char) 38);
+	            	}
+	            	
+	             	
+	                sb.append((char) character);
+	            }
+	            reader.close();
+	        } catch(FileNotFoundException fnfe) {
+	            fnfe.printStackTrace();
+	        } catch (IOException ioe) {
+	            ioe.printStackTrace();
+	        }
+	        return sb.toString();
+	    } 
 	
 }
