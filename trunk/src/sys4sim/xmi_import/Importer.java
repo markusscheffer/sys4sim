@@ -207,6 +207,7 @@ public class Importer extends DefaultHandler{
 			((Source) block).setTypeID(classOfAtt.getXmiID());
 		} else if (classOfAtt.isSubclassOf("SimulationSingleProcess")){
 			block = new Process();
+			generateResourcePool((Process) block, attribute);
 		} else {
 			block = new ModelBlock();
 			System.out.println("Suitable ModelBlock not found: " + classOfAtt.getName());
@@ -217,10 +218,83 @@ public class Importer extends DefaultHandler{
 		model.getElements().put(id, block);
 	}
 	
+	private static void generateResourcePool(Process process,
+			OwnedAttribute attribute) {
+		MachinePool mp = new MachinePool();
+		TransporterPool tp = new TransporterPool();
+		WorkerPool wp = new WorkerPool();
+		
+		UmlClass cls = attribute.getType();
+		for (OwnedAttribute att : cls.getAttributes()) {
+			if (att.getType() == null) {
+				
+			} else if (att.getType().isSubclassOf("SimulationQueue")) {
+				// TODO
+			} else {
+				Resource resource = addAttribute(process, att);
+				addToPools(resource, mp, tp, wp);
+			}
+		}
+		if (mp.getElements().size() > 0) {
+			process.getResourcePools().put(mp, mp.getElements().size());
+		}
+		if (wp.getElements().size() > 0) {
+			process.getResourcePools().put(wp, wp.getElements().size());
+		}
+		if (tp.getElements().size() > 0) {
+			process.getResourcePools().put(tp, tp.getElements().size());
+		}
+	}
+
+
+	
+	private static void addToPools(Resource resource, MachinePool mp,
+			TransporterPool tp, WorkerPool wp) {
+		if (resource == null) {
+			System.out.println("Sorry: Null resource");
+			return;
+		}
+		System.out.println("Adding Resource: " + resource.toString());
+		if (resource instanceof Machine) {
+			mp.add((Machine) resource);
+		} else if (resource instanceof Transporter) {
+			tp.add((Transporter) resource);
+		} else if (resource instanceof Worker) {
+			wp.add((Worker) resource);
+		} else {
+			System.out.println("Sorry: Do not know the correct resource.");
+		}
+	}
+	
+
+	private static Resource addAttribute(Process process, OwnedAttribute att) {
+		if (att.getType().isSubclassOf("SimulationMachine")) {
+			Machine machine = new Machine();
+			setName(machine, att);
+			return machine;
+		} else if (att.getType().isSubclassOf("SimulationWorker")) {
+			Worker worker = new Worker();
+			setName(worker, att);
+			return worker;
+		} else if (att.getType().isSubclassOf("SimulationTransporter")) {
+			Transporter transporter = new Transporter();
+			setName(transporter, att);
+			return transporter;
+		} else {
+			System.out.println("No matching Resource found for: " + att.getType().getName());
+			return null;
+		}
+	}
+
+	private static void setName(Resource resource, OwnedAttribute att) {
+		resource.setName(att.getName() + " (" + att.getType().getName() + ")");	
+	}
+
 	public static void addIfEntityDescription (Model model, Association association) {
 		if (association.getEnds().size() < 2) {
 			return;
 		}
+		
 		if (association.getEnds().get(0).isSubclassOf("SimulationArrivalProcess")) {
 			addIfEntityDescription(
 					model, 

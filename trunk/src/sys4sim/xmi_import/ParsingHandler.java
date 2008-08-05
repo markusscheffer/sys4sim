@@ -221,11 +221,15 @@ public class ParsingHandler extends DefaultHandler {
   public XmiObject ownedAttribute(String name, String uri, Attributes atts) {
 	  OwnedAttribute oa;
 	  String type = atts.getValue("xmi:type");
+	  PackagedElement pe = (PackagedElement) elementStack.peek();
+	  
 	  if (type != null && type.equals("uml:Port")) {
 		  oa = new Port();
+		  pe.getPorts().add((Port)oa);
 	  }
 	  else {
 		  oa = new OwnedAttribute();
+		  pe.getAttributes().add(oa);
 	  }
 	  
 	  setXmiID(oa, atts.getValue("xmi:id"));
@@ -233,8 +237,6 @@ public class ParsingHandler extends DefaultHandler {
 	  oa.setName(atts.getValue("name"));
 	  oa.setTypeString(atts.getValue("type"));
 	  oa.setAggregation(atts.getValue("aggregation"));
-	  PackagedElement pe = (PackagedElement) elementStack.peek();
-	  pe.getAttributes().add(oa);
 	  oa.setOwner(pe);
 	  return (XmiObject) oa;
   }
