@@ -35,7 +35,7 @@ public class Exporter implements ExportInterface {
    	 // definiere allgemeine Modelleigenschafften 
    
        Model
-       .addContent(new Element ("ID").setText("1213174774546"))
+       .addContent(new Element ("Id").setText("1213174774546"))
    	   .addContent(new Element("Name").setText("<![CDATA[MM1]]>"))//einsetzen
    	   .addContent(new Element("ExcludeFromBuild").setText("false"))
    	   .addContent(new Element("EngineVersion").setText("6"))
@@ -190,7 +190,7 @@ public class Exporter implements ExportInterface {
 		    Shapes.addContent(Text2);
 		    Text2
 		      .addContent(new Element("Id").setText("0"))
-	          .addContent(new Element("Name").setText("<![CDATA[text]]>"))
+	          .addContent(new Element("Name").setText("<![CDATA[text1]]>"))
 	          .addContent(new Element("ExcludeFromBuild").setText("false"))
 	          .addContent(new Element("X").setText("40"))
 	          .addContent(new Element("Y").setText("63"))
@@ -204,12 +204,12 @@ public class Exporter implements ExportInterface {
 	          .addContent(new Element("Color").setText("-16777216"))
 	          .addContent(new Element("Text").setText("<![CDATA[Experiment setup page]]>"));
 	          Element Font2 = new Element("Font");
-	          Text.addContent(Font2);
+	          Text2.addContent(Font2);
 	          Font2
 	            .addContent(new Element("Name").setText("Times New Roman"))
 	            .addContent(new Element("Size").setText("16"))
 	            .addContent(new Element("Style").setText("2"));
-	          Text
+	          Text2
 	          .addContent(new Element("Alignment").setText("LEFT"));
 	      Element Controls = new Element("Controls");
 		  Experiment.addContent(Controls);
@@ -260,71 +260,86 @@ public class Exporter implements ExportInterface {
 	   .addContent(new Element("Title").setText("<![CDATA[MM1 : Simulation]]>"))
 	   .addContent(new Element("FramesPerSecond").setText("<![CDATA[20.0]]>"))
 	   .addContent(new Element("RealTimeScale").setText("SCALE_1"));
-	   Element UIProperty   = new Element("UIProperty");
-	   PresentationProperties.addContent(UIProperty);
-	   UIProperty
-	   .setAttribute("Experiment Progress","false");
+	   //Element UIProperty   = new Element("UIProperty");
+	   //PresentationProperties.addContent(UIProperty);
+	   //UIProperty
+	   //.setAttribute("Experiment Progress","false");
 	   Element UIProperty2   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty2);
 	   UIProperty2
-	   .setAttribute("Simulation Progress","true");
+	   .setAttribute("Name","Simulation Progress")
+	   .setAttribute("Value","true");
 	   Element UIProperty3   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty3);
 	   UIProperty3
-	   .setAttribute("Statusbar Events Per Second","false");
+	   .setAttribute("Name","Statusbar Events Per Second")
+	   .setAttribute("Value","false");
 	   Element UIProperty4   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty4);
 	   UIProperty4
-	   .setAttribute("Statusbar Frames Per Second","false");
+	   .setAttribute("Name","Statusbar Frames Per Second")
+	   .setAttribute("Value","false");
 	   Element UIProperty5   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty5);
 	   UIProperty5
-	   .setAttribute("Statusbar Memory","true");
+	   .setAttribute("Name","Statusbar Memory")
+	   .setAttribute("Value","true");
 	   Element UIProperty6   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty6);
 	   UIProperty6
-	   .setAttribute("Statusbar Model Date","false");
+	   .setAttribute("Name","Statusbar Model Date")
+	   .setAttribute("Value","false");
 	   Element UIProperty7   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty7);
 	   UIProperty7
-	   .setAttribute("Statusbar Model Step","false");
+	   .setAttribute("Name","Statusbar Model Step")
+	   .setAttribute("Value","false");
 	   Element UIProperty8   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty8);
 	   UIProperty8
-	   .setAttribute("Statusbar Model Time","true");
+	   .setAttribute("Name","Statusbar Model Time")
+	   .setAttribute("Value","true");
 	   Element UIProperty9   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty9);
 	   UIProperty9
-	   .setAttribute("Statusbar Real Time Of Simulation","true");
+	   .setAttribute("Name","Statusbar Real Time Of Simulation")
+	   .setAttribute("Value","true");
 	   Element UIProperty10   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty10);
 	   UIProperty10
-	   .setAttribute("Statusbar Status","true");
+	   .setAttribute("Name","Statusbar Status")
+	   .setAttribute("Value","true");
 	   Element UIProperty11   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty11);
 	   UIProperty11
-	   .setAttribute("Toolbar Animation setup","false");
+	   .setAttribute("Name","Toolbar Animation setup")
+	   .setAttribute("Value","false");
 	   Element UIProperty12   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty12);
 	   UIProperty12
-	   .setAttribute("Toolbar Execution control","true");
+	   .setAttribute("Name","Toolbar Execution control")
+	   .setAttribute("Value","true");
 	   Element UIProperty13   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty13);
 	   UIProperty13
-	   .setAttribute("Toolbar File","false");
+	   .setAttribute("Name","Toolbar File")
+	   .setAttribute("Value","false");
 	   Element UIProperty14   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty14);
 	   UIProperty14
-	   .setAttribute("Toolbar Model navigation","true");
+	   .setAttribute("Name","Toolbar Model navigation")
+	   .setAttribute("Value","true");
 	   Element UIProperty15   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty15);
 	   UIProperty15
-	   .setAttribute("Toolbar Time scale setup","true");
+	   .setAttribute("Name","Toolbar Time scale setup")
+	   .setAttribute("Value","true");
 	   Element UIProperty16   = new Element("UIProperty");
 	   PresentationProperties.addContent(UIProperty16);
 	   UIProperty16
-	   .setAttribute("Toolbar View","false");
-	 Element ModelTimeProperties   = new Element("ModelTimeProperties ");
+	   .setAttribute("Name","Toolbar View")
+	   .setAttribute("Value","false");
+	 Element ModelTimeProperties   = new Element("ModelTimeProperties");
 	 Experiment.addContent(ModelTimeProperties );
 	 ModelTimeProperties 
 	 .setAttribute("UseCalendar","false")
@@ -334,7 +349,7 @@ public class Exporter implements ExportInterface {
 	 .addContent(new Element("FinalDate").setText("<![CDATA[1221814774546]]>"))
 	 .addContent(new Element("FinalTime").setText("<![CDATA[100.0]]>"))
 	 .addContent(new Element("ModelTimeUnit").setText("<![CDATA[Day]]>"));
-    Element RequiredLibraryReference   = new Element("RequiredLibraryReference ");
+    Element RequiredLibraryReference   = new Element("RequiredLibraryReference");
     Model.addContent(RequiredLibraryReference );
     RequiredLibraryReference
     .addContent(new Element("LibraryName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))
@@ -757,7 +772,7 @@ public class Exporter implements ExportInterface {
     	try
 		 {
 			File oldFile = new File("C:/Dokumente und Einstellungen/Administrator/workspace/sys4sim/test.xml");
-		    File newFile = new File("C:/Dokumente und Einstellungen/Administrator/Desktop/SammlungModelle/test.xml");
+		    File newFile = new File("C:/Dokumente und Einstellungen/Administrator/Desktop/SammlungModelle/test.alp");
 		    newFile.createNewFile();
 		    String sb =readFileContent(oldFile);
 		    FileWriter writer = new FileWriter(newFile);
@@ -778,6 +793,7 @@ public class Exporter implements ExportInterface {
 	    try {   
 	            FileReader reader = new FileReader(oldFile);
 	            int character;
+	            //boolean phase=false;
 	            while ((character=reader.read()) >-1) 
 	            {
 	            	// filtern der Sonderzeichen 
@@ -823,7 +839,7 @@ public class Exporter implements ExportInterface {
 	            		else sb.append((char) 38);
 	            	}
 	            	
-	             	
+	            	
 	                sb.append((char) character);
 	            }
 	            reader.close();
