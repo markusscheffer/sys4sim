@@ -98,8 +98,8 @@ public class Importer extends DefaultHandler{
 							connector.setConditionString(edge.getGuard());
 							System.out.println("Generating Connector between " + 
 									connector.getSource().getName() + " and " + 
-									connector.getTarget().getName());
-		//							" [condition: " + connector.getConditionString() + "]");
+									connector.getTarget().getName() +
+									" [condition: " + connector.getConditionString() + "]");
 						} else {
 							System.out.println("Generating Connector between " + 
 								connector.getSource().getName() + " and " 
