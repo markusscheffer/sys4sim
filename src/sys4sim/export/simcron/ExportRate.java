@@ -8,12 +8,12 @@ public class ExportRate {
 
 	
 	private Rate rate;
-	private int count;
+
 	private String name;
 	
-	public ExportRate(Rate rate,String name, int count) {
+	public ExportRate(Rate rate,String name) {
 		this.rate=rate;
-		this.count= count;
+
 		this.name = name;
 	}
 	
@@ -34,7 +34,7 @@ public class ExportRate {
 		}
 		else if(rate.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.NormalDistribution")){
 			result ="distrib2 type normal\n"+name+"par 1 "+((NormalDistribution)rate).getMeanValue()+"\n"+
-			"distrib"+count+"par 1 "+((NormalDistribution)rate).getStandardDeviationValue();
+			name+"par 1 "+((NormalDistribution)rate).getStandardDeviationValue();
 		}
 		
 		return result;
@@ -43,6 +43,7 @@ public class ExportRate {
 	public String getName(){
 		return name;
 	}
+
 
 
 }
