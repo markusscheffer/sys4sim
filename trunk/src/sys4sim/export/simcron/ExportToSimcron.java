@@ -8,14 +8,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
 
 
 import sys4sim.export.ExportInterface;
+import sys4sim.export.simcron.ExportObject.Type;
 import sys4sim.internal_model.Connector;
 import sys4sim.internal_model.Entity;
-import sys4sim.internal_model.Machine;
 import sys4sim.internal_model.Model;
 import sys4sim.internal_model.ModelElement;
 import sys4sim.internal_model.Queue;
@@ -29,7 +27,11 @@ public class ExportToSimcron implements ExportInterface{
 	private String mcFileOutput="";
 	private String mpFileOutput="";
 	private String maFileOutput="";
+	private String mpFilePartOutput="";
+	private String mpFileEndPartOutput="";
 	private File file;
+	
+//	private enum Type {Process,Queue,Source, Sink};
 	
 	
 	public void writeFile(Model model, File file) {
@@ -45,21 +47,35 @@ public class ExportToSimcron implements ExportInterface{
 		ExportSink eSi = null;
 		ExportSource eSo = null;
 		
+		Hashtable<String, ExportObject> mpFileTable = new Hashtable<String, ExportObject>();
+		ArrayList<ExportProcess> ProcessList = new ArrayList<ExportProcess>();
 		for (ModelElement element : model.getElements().values()){
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process")){
-				String name="machine"+(processCount);
-				element.setName(name);
-				ExportProcess eP = new ExportProcess((Process)element,name,processCount);			
+				String Processname="process"+(processCount);
+				String name;
+				element.setName(Processname);
+				ExportProcess eP = new ExportProcess((Process)element,Processname,processCount,Type.Process);			
 				mcFileOutput=mcFileOutput+eP.getMcString()+"\n";
 				maFileOutput=maFileOutput+eP.getMaString()+"\n";
+				Rate rate = (Rate) ((Process)element).getProcessingRate();
+				name="distrib"+(rateCount);
+			//	rate.setName(name);
+				ExportRate eRate = new ExportRate(rate,name);
+				mcFileOutput=mcFileOutput+eRate.getMcString()+"\n";
+				maFileOutput=maFileOutput+eRate.getMaString()+"\n";
+				eP.addRate(eRate);
+				mpFileTable.put(Processname, eP);
+				ProcessList.add(eP);
+				rateCount++;
 				processCount++;
 			}
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Queue")){
 				String name="queue"+(queueCount);
 				element.setName(name);
-				ExportQueue eq= new ExportQueue((Queue)element,name,queueCount);
+				ExportQueue eq= new ExportQueue((Queue)element,name,queueCount,Type.Queue);
 				mcFileOutput=mcFileOutput+eq.getMcString()+"\n";
 				maFileOutput=maFileOutput+eq.getMaString()+"\n";	
+				mpFileTable.put(name, eq);
 				queueCount++;
 			}
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector")){
@@ -73,7 +89,7 @@ public class ExportToSimcron implements ExportInterface{
 				else {
 					String name="tech"+(techCount);
 					element.setName(name);
-					et= new ExportTech((Connector)element,name,techCount);
+					et= new ExportTech((Connector)element,name,techCount,Type.Tech);
 					mcFileOutput=mcFileOutput+et.getMcString()+"\n";
 					maFileOutput=maFileOutput+et.getMaString()+"\n";
 					
@@ -84,22 +100,24 @@ public class ExportToSimcron implements ExportInterface{
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink")){
 				String name="sink"+(queueCount);
 				element.setName(name);
-				eSi= new ExportSink((Sink)element,name,queueCount);	
+				eSi= new ExportSink((Sink)element,name,queueCount,Type.Sink);	
 				mcFileOutput=mcFileOutput+eSi.getMcString()+"\n";
 				maFileOutput=maFileOutput+eSi.getMaString()+"\n";
+				mpFileTable.put(name, eSi);
 				queueCount++;
 			}
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Source")){
-				String name="source"+(queueCount);
-				element.setName(name);
-				eSo= new ExportSource((Source)element,name, queueCount);	
+				String Sourcename="source"+(queueCount);
+				String name;
+				element.setName(Sourcename);
+				eSo= new ExportSource((Source)element,Sourcename, queueCount, Type.Source);	
 				mcFileOutput=mcFileOutput+eSo.getMcString()+"\n";
 				maFileOutput=maFileOutput+eSo.getMaString()+"\n";
 				for (Entity entity : ((Source) element).getEntities().keySet()) {
 					Rate rate = (Rate) ((Source) element).getEntities().get(entity);
 					name="distrib"+(rateCount);
 				//	rate.setName(name);
-					ExportRate eRate = new ExportRate(rate,name,rateCount);
+					ExportRate eRate = new ExportRate(rate,name);
 					mcFileOutput=mcFileOutput+eRate.getMcString()+"\n";
 					maFileOutput=maFileOutput+eRate.getMaString()+"\n";
 					name="job"+(entityCount);
@@ -110,6 +128,7 @@ public class ExportToSimcron implements ExportInterface{
 					rateCount++;
 					entityCount++;
 					eSo.addEntity(eJ, eRate);
+					mpFileTable.put(Sourcename, eSo);
 		    	}
 				queueCount++;
 			}
@@ -117,50 +136,63 @@ public class ExportToSimcron implements ExportInterface{
 			
 		}
 		
-		//alle nötige für das mp-File berechen
+		// alles nötige für das mp-File berechen
 		// hier wird die Technologieausgaben ermittelt
-		Hashtable<String, ModelElement> table = (Hashtable<String, ModelElement>) et.getconnectorTable();
-		int j =0;
 		String status ="sys4sim.internal_model.Source";
-		while (status!=null){
-				
-			boolean gefunden=false;
-			int conValue=0;
-				
-			while(gefunden==false){
-				String s="connector_"+conValue;
-				Connector conn = (Connector) table.get(s);
-				if (conn.getSource().getClass().getName().equalsIgnoreCase(status)){
-					String st= et.getMpString(conn.getSource().getName());
-					mpFileOutput=mpFileOutput+ et.getMpString(conn.getSource().getName())+"\n";
-					System.out.println(st);
-					status=conn.getTarget().getClass().getName();
-					if (conn.getTarget().getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink")){
-						st= et.getMpString(conn.getTarget().getName());
-						mpFileOutput=mpFileOutput+ et.getMpString(conn.getTarget().getName())+"\n";
-						System.out.println(st);
+		String ModellObjectName  ="source3";
+		int stepCount=1;
+		for (Entity entity : model.getEntities()){
+			ModellObjectName = entity.getSource().getName();
+			ExportObject element = (ExportObject) mpFileTable.get(ModellObjectName);		
+			mpFileOutput=mpFileOutput+ et.getMpString(ModellObjectName)+"\n";
+			mpFilePartOutput=mpFilePartOutput+"tech1 pass "+stepCount+" spec 0 tag 0"+"\n";
+			mpFileEndPartOutput=mpFileEndPartOutput+((ExportSource)element).getMpSourceString();
+			stepCount++;
+			element = mpFileTable.get(element.getInternalObjekt().getOut().get(0).getTarget().getName());
+			while (status!=null){
+				ModellObjectName = element.getInternalObjekt().getName();
+				if (element.getType()==Type.Process) {
+					mpFileOutput=mpFileOutput+ et.getMpString(ModellObjectName)+"\n";
+					mpFilePartOutput=mpFilePartOutput+"tech1 pass "+stepCount+" spec 0 time "+
+					((ExportProcess)element).getMpString()+"\n";
+					stepCount++;
+					element = mpFileTable.get(element.getInternalObjekt().getOut().get(0).getTarget().getName());
+					
+				} else			
+					if (element.getType()==Type.Sink) {
+						mpFileOutput=mpFileOutput+ et.getMpString(ModellObjectName)+"\n";
+						mpFilePartOutput=mpFilePartOutput+"tech1 pass "+stepCount+" spec 0 tag 0"+"\n";
+						//in der Sink befindet sich nur so viele Jobs wie die Capazität es zulässt der 
+						//Rest wird gekillt (Bei Sink Kapazität =1)
+						mpFilePartOutput=mpFilePartOutput+((ExportSink)element).getName()+" kill 1\n";
+						stepCount++;
 						status=null;
+					} else {
+						mpFileOutput=mpFileOutput+ et.getMpString(ModellObjectName)+"\n";
+						mpFilePartOutput=mpFilePartOutput+"tech1 pass "+stepCount+" spec 0 tag 0"+"\n";
+						stepCount++;
+						element = mpFileTable.get(element.getInternalObjekt().getOut().get(0).getTarget().getName());
+						
 					}
-					gefunden=true;
-				} else{		 
-				}
-				conValue++;	 
+				
+				
 			}
-			j++;
 		}
-		for (int i =1; i<=connectorCount;i++){
-			mpFileOutput=mpFileOutput+"tech1 pass "+i+" spec 0 tag 0"+"\n";
-			
-		}
-		
+
+		mpFileOutput=mpFileOutput+mpFilePartOutput;
+
 		for (ExportEntity entity : eSo.getEntityTable().keySet()) {
 			ExportRate rate = (ExportRate) eSo.getEntityTable().get(entity);
 			mpFileOutput=mpFileOutput+ rate.getMpString()+"\n";
 			mpFileOutput=mpFileOutput+ entity.getMpString()+"\n";
 			mpFileOutput=mpFileOutput+ eSo.getMpSampleString(rate.getName())+"\n";
-			mpFileOutput=mpFileOutput+ eSo.getMpSourceString()+"\n";
-			
+			mpFileOutput=mpFileOutput+ eSo.getMpSourceString()+"\n";		
 		}
+		
+		for (ExportProcess process : ProcessList) {
+			mpFileOutput=mpFileOutput+process.getMpDistrString()+"\n";
+		}
+		
 		
 		writeMcFile();
 		writeMaFile();

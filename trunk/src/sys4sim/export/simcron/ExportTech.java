@@ -4,20 +4,23 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import sys4sim.internal_model.Connector;
+import sys4sim.internal_model.ModelBlock;
 import sys4sim.internal_model.ModelElement;
 
-public class ExportTech {
+public class ExportTech extends ExportObject {
 	
 	private Hashtable<String, ModelElement> connectorTable;
 	private int count;
 	private String name;
+	private Type type;
 	
-	public ExportTech(Connector connector,String name, int count){
+	public ExportTech(Connector connector,String name, int count, Type type){
 		connectorTable = new Hashtable<String, ModelElement>();
 		String s = "connector_0";
 		connectorTable.put(s,connector);
 		this.count=count;
 		this.name=name;
+		this.type=type;
 	}
 	
 	public String getMcString(){
@@ -45,4 +48,17 @@ public class ExportTech {
 	public Hashtable<String, ModelElement> getconnectorTable() {
 		return connectorTable;
 	}
+
+	@Override
+	public Type getType() {
+
+		return type;
+	}
+
+	@Override
+	public ModelBlock getInternalObjekt() {
+		
+		return null;
+	}
+
 }
