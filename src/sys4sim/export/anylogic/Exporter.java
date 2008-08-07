@@ -13,6 +13,8 @@ import java.lang.String;
 
 import java.util.Iterator;
 
+import javax.xml.transform.Source;
+
 
 import org.jdom.*;
 import org.jdom.output.Format;
@@ -86,29 +88,37 @@ public class Exporter implements ExportInterface {
         }
         
         //erzeugen der Koordinaten
-        for (ModelElement element : model.getElements().values()) 
-        { 
-        	
+      //  for (ModelElement element : model.getElements().values()) 
+      //  { 
+            
         	int X=200; int Y=140;
-        	element = model.getEntities().get(0).getSource();
-        	element.setX(X);element.setY(Y);
-        	ModelBlock source = (ModelBlock)element;
+        	//model.getEntities().get(0).getSource().setX(X);
+        	//model.getEntities().get(0).getSource().setX(Y);
+        	System.out.println(model.getEntities().get(0).getSource().getName());
+        	//ArrayList<Connector> outList = new ArrayList<Connector>();
+        	//outList = model.getEntities().get(0).getSource().getOut();
+        //	element2.setX(X);element2.setY(Y);
+       // 	ModelBlock source = (ModelBlock)element2;
+        
+      /*  	
         	
-        	ArrayList<Connector> out = new ArrayList<Connector>();
             out = source.getOut();
-        	Iterator itr = out.iterator();
-        	
-        	Connector elem2 = (Connector)itr.next();
-        	System.out.print(elem2.getName());
-        	while (itr.hasNext()) {
-        		Connector elem = (Connector)itr.next();
-        		System.out.print(elem.getName());
-        		}
-        		System.out.println("soooo");
-        	
+            for ( Iterator i = out.iterator(); i.hasNext(); )
+            {
+              Connector s =   (Connector)   i.next();
+              
+            }
+        
+            
+            for ( Iterator<Connector> i = out.iterator(); i.hasNext(); )
+            {
+            	Connector s = i.next();
+              
+            }
+            
         	//hole element raus 
         }
-                
+           */     
 		//FOR für die Erzeugung der Connectoren	
         int zaehlerConnector =0;
 		for (ModelElement element : model.getElements().values()) 
