@@ -6,9 +6,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import java.lang.String;
+
+import java.util.Iterator;
 
 
 import org.jdom.*;
@@ -18,6 +21,7 @@ import org.jdom.output.XMLOutputter;
 import sys4sim.export.ExportInterface;
 import sys4sim.internal_model.Connector;
 import sys4sim.internal_model.Model;
+import sys4sim.internal_model.ModelBlock;
 import sys4sim.internal_model.ModelElement;
 
 public class Exporter implements ExportInterface {
@@ -80,12 +84,36 @@ public class Exporter implements ExportInterface {
         {
         	element.setId(IDErzeugen(8,9));
         }
+        
+        //erzeugen der Koordinaten
+        for (ModelElement element : model.getElements().values()) 
+        { 
+        	
+        	int X=200; int Y=140;
+        	element = model.getEntities().get(0).getSource();
+        	element.setX(X);element.setY(Y);
+        	ModelBlock source = (ModelBlock)element;
+        	
+        	ArrayList<Connector> out = new ArrayList<Connector>();
+            out = source.getOut();
+        	Iterator itr = out.iterator();
+        	
+        	Connector elem2 = (Connector)itr.next();
+        	System.out.print(elem2.getName());
+        	while (itr.hasNext()) {
+        		Connector elem = (Connector)itr.next();
+        		System.out.print(elem.getName());
+        		}
+        		System.out.println("soooo");
+        	
+        	//hole element raus 
+        }
                 
 		//FOR für die Erzeugung der Connectoren	
         int zaehlerConnector =0;
 		for (ModelElement element : model.getElements().values()) 
 		{
-			System.out.println(element.getClass().getName());
+			//System.out.println(element.getClass().getName());
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
 			{
 				zaehlerConnector = zaehlerConnector+1;
@@ -766,6 +794,11 @@ public class Exporter implements ExportInterface {
         }
         return b;
     }
+	
+	private static Element Createxy(Element EmbeddedObjects, ModelElement element)
+	{
+		return(EmbeddedObjects);
+	}
 	
     private static void Sonderzeichen()
     {
