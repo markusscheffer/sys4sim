@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Queue;
 import java.util.Random;
 
@@ -21,11 +22,15 @@ import org.jdom.*;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import sun.security.action.GetBooleanAction;
 import sys4sim.export.ExportInterface;
 import sys4sim.internal_model.Connector;
+import sys4sim.internal_model.Entity;
 import sys4sim.internal_model.Model;
 import sys4sim.internal_model.ModelBlock;
 import sys4sim.internal_model.ModelElement;
+import sys4sim.internal_model.Rate;
+import sys4sim.internal_model.ResourcePool;
 
 public class Exporter implements ExportInterface {
 
@@ -92,71 +97,14 @@ public class Exporter implements ExportInterface {
         int X=100; int Y=140;
         model.getEntities().get(0).getSource().setX(X);
         model.getEntities().get(0).getSource().setY(Y);
-        //System.out.println(model.getEntities().get(0).getSource().getName());
-        
-        ArrayList<Connector> outList = new ArrayList<Connector>();
-        outList = model.getEntities().get(0).getSource().getOut();
-        
-        
-        for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
-            {
-        	    
-            	Connector s = i.next();
-            	if (i.hasNext())
-            	{ 
-            		X=X+80;Y=Y+60;int Y2=Y-120;int Z=0;
-            		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
-            			Z=1;
-            		System.out.println("Target");
-            		System.out.println(s.getTarget().getName());
-            		System.out.println(X);
-            		System.out.println(Y);
-            		if (Z==1) {
-            		s.getTarget().setX(X);
-            		s.getTarget().setY(Y);
-            		rekursiv(s.getTarget(),X,Y);}
-            		//elem 2
-            		s = i.next();
-            		Z=0;
-            		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
-            			Z=1;
-            		if (Z==1) {
-            		s.getTarget().setX(X);
-            		s.getTarget().setY(Y2);
-            		rekursiv(s.getTarget(),X,Y2);}
-            		
-            		System.out.println("Target");
-            		System.out.println(s.getTarget().getName());
-            		System.out.println(X);
-            		System.out.println(Y);
-            		
-            	}
-            	else
-            	{
-            		X=X+80;int Z=0;
-            		System.out.println("Target");
-            		System.out.println(s.getTarget().getName());
-            		System.out.println(X);
-            		System.out.println(Y);
-            		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
-            			Z=1;
-            		if (Z==1) {
-            		s.getTarget().setX(X);
-            		s.getTarget().setY(Y);
-            		rekursiv(s.getTarget(),X,Y);}
-            		
-            	}
-            	
-            }
-        
-        	
-        
+        CreateXYrekursiv(model.getEntities().get(0).getSource(),X,Y);       
                 
-		//FOR für die Erzeugung der Connectoren	
+                
+	   //FOR für die Erzeugung der Connectoren	
         int zaehlerConnector =0;
 		for (ModelElement element : model.getElements().values()) 
 		{
-			System.out.println(element.getClass().getName());
+			
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
 			{
 				zaehlerConnector = zaehlerConnector+1;
@@ -166,6 +114,7 @@ public class Exporter implements ExportInterface {
 		
 		Element EmbeddedObjects = new Element("EmbeddedObjects");
         ActiveObjectClass.addContent(EmbeddedObjects);
+        
        //FOR für die Erzeugung der Elemente	
         int zaehlerSink = 0;int zaehlerSource = 0;int zaehlerMachine = 0;int zaehlerQueue = 0;
 		for (ModelElement element : model.getElements().values()) 
@@ -184,7 +133,10 @@ public class Exporter implements ExportInterface {
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
 				{
 				zaehlerMachine=zaehlerMachine+1;
-				CreateProcess(EmbeddedObjects,element,zaehlerMachine);
+				//if the process need a resourcepool create service else create delay
+				if (((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
+					CreateDelay (EmbeddedObjects,element,zaehlerMachine);
+				else CreateProcess(EmbeddedObjects,element,zaehlerMachine);
 				}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Queue"))
 				{
@@ -195,6 +147,77 @@ public class Exporter implements ExportInterface {
 				CreateWorker(EmbeddedObjects,element);
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Transporter"))
 				CreateTransporter(EmbeddedObjects,element);
+		}
+		
+		//FOR für die Erzeugung der RessourcePools	///verschiedene resourcepools brauchen verschiedene Namen dann hier testen ob schon gebaut
+		int zaehlerMachinePool =0;int zaehlerWorkerPool =0;int zaehlerTransporterPool =0;
+		for (ModelElement element : model.getElements().values()) 
+		{
+			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+				
+				if (!((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
+			       { 
+					 Hashtable<ResourcePool, Integer> tablePools = new Hashtable<ResourcePool, Integer>();
+					 tablePools = ((sys4sim.internal_model.Process)element).getResourcePools();
+					 
+					 
+					 for(ResourcePool t : tablePools.keySet())
+					 {
+						 if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.MachinePool"))
+							{
+							zaehlerMachinePool = zaehlerMachinePool+1;
+							String name = "MachinePool";
+							int resourcesInPool=(((sys4sim.internal_model.MachinePool)t).getElements().size());
+							int needResources=(tablePools.get(t));
+							//create ID for ResourcePool
+							((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
+							//create x and y value for ResourcePool
+							if (t.getX()==0&&t.getY()==0)
+						    {
+								t.setX(element.getX()+10);
+								t.setY(element.getY()+50);
+						    }
+							//create element 
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerMachinePool,name,resourcesInPool);
+						    }
+						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.TransporterPool"))
+						{
+							zaehlerTransporterPool = zaehlerTransporterPool+1;
+							String name = "TransporterPool";
+							int resourcesInPool=(((sys4sim.internal_model.TransporterPool)t).getElements().size());
+							int needResources=(tablePools.get(t));
+							//create ID for ResourcePool
+							((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
+							//create x and y value for ResourcePool
+							if (element.getX()==0&&element.getY()==0)
+						    {
+								t.setX(element.getX()+10);
+								t.setY(element.getY()+50);
+						    }
+							//create element
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerTransporterPool,name,resourcesInPool);
+					    }
+						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.WorkerPool"))
+						{
+							zaehlerWorkerPool = zaehlerWorkerPool+1;
+							String name = "WorkerPool";
+							int resourcesInPool=(((sys4sim.internal_model.WorkerPool)t).getElements().size());
+							int needResources=(tablePools.get(t));
+							//create ID for ResourcePool
+							((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
+							//create x and y value for ResourcePool
+							if (element.getX()==0&&element.getY()==0)
+						    {
+								t.setX(element.getX()+10);
+								t.setY(element.getY()+50);
+						    }
+							//create element
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerWorkerPool,name,resourcesInPool);
+						}
+						else System.out.println("Error: no valid RessourcePool");
+					 }
+					 
+			       }
 		}
 		
 	
@@ -484,7 +507,7 @@ public class Exporter implements ExportInterface {
         return Connectors;		
 	}
 	
-		
+	
 	
 	//Methode zur Erzeugung der einzelnen Senken
 	private static Element CreateSink(Element EmbeddedObjects, ModelElement element,int zaehlerElement) 
@@ -531,14 +554,25 @@ public class Exporter implements ExportInterface {
 	//Methode zur Erzeugung der einzelnen 
 	private static Element CreateSource(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
 	{
+		//initialize of the name, x-value, y-value, id, capayity of inputbuffer 
 		String zname = "source"+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
-		
 		String ID = ((ModelElement) element).getId();
 		String X = String.valueOf(((ModelElement) element).getX()); 
 		String Y = String.valueOf(((ModelElement) element).getY()); 
 		//int capacity =((sys4sim.internal_model.Source) element).getCapacity();
-		
+		int batchSizeValue=((sys4sim.internal_model.Source) element).getBatchSize();
+		String batchSize = "<![CDATA["+String.valueOf(batchSizeValue)+"]]>";
+		//get distribution
+		Hashtable<Entity, Rate> tableRate = new Hashtable<Entity, Rate>();
+		tableRate = ((sys4sim.internal_model.Source) element).getEntities();
+		String distribution ="";
+		for(Entity t : tableRate.keySet())
+		 {
+			 Rate rate=(tableRate.get(t));
+			 distribution=CreateDistributionForSource(rate);
+		 }
+		if (distribution=="") System.out.println("Error no distribution, look at function CreateSource.");
 		System.out.println(X);
 		System.out.println(Y);
 		System.out.println("--source");
@@ -574,7 +608,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter2);
 				Parameter2
 				.addContent(new Element("Name").setText("<![CDATA[rate]]>"))//wenn on enter code da ist
-				.addContent(new Element("Value").setText("<![CDATA[poisson(0.45)]]>"));//wenn on enter code da ist jetzt bsp
+				.addContent(new Element("Value").setText(distribution));//wenn on enter code da ist jetzt bsp
 				Element Parameter3 = new Element("Parameter"); 
 				Parameters.addContent(Parameter3);
 				Parameter3
@@ -594,7 +628,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter6);
 				Parameter6
 				.addContent(new Element("Name").setText("<![CDATA[entitiesPerArrival]]>"))//wenn code da
-				.addContent(new Element("Value").setText("<![CDATA[1]]>"));//hab mal 1
+				.addContent(new Element("Value").setText(batchSize));//hab mal 1
 				Element Parameter7 = new Element("Parameter"); 
 				Parameters.addContent(Parameter7);
 				Parameter7
@@ -642,6 +676,10 @@ public class Exporter implements ExportInterface {
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()); 
+		String distribution = CreateDistribution(element);
+		int capacityValue =((sys4sim.internal_model.Process) element).getCapacity();
+		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
+
 		System.out.println(X);
 		System.out.println(Y);
 		System.out.println("--process");
@@ -677,7 +715,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter2);
 				Parameter2
 				.addContent(new Element("Name").setText("<![CDATA[delayTime]]>"))//muss dann gemacht werden
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));//wenn on enter code da ist jetzt bsp
+				.addContent(new Element("Value").setText(distribution));//wenn on enter code da ist jetzt bsp
 				Element Parameter3 = new Element("Parameter"); 
 				Parameters.addContent(Parameter3);
 				Parameter3
@@ -687,7 +725,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter4);
 				Parameter4
 				.addContent(new Element("Name").setText("<![CDATA[capacity]]>"))//muss dann gemacht werden
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				.addContent(new Element("Value").setText(capacity));
 				Element Parameter5 = new Element("Parameter"); 
 				Parameters.addContent(Parameter5);
 				Parameter5
@@ -728,14 +766,35 @@ public class Exporter implements ExportInterface {
 	
 	private static Element CreateProcess(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
 	{
+		//initialize of the name, x-value, y-value, id, capayity of inputbuffer and distribution
 		String zname = "service"+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()-20); 
+		int capacityValue = ((sys4sim.internal_model.Process) element).getCapacity();
+		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
+		String distribution = CreateDistribution(element);
+		
+		//search number of needed resources for one entity, now only one resourcepool per process is realized
+		int needResources=0;
+		if (!((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
+	       { 
+			 Hashtable<ResourcePool, Integer> tablePools = new Hashtable<ResourcePool, Integer>();
+			 tablePools = ((sys4sim.internal_model.Process)element).getResourcePools();
+			 
+			 int z=0;
+			 for(ResourcePool t : tablePools.keySet())
+			 {
+				 z=z+1;
+				 if (z > 1) System.out.println("Error by creating process, more then one resourcepool for this process. Please check the function Create Process");
+				 needResources=(tablePools.get(t));
+			 }
+	       }
+		String needResourcesSrting = "<![CDATA["+String.valueOf(needResources)+"]]>";
 		
 		
-		
+		//create the XML file
 		Element EmbeddedObject = new Element("EmbeddedObject");
 		EmbeddedObjects.addContent(EmbeddedObject);
 			EmbeddedObject
@@ -761,12 +820,12 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter);
 				Parameter
 				.addContent(new Element("Name").setText("<![CDATA[quantity]]>"))//muss dann gemacht werden aus dem modell
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));//gleiches
+				.addContent(new Element("Value").setText(needResourcesSrting));//wie viele einheiten vom resourcepool gebraucht werden
 				Element Parameter2 = new Element("Parameter"); 
 				Parameters.addContent(Parameter2);
 				Parameter2
 				.addContent(new Element("Name").setText("<![CDATA[delayTime]]>"))//muss dann gemacht werden
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));//wenn on enter code da ist jetzt bsp
+				.addContent(new Element("Value").setText(distribution));//wenn on enter code da ist jetzt bsp
 				Element Parameter3 = new Element("Parameter"); 
 				Parameters.addContent(Parameter3);
 				Parameter3
@@ -791,7 +850,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter7);
 				Parameter7
 				.addContent(new Element("Name").setText("<![CDATA[queueCapacity]]>"))//dann wenn modell
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				.addContent(new Element("Value").setText(capacity));
 				Element Parameter8 = new Element("Parameter"); 
 				Parameters.addContent(Parameter8);
 				Parameter8
@@ -867,6 +926,128 @@ public class Exporter implements ExportInterface {
 				Parameter22
 				.addContent(new Element("Name").setText("<![CDATA[enableStats]]>"))//bleibt aussen vor
 				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+		return EmbeddedObjects;
+	}
+	
+	private static Element CreateResourcePool(Element EmbeddedObjects, ModelElement element,int zaehlerElement,String zName,int zResourcesInPool) 
+	{
+		String zname = zName+String.valueOf(zaehlerElement);
+		String name = "<![CDATA["+zname+"]]>";
+		String ID = element.getId();
+		String X = String.valueOf(element.getX()); 
+		String Y = String.valueOf(element.getY()); 
+		String resourcesInPool = "<![CDATA["+zResourcesInPool+"]]>";
+		
+		System.out.println(X);
+		System.out.println(Y);
+		System.out.println("--resourcePool");
+		
+		Element EmbeddedObject = new Element("EmbeddedObject");
+		EmbeddedObjects.addContent(EmbeddedObject);
+			EmbeddedObject
+			.addContent(new Element("Id").setText(ID))//
+			.addContent(new Element("Name").setText(name))//
+			.addContent(new Element("ExcludeFromBuild").setText("false"))
+			.addContent(new Element("X").setText(X))//bea nebeneinander Koordinaten
+			.addContent(new Element("Y").setText(Y))
+			.addContent(new Element("Label").setText("<X>-10</X><Y>30</Y>"))//bea wieder gucken Schachtelung
+			.addContent(new Element("PublicFlag").setText("false"))
+			.addContent(new Element("PresentationFlag").setText("true"))
+			.addContent(new Element("ShowLabel").setText("true"));
+			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
+			EmbeddedObject.addContent(ActiveObjectClass2);
+				ActiveObjectClass2
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[ResourcePool]]>"));//bea name des Objekts in der Bibliothek
+			EmbeddedObject
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[ResourceUnit]]>"));//ba
+			Element Parameters = new Element("Parameters"); 
+			EmbeddedObject.addContent(Parameters);
+			Element Parameter = new Element("Parameter"); 
+			Parameters.addContent(Parameter);
+			Parameter
+			.addContent(new Element("Name").setText("<![CDATA[unitsAreObjects]]>"))//muss dann gemacht werden aus dem modell
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));//wie viele einheiten vom resourcepool gebraucht werden
+			Element Parameter2 = new Element("Parameter"); 
+			Parameters.addContent(Parameter2);
+			Parameter2
+			.addContent(new Element("Name").setText("<![CDATA[capacityDefinedByTable]]>"))//muss dann gemacht werden
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));//wenn on enter code da ist jetzt bsp
+			Element Parameter3 = new Element("Parameter"); 
+			Parameters.addContent(Parameter3);
+			Parameter3
+			.addContent(new Element("Name").setText("<![CDATA[capacity]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText(resourcesInPool));
+			Element Parameter4 = new Element("Parameter"); 
+			Parameters.addContent(Parameter4);
+			Parameter4
+			.addContent(new Element("Name").setText("<![CDATA[capacityTable]]>"))//muss dann gemacht werden
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter5 = new Element("Parameter"); 
+			Parameters.addContent(Parameter5);
+			Parameter5
+			.addContent(new Element("Name").setText("<![CDATA[newUnit]]>"))//dann wenn modell
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter6 = new Element("Parameter"); 
+			Parameters.addContent(Parameter6);
+			Parameter6
+			.addContent(new Element("Name").setText("<![CDATA[onNewUnit]]>"))//dann wenn modell
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));//
+			Element Parameter7 = new Element("Parameter"); 
+			Parameters.addContent(Parameter7);
+			Parameter7
+			.addContent(new Element("Name").setText("<![CDATA[onSeize]]>"))//dann wenn modell
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter8 = new Element("Parameter"); 
+			Parameters.addContent(Parameter8);
+			Parameter8
+			.addContent(new Element("Name").setText("<![CDATA[onRelease]]>"))//bleibt aussen vor 
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter9 = new Element("Parameter"); 
+			Parameters.addContent(Parameter9);
+			Parameter9
+			.addContent(new Element("Name").setText("<![CDATA[enablePriorities]]>"))//bleibt aussen vor 
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter10 = new Element("Parameter"); 
+			Parameters.addContent(Parameter10);
+			Parameter10  
+			.addContent(new Element("Name").setText("<![CDATA[priority]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter11 = new Element("Parameter"); 
+			Parameters.addContent(Parameter11);
+			Parameter11
+			.addContent(new Element("Name").setText("<![CDATA[idleUnitShape]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter12 = new Element("Parameter"); 
+			Parameters.addContent(Parameter12);
+			Parameter12
+			.addContent(new Element("Name").setText("<![CDATA[busyUnitShape]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter13 = new Element("Parameter"); 
+			Parameters.addContent(Parameter13);
+			Parameter13
+			.addContent(new Element("Name").setText("<![CDATA[uniqueShape]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter14 = new Element("Parameter"); 
+			Parameters.addContent(Parameter14);
+			Parameter14
+			.addContent(new Element("Name").setText("<![CDATA[enableRotation]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter15 = new Element("Parameter"); 
+			Parameters.addContent(Parameter15);
+			Parameter15
+			.addContent(new Element("Name").setText("<![CDATA[animationGuide]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter16 = new Element("Parameter"); 
+			Parameters.addContent(Parameter16);
+			Parameter16
+			.addContent(new Element("Name").setText("<![CDATA[animationType]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			Element Parameter17 = new Element("Parameter"); 
+			Parameters.addContent(Parameter17);
+			Parameter17
+			.addContent(new Element("Name").setText("<![CDATA[enableStats]]>"))//bleibt aussen vor
+			.addContent(new Element("Value").setText("<![CDATA[]]>"));
 		return EmbeddedObjects;
 	}
 	
@@ -1031,7 +1212,7 @@ public class Exporter implements ExportInterface {
 	   	 }    	
     }
     
-    private static void rekursiv(ModelBlock target,int X,int Y)
+    private static void CreateXYrekursiv(ModelBlock target,int X,int Y)
     {
     ArrayList<Connector> outList = new ArrayList<Connector>();
 	outList = target.getOut();
@@ -1051,7 +1232,7 @@ public class Exporter implements ExportInterface {
     		if (Z==1) {
      		s.getTarget().setX(X);
      		s.getTarget().setY(Y);
-     		rekursiv(s.getTarget(),X,Y);}
+     		CreateXYrekursiv(s.getTarget(),X,Y);}
      		s = i.next();
      		Z=0;
      		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
@@ -1063,7 +1244,7 @@ public class Exporter implements ExportInterface {
     		if (Z==1) {
     		s.getTarget().setX(X);
      		s.getTarget().setY(Y2);
-     		rekursiv(s.getTarget(),X,Y2);}
+     		CreateXYrekursiv(s.getTarget(),X,Y2);}
      		
      	}
      	else
@@ -1079,11 +1260,109 @@ public class Exporter implements ExportInterface {
      		if (Z==1) {
      		s.getTarget().setX(X);
      		s.getTarget().setY(Y);
-     		rekursiv(s.getTarget(),X,Y);}
+     		CreateXYrekursiv(s.getTarget(),X,Y);}
      		
      	}
      	
      }
+    }
+    
+    private static String CreateDistribution(ModelElement element)
+    {
+    	String distribution;
+    	//System.out.println(((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString());
+		if (((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.ConstantRate"))
+		{
+			sys4sim.internal_model.Rate zw=((sys4sim.internal_model.Process) element).getProcessingRate();
+			String unit = ((sys4sim.internal_model.ConstantRate) zw).getUnit();
+			double value = ((sys4sim.internal_model.ConstantRate) zw).getValue();
+			distribution = "<![CDATA["+String.valueOf(value)+"]]>";
+		}
+		else if (((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.NormalDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=((sys4sim.internal_model.Process) element).getProcessingRate();
+			String meanUnit =((sys4sim.internal_model.NormalDistribution) zw).getMeanUnit();
+			double meanValue =((sys4sim.internal_model.NormalDistribution) zw).getMeanValue();
+			String standardDeviationUnit =((sys4sim.internal_model.NormalDistribution) zw).getStandardDeviationUnit();
+			double standardDeviationValue =((sys4sim.internal_model.NormalDistribution) zw).getStandardDeviationValue();
+			distribution = "<![CDATA[normal("+String.valueOf(standardDeviationValue)+", "+String.valueOf(meanValue)+" )]]>";
+		}
+		else if (((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.ExponentialDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=((sys4sim.internal_model.Process) element).getProcessingRate();
+			String meanUnit = ((sys4sim.internal_model.ExponentialDistribution) zw).getMeanUnit();
+			double meanValue = ((sys4sim.internal_model.ExponentialDistribution) zw).getMeanValue();
+			distribution = "<![CDATA[exponential("+String.valueOf(meanValue)+")]]>";
+		}
+		else if (((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.PoissonDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=((sys4sim.internal_model.Process) element).getProcessingRate();
+			String expectedUnit = ((sys4sim.internal_model.PoissonDistribution) zw).getExpectedUnit();
+			double expectedValue = ((sys4sim.internal_model.PoissonDistribution) zw).getExpectedValue();
+			distribution = "<![CDATA[poisson("+String.valueOf(expectedValue)+")]]>";
+		}
+		else if (((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.TriangularDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=((sys4sim.internal_model.Process) element).getProcessingRate();
+			String maxUnit =((sys4sim.internal_model.TriangularDistribution) zw).getMaxUnit();
+			double maxValue =((sys4sim.internal_model.TriangularDistribution) zw).getMaxValue();
+			String minDeviationUnit =((sys4sim.internal_model.TriangularDistribution) zw).getMinUnit();
+			double minDeviationValue =((sys4sim.internal_model.TriangularDistribution) zw).getMinValue();
+			String modeDeviationUnit =((sys4sim.internal_model.TriangularDistribution) zw).getModeUnit();
+			double modeDeviationValue =((sys4sim.internal_model.TriangularDistribution) zw).getModeValue();
+			distribution = "<![CDATA[tringular( "+String.valueOf(minDeviationValue)+", "+String.valueOf(modeDeviationValue)+", "+String.valueOf(maxValue)+" )]]>";
+		}
+		else {distribution = "<![CDATA[1]]>";}
+		return distribution;
+    }
+    
+    private static String CreateDistributionForSource(Rate rate)
+    {
+    	String distribution;
+    	//System.out.println(((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString());
+		if (((sys4sim.internal_model.Rate) rate).getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.ConstantRate"))
+		{
+			sys4sim.internal_model.Rate zw= rate;
+			String unit = ((sys4sim.internal_model.ConstantRate) zw).getUnit();
+			double value = ((sys4sim.internal_model.ConstantRate) zw).getValue();
+			distribution = "<![CDATA["+String.valueOf(value)+"]]>";
+		}
+		else if (((sys4sim.internal_model.Rate) rate).getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.NormalDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=rate;
+			String meanUnit =((sys4sim.internal_model.NormalDistribution) zw).getMeanUnit();
+			double meanValue =((sys4sim.internal_model.NormalDistribution) zw).getMeanValue();
+			String standardDeviationUnit =((sys4sim.internal_model.NormalDistribution) zw).getStandardDeviationUnit();
+			double standardDeviationValue =((sys4sim.internal_model.NormalDistribution) zw).getStandardDeviationValue();
+			distribution = "<![CDATA[normal("+String.valueOf(standardDeviationValue)+", "+String.valueOf(meanValue)+" )]]>";
+		}
+		else if (((sys4sim.internal_model.Rate) rate).getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.ExponentialDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=rate;
+			String meanUnit = ((sys4sim.internal_model.ExponentialDistribution) zw).getMeanUnit();
+			double meanValue = ((sys4sim.internal_model.ExponentialDistribution) zw).getMeanValue();
+			distribution = "<![CDATA[exponential("+String.valueOf(meanValue)+")]]>";
+		}
+		else if (((sys4sim.internal_model.Rate) rate).getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.PoissonDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=rate;
+			String expectedUnit = ((sys4sim.internal_model.PoissonDistribution) zw).getExpectedUnit();
+			double expectedValue = ((sys4sim.internal_model.PoissonDistribution) zw).getExpectedValue();
+			distribution = "<![CDATA[poisson("+String.valueOf(expectedValue)+")]]>";
+		}
+		else if (((sys4sim.internal_model.Rate) rate).getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.TriangularDistribution"))
+		{
+			sys4sim.internal_model.Rate zw=rate;
+			String maxUnit =((sys4sim.internal_model.TriangularDistribution) zw).getMaxUnit();
+			double maxValue =((sys4sim.internal_model.TriangularDistribution) zw).getMaxValue();
+			String minDeviationUnit =((sys4sim.internal_model.TriangularDistribution) zw).getMinUnit();
+			double minDeviationValue =((sys4sim.internal_model.TriangularDistribution) zw).getMinValue();
+			String modeDeviationUnit =((sys4sim.internal_model.TriangularDistribution) zw).getModeUnit();
+			double modeDeviationValue =((sys4sim.internal_model.TriangularDistribution) zw).getModeValue();
+			distribution = "<![CDATA[tringular( "+String.valueOf(minDeviationValue)+", "+String.valueOf(modeDeviationValue)+", "+String.valueOf(maxValue)+" )]]>";
+		}
+		else {distribution = "<![CDATA[1]]>";}
+		return distribution;
     }
     
     private static String readFileContent (File oldFile) {
