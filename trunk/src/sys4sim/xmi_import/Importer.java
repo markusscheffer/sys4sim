@@ -227,11 +227,11 @@ public class Importer extends DefaultHandler{
 		model.getElements().put(mp.getId(), mp);
 		
 		TransporterPool tp = new TransporterPool();
-		mp.setId("tp" + poolCounter);
+		tp.setId("tp" + poolCounter);
 		model.getElements().put(tp.getId(), tp);
 		
 		WorkerPool wp = new WorkerPool();
-		mp.setId("wp" + poolCounter);
+		wp.setId("wp" + poolCounter);
 		model.getElements().put(wp.getId(), wp);
 		
 		poolCounter++;
