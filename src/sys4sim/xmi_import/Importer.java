@@ -218,11 +218,23 @@ public class Importer extends DefaultHandler{
 		model.getElements().put(id, block);
 	}
 	
+	private static int poolCounter = 0;
+	
 	private static void generateResourcePool(Process process,
 			OwnedAttribute attribute) {
 		MachinePool mp = new MachinePool();
+		mp.setId("mp" + poolCounter);
+		model.getElements().put(mp.getId(), mp);
+		
 		TransporterPool tp = new TransporterPool();
+		mp.setId("tp" + poolCounter);
+		model.getElements().put(tp.getId(), tp);
+		
 		WorkerPool wp = new WorkerPool();
+		mp.setId("wp" + poolCounter);
+		model.getElements().put(wp.getId(), wp);
+		
+		poolCounter++;
 		
 		UmlClass cls = attribute.getType();
 		for (OwnedAttribute att : cls.getAttributes()) {
