@@ -3,6 +3,8 @@ package sys4sim.gui;
 
 import java.io.File;
 
+import javax.swing.ButtonGroup;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -15,6 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import sys4sim.export.anylogic.Settings;
 import sys4sim.internal_model.Model;
 import sys4sim.xmi_import.Importer;
 
@@ -24,7 +27,12 @@ public class GUI {
 	 private Shell shell; 
 	 private Label messageLabel;
 	 private Button importButton;
-	 private Button anylogicExportButton;
+	 private Button anylogicExportButton;	
+	 private Button anylogicChoiceButton;
+	 private Button anylogicChoiceButton2;
+	 private Button anylogicChoiceButton3;
+	 private Button anylogicDelayButton;
+	 private Settings set = new Settings();
 	 private FileDialog importFileDialog;
 	 private Importer importer;
 	 private Model model;
@@ -41,6 +49,12 @@ public class GUI {
 		 importButton = new Button(shell, SWT.PUSH);
 		 anylogicExportButton = new Button(shell, SWT.PUSH);
 		 anylogicExportFileDialog = new FileDialog(shell, SWT.SAVE);
+		 
+		 
+		 anylogicChoiceButton = new Button(shell, SWT.CHECK);
+		 anylogicChoiceButton2 = new Button(shell, SWT.CHECK);
+		 anylogicChoiceButton3 = new Button(shell, SWT.CHECK);
+		 anylogicDelayButton = new Button(shell, SWT.CHECK);
 		 
 		 shell.setText("SysML Simulation Converter");
 		 shell.setSize(800,400);
@@ -72,7 +86,45 @@ public class GUI {
 				  }
 		 });
 		 
+		 anylogicChoiceButton.setText("original");
+		 anylogicChoiceButton.setSize(60,30);
+		 anylogicChoiceButton.setLocation(350, 150);
+		 anylogicChoiceButton.addSelectionListener(new SelectionAdapter() { 
+			  public void widgetSelected(SelectionEvent e) { 
+				  int choice=1;
+				  anylogicChoiceSet(choice); 
+				  }
+		 });
 		 
+		 anylogicChoiceButton2.setText("high buffers");
+		 anylogicChoiceButton2.setSize(80,30);
+		 anylogicChoiceButton2.setLocation(420, 150);
+		 anylogicChoiceButton2.addSelectionListener(new SelectionAdapter() { 
+			  public void widgetSelected(SelectionEvent e) { 
+				  int choice=2;
+				  anylogicChoiceSet(choice); 
+				  }
+		 });
+		 
+		 anylogicChoiceButton3.setText("port protection");
+		 anylogicChoiceButton3.setSize(100,30);
+		 anylogicChoiceButton3.setLocation(500, 150);
+		 anylogicChoiceButton3.addSelectionListener(new SelectionAdapter() { 
+			  public void widgetSelected(SelectionEvent e) { 
+				  int choice=3;
+				  anylogicChoiceSet(choice); 
+				  }
+		 });
+		 
+		 anylogicDelayButton.setText("delay mode");
+		 anylogicDelayButton.setSize(100,30);
+		 anylogicDelayButton.setLocation(350, 180);
+		 anylogicDelayButton.addSelectionListener(new SelectionAdapter() { 
+			  public void widgetSelected(SelectionEvent e) { 
+				  boolean choice=true;
+				  anylogicDelayModeSet(choice); 
+				  }
+		 });
 		 
 		 shell.open ();
 		 while (!shell.isDisposed()) {
@@ -96,7 +148,17 @@ public class GUI {
 	}
 	
 	public void exportAnylogic(File filepath) {
-		anylogicExporter.writeFile(model, filepath);
+		
+		anylogicExporter.writeFile(model, filepath, set);
+	}
+	
+	public void anylogicChoiceSet(int choice) {
+		
+		set.setPortChoice(choice);
+	}
+	public void anylogicDelayModeSet (boolean choice){
+		
+		set.setDelayMode(choice);
 	}
 	
 }
