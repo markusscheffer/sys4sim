@@ -79,4 +79,8 @@ public class ExportSource extends ExportObject{
 		return source;
 	}
 	
+	public Source getSource(){
+		return source;
+	}
+	
 }

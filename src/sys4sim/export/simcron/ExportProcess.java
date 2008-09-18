@@ -34,7 +34,7 @@ public class ExportProcess extends ExportObject {
 	
 	public String getMpDistrString(){
 		String result = rate.getMpString()+"\n";
-		result = result + name+" distrib busy factor "+rate.getName();
+		result = result + name+" distrib busy offset "+rate.getName();
 		return result;
 	}
 

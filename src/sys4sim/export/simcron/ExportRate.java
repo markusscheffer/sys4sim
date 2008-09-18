@@ -39,10 +39,10 @@ public class ExportRate {
 		}
 		else if(rate.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.NormalDistribution")){
 			result =name+" type normal\n"+name+"par 1 "+((NormalDistribution)rate).getMeanValue()+"\n"+
-			name+" par 1 "+((NormalDistribution)rate).getStandardDeviationValue();
+			name+" par 2 "+((NormalDistribution)rate).getStandardDeviationValue();
 		} else {
 			//Default
-			result =name+" type normal\n"+name+" par 1 1\n"+name+" par 1 10.0";
+			result =name+" type normal\n"+name+" par 1 10.0\n"+name+" par 2 10.0";
 		}
 		
 		return result;
