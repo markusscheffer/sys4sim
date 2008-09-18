@@ -80,22 +80,6 @@ public class ExportToSimcron implements ExportInterface{
 			}
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector")){
 				
-				if (techCount>1) {
-					et.addConnector((Connector)element, connectorCount);
-					connectorCount++;
-			//	mcFileOutput=mcFileOutput+et.getMcString()+"\n";
-			//	maFileOutput=maFileOutput+et.getMaString()+"\n";
-				}
-				else {
-					String name="tech"+(techCount);
-					element.setName(name);
-					et= new ExportTech((Connector)element,name,techCount,Type.Tech);
-					mcFileOutput=mcFileOutput+et.getMcString()+"\n";
-					maFileOutput=maFileOutput+et.getMaString()+"\n";
-					
-				}
-				
-				techCount++;
 			}
 			if(element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink")){
 				String name="sink"+(queueCount);
@@ -136,10 +120,34 @@ public class ExportToSimcron implements ExportInterface{
 			
 		}
 		
-		// alles nötige für das mp-File berechen
+		//hier werden alle Connectoren betrachtet und die entsprechenden Technologien gebildet!
+		Source source = eSo.getSource();
+		Connector connector = null;
+		if (source.getOut().size()==1) {
+			String name="tech"+(techCount);
+			connector = source.getOut().get(0);
+			et= new ExportTech(connector,name,techCount,Type.Tech);
+			mcFileOutput=mcFileOutput+et.getMcString()+"\n";
+			maFileOutput=maFileOutput+et.getMaString()+"\n";
+			techCount++;
+		} else {
+			//Hier muss beachtet werden das 2 Connectoren von einer Source abgehen
+		}
+		
+		while(connector!=null){
+			if( connector.getTarget().getOut().size()==1) {
+				connector = connector.getTarget().getOut().get(0);
+			} else if ( connector.getTarget().getOut().size()==0){
+				        connector =null;
+				   } else {
+					   //noch zu implementieren...-> 2. technologie oder Branches anlegen
+				   }
+		};
+		
+		// alles nötige wird für das mp-File ermittelt
 		// hier wird die Technologieausgaben ermittelt
 		String status ="sys4sim.internal_model.Source";
-		String ModellObjectName  ="source3";
+		String ModellObjectName  ="";
 		int stepCount=1;
 		for (Entity entity : model.getEntities()){
 			ModellObjectName = entity.getSource().getName();
@@ -162,7 +170,7 @@ public class ExportToSimcron implements ExportInterface{
 					if (element.getType()==Type.Sink) {
 						mpFileOutput=mpFileOutput+ et.getMpString(ModellObjectName)+"\n";
 						mpFilePartOutput=mpFilePartOutput+"tech1 pass "+stepCount+" spec 0 tag 0"+"\n";
-						//in der Sink befindet sich nur so viele Jobs wie die Capazität es zulässt der 
+						//in der Sink befindet sich nur so viele Jobs wie die Kapazität es zulässt der 
 						//Rest wird gekillt (Bei Sink Kapazität =1)
 						mpFilePartOutput=mpFilePartOutput+((ExportSink)element).getName()+" kill 1\n";
 						stepCount++;
