@@ -8,21 +8,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Queue;
+import java.util.Iterator;
 import java.util.Random;
 
-import java.lang.String;
-
-import java.util.Iterator;
-
-import javax.xml.transform.Source;
-
-
-import org.jdom.*;
+import org.jdom.Document;
+import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
-import sun.security.action.GetBooleanAction;
 import sys4sim.export.ExportInterface;
 import sys4sim.internal_model.Connector;
 import sys4sim.internal_model.Entity;
@@ -34,8 +27,75 @@ import sys4sim.internal_model.ResourcePool;
 
 public class Exporter implements ExportInterface {
 
-	public void writeFile(Model model, File file) {
+	public void writeFile(Model model, File file,Settings set) {
 	
+	
+		
+		
+	//Modell abändern	
+	
+	if (set.getPortChoice()==3)
+	{
+		
+		//Erzeuege Eingangsbuffer
+	     int zsourcebuffer =0;	
+	     //Model model2 = new Model();
+		 Hashtable <String, ModelElement> tableElem = new Hashtable<String, ModelElement>();
+	     tableElem = model.getElements();
+	     	    		 
+		 Hashtable<String, ModelElement> tempTable = new Hashtable<String, ModelElement>();
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+			 if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Source"))
+				{
+				 
+				    ArrayList<Connector> outList = new ArrayList<Connector>();
+					outList = ((ModelBlock)element).getOut();
+					 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+				     {
+						    //erzeuge Buffer
+						    zsourcebuffer+=1;
+						    sys4sim.internal_model.Queue queue = new sys4sim.internal_model.Queue();
+							queue.setCapacity(10000);
+							queue.setName("sourcebuffer"+String.valueOf(zsourcebuffer));
+							tempTable.put("sourcebuffer"+String.valueOf(zsourcebuffer), queue);
+				 	        // Connector abändern
+							Connector s = i.next();
+							ModelBlock z = s.getTarget();
+							z.getIn().remove(s);
+				 	        s.setTarget(queue);
+				 	        s.setTargetName(queue.getName());
+				 	        //neuen Connector zwischen Buffer und Elziel erzeugen
+				 	       sys4sim.internal_model.Connector con = new sys4sim.internal_model.Connector();
+				 	       con.setSource(queue);
+				 	       con.setSourceName(queue.getName());
+				 	       con.setTarget(z);
+				 	       con.setTargetName(z.getName());
+				 	       z.getIn().add(con);
+				 	      tempTable.put("Con"+String.valueOf(zsourcebuffer), con);
+				 	       //neues Teil in Buffer get.out schreiben
+				 	       queue.getOut().add(con);
+				        }					
+				}			    
+	        }
+	 
+	 
+		 for(String s : tempTable.keySet()){
+		 ModelElement m = tempTable.get(s);
+		 tableElem.put(s, m);}
+		 model.setElements(tableElem);
+	
+	 //erzeuge On Exit Code
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+               CreateFunction(element);
+	        
+	        }
+	} 
+	
+		
 	 // Wurzelelement erzeugen
    	 Element root =  new  Element("AnyLogicWorkspace")
    	 .setAttribute("WorkspaceVersion","1.9")
@@ -86,11 +146,37 @@ public class Exporter implements ExportInterface {
                    
                Element Connectors = new Element("Connectors");
                ActiveObjectClass.addContent(Connectors);
-                
+        
+         ///Erzeugen der Ressourcepools Ids kann dann weg wenn sie Elemente sind
+               
+            if (!set.getDelayMode())
+            {
+               for (ModelElement element : model.getElements().values()) 
+       		{
+               	if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+       			{			
+       			if (!((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
+       			{ 
+       			 Hashtable<ResourcePool, Integer> tablePools = new Hashtable<ResourcePool, Integer>();
+				 tablePools = ((sys4sim.internal_model.Process)element).getResourcePools();
+				 
+				 for(ResourcePool t : tablePools.keySet())
+				 {
+					 t.setId(IDErzeugen(8,9));
+				 }
+       				
+       			}
+       			}
+       		}
+            }
+               
         //Erzeugen der anylogic IDs
         for (ModelElement element : model.getElements().values()) 
         {
         	element.setId(IDErzeugen(8,9));
+        	System.out.println("--------------");
+        	System.out.println(element.getName());
+        	System.out.println(element.getId());
         }
         
        //weise den Eleementen Koordinaten zu
@@ -98,8 +184,29 @@ public class Exporter implements ExportInterface {
         model.getEntities().get(0).getSource().setX(X);
         model.getEntities().get(0).getSource().setY(Y);
         CreateXYrekursiv(model.getEntities().get(0).getSource(),X,Y);       
-                
-                
+           
+        //erzeugen der Connectoren zu den ResourcePools
+        if (!set.getDelayMode())
+        {
+        int zaehlerConnectorPool =0;
+        for (ModelElement element : model.getElements().values()) 
+		{
+        	if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+			{			
+			if (!((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
+			{ 
+					 Hashtable<ResourcePool, Integer> tablePools = new Hashtable<ResourcePool, Integer>();
+					 tablePools = ((sys4sim.internal_model.Process)element).getResourcePools();
+					 
+					 for(ResourcePool t : tablePools.keySet())
+					 {
+						 zaehlerConnectorPool+=1;
+						 CreateConnectorForResourcePool(Connectors,element,t,zaehlerConnectorPool);
+					 }
+			}
+			}
+		}
+        }
 	   //FOR für die Erzeugung der Connectoren	
         int zaehlerConnector =0;
 		for (ModelElement element : model.getElements().values()) 
@@ -135,13 +242,14 @@ public class Exporter implements ExportInterface {
 				zaehlerMachine=zaehlerMachine+1;
 				//if the process need a resourcepool create service else create delay
 				if (((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
-					CreateDelay (EmbeddedObjects,element,zaehlerMachine);
-				else CreateProcess(EmbeddedObjects,element,zaehlerMachine);
+					CreateDelay (EmbeddedObjects,element,zaehlerMachine,set);
+				else if (!set.getDelayMode())CreateProcess(EmbeddedObjects,element,zaehlerMachine,set);
+				else CreateDelay (EmbeddedObjects,element,zaehlerMachine,set);
 				}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Queue"))
 				{
 				zaehlerQueue=zaehlerQueue+1;
-				CreateQueue(EmbeddedObjects,element,zaehlerQueue);
+				CreateQueue(EmbeddedObjects,element,zaehlerQueue,set);
 				}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Worker"))
 				CreateWorker(EmbeddedObjects,element);
@@ -150,6 +258,8 @@ public class Exporter implements ExportInterface {
 		}
 		
 		//FOR für die Erzeugung der RessourcePools	///verschiedene resourcepools brauchen verschiedene Namen dann hier testen ob schon gebaut
+		if (!set.getDelayMode())
+		{
 		int zaehlerMachinePool =0;int zaehlerWorkerPool =0;int zaehlerTransporterPool =0;
 		for (ModelElement element : model.getElements().values()) 
 		{
@@ -170,7 +280,7 @@ public class Exporter implements ExportInterface {
 							int resourcesInPool=(((sys4sim.internal_model.MachinePool)t).getElements().size());
 							int needResources=(tablePools.get(t));
 							//create ID for ResourcePool
-							((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
+							///((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
 							//create x and y value for ResourcePool
 							if (t.getX()==0&&t.getY()==0)
 						    {
@@ -178,7 +288,7 @@ public class Exporter implements ExportInterface {
 								t.setY(element.getY()+50);
 						    }
 							//create element 
-							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerMachinePool,name,resourcesInPool);
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerMachinePool,name,resourcesInPool,set);
 						    }
 						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.TransporterPool"))
 						{
@@ -187,7 +297,7 @@ public class Exporter implements ExportInterface {
 							int resourcesInPool=(((sys4sim.internal_model.TransporterPool)t).getElements().size());
 							int needResources=(tablePools.get(t));
 							//create ID for ResourcePool
-							((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
+							///((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
 							//create x and y value for ResourcePool
 							if (element.getX()==0&&element.getY()==0)
 						    {
@@ -195,7 +305,7 @@ public class Exporter implements ExportInterface {
 								t.setY(element.getY()+50);
 						    }
 							//create element
-							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerTransporterPool,name,resourcesInPool);
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerTransporterPool,name,resourcesInPool,set);
 					    }
 						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.WorkerPool"))
 						{
@@ -204,7 +314,7 @@ public class Exporter implements ExportInterface {
 							int resourcesInPool=(((sys4sim.internal_model.WorkerPool)t).getElements().size());
 							int needResources=(tablePools.get(t));
 							//create ID for ResourcePool
-							((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
+							///((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
 							//create x and y value for ResourcePool
 							if (element.getX()==0&&element.getY()==0)
 						    {
@@ -212,14 +322,14 @@ public class Exporter implements ExportInterface {
 								t.setY(element.getY()+50);
 						    }
 							//create element
-							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerWorkerPool,name,resourcesInPool);
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerWorkerPool,name,resourcesInPool,set);
 						}
 						else System.out.println("Error: no valid RessourcePool");
 					 }
 					 
 			       }
 		}
-		
+		}
 	
 	// erzeugen des Experiments
 		
@@ -468,7 +578,8 @@ public class Exporter implements ExportInterface {
    		 
    	 }
    	 
-   	 Sonderzeichen();
+   	 String file2 = file.toString();
+   	 Sonderzeichen(file2);
 			 
 	}
 	
@@ -477,6 +588,7 @@ public class Exporter implements ExportInterface {
 	{ 
 		String zname = "connector"+String.valueOf(zaehlerConnector);
 		String name = "<![CDATA["+zname+"]]>";
+		String name2= "<![CDATA["+element.getName()+"]]>";
 		String ID = element.getId();
 		String sourceID = element.getSource().getId().toString();
 		String targetID = element.getTarget().getId().toString();
@@ -508,12 +620,46 @@ public class Exporter implements ExportInterface {
 	}
 	
 	
+	private static Element CreateConnectorForResourcePool(Element Connectors, ModelElement element,ResourcePool pool,int zaehlerConnector) 
+	{ 
+		String zname = "connectorpool"+String.valueOf(zaehlerConnector);
+		String name = "<![CDATA["+zname+"]]>";
+		String ID = IDErzeugen(8,9);
+		String sourceID = pool.getId().toString();
+		String targetID = (element).getId().toString();
+		
+		//element.getTarget();
+		
+		Element Connector = new Element("Connector");
+        Connectors.addContent(Connector);
+        Connector
+        .addContent(new Element("Id").setText(ID))//
+        .addContent(new Element("Name").setText(name))//
+        .addContent(new Element("ExcludeFromBuild").setText("false"))
+        .addContent(new Element("X").setText("170"))//Koordinaten
+        .addContent(new Element("Y").setText("150"))                
+        .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))// bea ob das so geht
+        .addContent(new Element("PublicFlag").setText("false"))
+        .addContent(new Element("PresentationFlag").setText("true"))
+        .addContent(new Element("ShowLabel").setText("false"))
+        .addContent(new Element("SourceEmbeddedObject").setText(sourceID))//
+        .addContent(new Element("SourceConnectableName").setText("port"))//mal gucken ob funzt alle in  bzw. out
+        .addContent(new Element("TargetEmbeddedObject").setText(targetID))//
+        .addContent(new Element("TargetConnectableName").setText("access"));
+        Element Points = new Element("Points");
+        Connector.addContent(Points);
+          Points
+          .addContent(new Element("Point").setText("<X>0</X><Y>0</Y>"))    //bea
+          .addContent(new Element("Point").setText("<X>30</X><Y>0</Y>"));   //bea
+        return Connectors;		
+	}
 	
 	//Methode zur Erzeugung der einzelnen Senken
 	private static Element CreateSink(Element EmbeddedObjects, ModelElement element,int zaehlerElement) 
 	{
 		String zname = "sink"+String.valueOf(zaehlerElement);
-		String name = "<![CDATA["+zname+"]]>";
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()); 
@@ -556,7 +702,8 @@ public class Exporter implements ExportInterface {
 	{
 		//initialize of the name, x-value, y-value, id, capayity of inputbuffer 
 		String zname = "source"+String.valueOf(zaehlerElement);
-		String name = "<![CDATA["+zname+"]]>";
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
 		String ID = ((ModelElement) element).getId();
 		String X = String.valueOf(((ModelElement) element).getX()); 
 		String Y = String.valueOf(((ModelElement) element).getY()); 
@@ -603,17 +750,17 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter);
 				Parameter
 				.addContent(new Element("Name").setText("<![CDATA[arrivalType]]>"))//bleibt aussen vor
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));//
+				.addContent(new Element("Value").setText("<![CDATA[Source.INTERARRIVAL_TIME]]>"));//
 				Element Parameter2 = new Element("Parameter"); 
 				Parameters.addContent(Parameter2);
 				Parameter2
 				.addContent(new Element("Name").setText("<![CDATA[rate]]>"))//wenn on enter code da ist
-				.addContent(new Element("Value").setText(distribution));//wenn on enter code da ist jetzt bsp
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));//wenn on enter code da ist jetzt bsp
 				Element Parameter3 = new Element("Parameter"); 
 				Parameters.addContent(Parameter3);
 				Parameter3
 				.addContent(new Element("Name").setText("<![CDATA[interarrivalTime]]>"))//bleibt aussen vor
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				.addContent(new Element("Value").setText(distribution));
 				Element Parameter4 = new Element("Parameter"); 
 				Parameters.addContent(Parameter4);
 				Parameter4
@@ -669,17 +816,22 @@ public class Exporter implements ExportInterface {
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
-	private static Element CreateDelay(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
+	private static Element CreateDelay(Element EmbeddedObjects, ModelElement element,int zaehlerElement,Settings set)
 	{
 		String zname = "delay"+String.valueOf(zaehlerElement);
-		String name = "<![CDATA["+zname+"]]>";
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()); 
 		String distribution = CreateDistribution(element);
 		int capacityValue =((sys4sim.internal_model.Process) element).getCapacity();
+		if (capacityValue==0) capacityValue=1;
 		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
+		if (set.getPortChoice()==2) capacity = "<![CDATA["+String.valueOf(10000)+"]]>";
 
+		
+		String onExit = "<![CDATA["+((ModelBlock)element).getOnExit()+"]]>";
 		System.out.println(X);
 		System.out.println(Y);
 		System.out.println("--process");
@@ -740,7 +892,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter7);
 				Parameter7
 				.addContent(new Element("Name").setText("<![CDATA[onExit]]>"))//dann wenn modell
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				.addContent(new Element("Value").setText(onExit));
 				Element Parameter8 = new Element("Parameter"); 
 				Parameters.addContent(Parameter8);
 				Parameter8
@@ -764,17 +916,22 @@ public class Exporter implements ExportInterface {
 		return EmbeddedObjects;
 	}
 	
-	private static Element CreateProcess(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
+	private static Element CreateProcess(Element EmbeddedObjects, ModelElement element,int zaehlerElement,Settings set)
 	{
 		//initialize of the name, x-value, y-value, id, capayity of inputbuffer and distribution
 		String zname = "service"+String.valueOf(zaehlerElement);
-		String name = "<![CDATA["+zname+"]]>";
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()-20); 
 		int capacityValue = ((sys4sim.internal_model.Process) element).getCapacity();
 		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
+		if (capacityValue==0) capacityValue=1;
+		if (set.getPortChoice()==2) capacity = "<![CDATA["+String.valueOf(10000)+"]]>";
 		String distribution = CreateDistribution(element);
+		
+		String onExit = "<![CDATA["+((ModelBlock)element).getOnExit()+"]]>";
 		
 		//search number of needed resources for one entity, now only one resourcepool per process is realized
 		int needResources=0;
@@ -803,7 +960,7 @@ public class Exporter implements ExportInterface {
 			.addContent(new Element("ExcludeFromBuild").setText("false"))
 			.addContent(new Element("X").setText(X))
 			.addContent(new Element("Y").setText(Y))
-			.addContent(new Element("Label").setText("<X>10</X><Y>-20</Y>"))
+			.addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))
 			.addContent(new Element("PublicFlag").setText("false"))
 			.addContent(new Element("PresentationFlag").setText("true"))
 			.addContent(new Element("ShowLabel").setText("true"));
@@ -845,7 +1002,7 @@ public class Exporter implements ExportInterface {
 				Parameters.addContent(Parameter6);
 				Parameter6
 				.addContent(new Element("Name").setText("<![CDATA[onExit]]>"))//dann wenn modell
-				.addContent(new Element("Value").setText("<![CDATA[]]>"));//
+				.addContent(new Element("Value").setText(onExit));//
 				Element Parameter7 = new Element("Parameter"); 
 				Parameters.addContent(Parameter7);
 				Parameter7
@@ -929,10 +1086,11 @@ public class Exporter implements ExportInterface {
 		return EmbeddedObjects;
 	}
 	
-	private static Element CreateResourcePool(Element EmbeddedObjects, ModelElement element,int zaehlerElement,String zName,int zResourcesInPool) 
+	private static Element CreateResourcePool(Element EmbeddedObjects, ModelElement element,int zaehlerElement,String zName,int zResourcesInPool,Settings set) 
 	{
 		String zname = zName+String.valueOf(zaehlerElement);
 		String name = "<![CDATA["+zname+"]]>";
+		String name2= "<![CDATA["+element.getName()+"]]>";
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()); 
@@ -1052,15 +1210,18 @@ public class Exporter implements ExportInterface {
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
-	private static Element CreateQueue(Element EmbeddedObjects, ModelElement element, int zaehlerElement)
+	private static Element CreateQueue(Element EmbeddedObjects, ModelElement element, int zaehlerElement,Settings set)
 	{
 		String zname = "queue"+String.valueOf(zaehlerElement);
-		String name = "<![CDATA["+zname+"]]>";
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()-20); 
 		int capacityValue = ((sys4sim.internal_model.Queue) element).getCapacity();
+		if (capacityValue==0) capacityValue=100;
 		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
+		if (set.getPortChoice()==2) capacity = "<![CDATA["+String.valueOf(10000)+"]]>";
 		System.out.println(X);
 		System.out.println(Y);
 		System.out.println("--queue");
@@ -1193,12 +1354,12 @@ public class Exporter implements ExportInterface {
 	
 	
 	
-    private static void Sonderzeichen()
+    private static void Sonderzeichen(String file)
     {
     	try
 		 {
 			File oldFile = new File("C:/Dokumente und Einstellungen/Administrator/workspace/sys4sim/test.xml");
-		    File newFile = new File("C:/Dokumente und Einstellungen/Administrator/Desktop/SammlungModelle/test.alp");
+		    File newFile = new File(file);
 		    newFile.createNewFile();
 		    String sb =readFileContent(oldFile);
 		    FileWriter writer = new FileWriter(newFile);
@@ -1210,6 +1371,54 @@ public class Exporter implements ExportInterface {
 		 catch (IOException e) {
 	   		 
 	   	 }    	
+    }
+    
+    private static void CreateFunction(ModelElement element)
+    {
+    	///muss noch für queues
+    	if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+		{
+		     ArrayList<Connector> outList = new ArrayList<Connector>();
+			 outList = ((ModelBlock)element).getOut();
+			 // Hole Ziele als next
+			 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+		     { 
+				 Connector con = i.next();
+				 ModelBlock next = con.getTarget();
+				 if (!next.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink"))
+					{
+			        ArrayList<String> inListString = new ArrayList<String>();
+				    ArrayList<Connector> inList = new ArrayList<Connector>();
+					inList = ((ModelBlock)element).getIn();
+					
+					 //hole Vorgänger als next2 in Sring Liste
+					 for ( Iterator<Connector> it = inList.iterator(); it.hasNext(); )
+				     {   
+						 Connector con2 = it.next();
+						 ModelBlock next2 = con2.getSource();
+						 inListString.add(next2.getName());
+				     }
+					
+				 String function = "if ("+next.getName()+".size() >="+next.getName()+".capacity-1){"+element.getName()+".in.disconnectAndUnmapAll();"+element.getName()+".in.refreshConnections();}";
+				 function = ((ModelBlock)element).getOnExit()+function;
+				 ((ModelBlock)element).setOnExit(function);
+				 //((ModelBlock)element).setOnExit("if ("+next.getName()+".size() >="+next.getName()+".capacity-1){"+element.getName()+".in.disconnectAndUnmapAll();"+element.getName()+".in.refreshConnections();}");
+				 
+				 function = "if ("+next.getName()+".size() < "+next.getName()+".capacity){";
+				 
+				 for ( Iterator<String> iter = inListString.iterator(); iter.hasNext(); )
+			     { 
+					 String str = iter.next();
+					 String zus = element.getName()+".in.connect("+str+".out);"+element.getName()+".in.refreshConnections();"+str+".out.refreshConnections();";
+					 function = function+zus;
+			     }
+				 function = function+"}";
+				 function = ((ModelBlock)next).getOnExit()+function;
+				 ((ModelBlock)next).setOnExit(function);
+		     }
+		     }
+		
+		}
     }
     
     private static void CreateXYrekursiv(ModelBlock target,int X,int Y)
