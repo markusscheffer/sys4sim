@@ -13,7 +13,6 @@ public class ExportRate {
 	
 	public ExportRate(Rate rate,String name) {
 		this.rate=rate;
-
 		this.name = name;
 	}
 	
@@ -29,12 +28,21 @@ public class ExportRate {
 		//Default Einstellung
 		String result = name+" par 1 10.0" ;
 	
-		if(rate.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.PoissonDistribution")){
-			result =name+" type exponential\n"+name+" par 1 "+((PoissonDistribution)rate).getExpectedValue();
+		if(rate.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.ExponentialDistribution")){
+			
+			if (((PoissonDistribution)rate).getExpectedUnit().equalsIgnoreCase("s")){
+				//TODO noch ändern
+				result =name+" type exponential\n"+name+" par 1 "+((PoissonDistribution)rate).getExpectedValue();
+			} else {
+				//Hier müssen noch anderen Einheiten ergänzt bzw dann umgerechnet werden
+			}
 		}
 		else if(rate.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.NormalDistribution")){
-			result ="distrib2 type normal\n"+name+"par 1 "+((NormalDistribution)rate).getMeanValue()+"\n"+
-			name+"par 1 "+((NormalDistribution)rate).getStandardDeviationValue();
+			result =name+" type normal\n"+name+"par 1 "+((NormalDistribution)rate).getMeanValue()+"\n"+
+			name+" par 1 "+((NormalDistribution)rate).getStandardDeviationValue();
+		} else {
+			//Default
+			result =name+" type normal\n"+name+" par 1 1\n"+name+" par 1 10.0";
 		}
 		
 		return result;
