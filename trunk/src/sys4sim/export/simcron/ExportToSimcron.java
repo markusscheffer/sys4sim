@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-
-import sys4sim.export.ExportInterface;
+import sys4sim.export.ExportSimcronInterface;
 import sys4sim.export.simcron.ExportObject.Type;
 import sys4sim.internal_model.Connector;
 import sys4sim.internal_model.Entity;
@@ -22,7 +20,7 @@ import sys4sim.internal_model.Rate;
 import sys4sim.internal_model.Sink;
 import sys4sim.internal_model.Source;
 
-public class ExportToSimcron implements ExportInterface{
+public class ExportToSimcron implements ExportSimcronInterface{
 
 	private String mcFileOutput="";
 	private String mpFileOutput="";
@@ -30,9 +28,6 @@ public class ExportToSimcron implements ExportInterface{
 	private String mpFilePartOutput="";
 	private String mpFileEndPartOutput="";
 	private File file;
-	
-//	private enum Type {Process,Queue,Source, Sink};
-	
 	
 	public void writeFile(Model model, File file) {
 		this.file=file;
