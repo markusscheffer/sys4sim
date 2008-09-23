@@ -280,15 +280,15 @@ public class Importer extends DefaultHandler{
 		}
 		if (mp.getElements().size() > 0) {
 			process.getResourcePools().put(mp, mp.getElements().size());
-			model.getElements().put(mp.getId(), mp);
+			//model.getElements().put(mp.getId(), mp);
 		}
 		if (wp.getElements().size() > 0) {
 			process.getResourcePools().put(wp, wp.getElements().size());
-			model.getElements().put(wp.getId(), wp);
+			//model.getElements().put(wp.getId(), wp);
 		}
 		if (tp.getElements().size() > 0) {
 			process.getResourcePools().put(tp, tp.getElements().size());
-			model.getElements().put(tp.getId(), tp);
+			//model.getElements().put(tp.getId(), tp);
 		}
 		System.out.println("foo");
 	}
