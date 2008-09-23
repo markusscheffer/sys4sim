@@ -33,4 +33,30 @@ public class Model {
 	public void setSource(Source source) {
 		this.source = source;
 	}
+	
+	public void addConnector(Connector connector) {
+		boolean doNotAdd = false;
+		for (ModelElement elem : this.getElements().values()) {
+			if (elem instanceof Connector) {
+				Connector c = (Connector) elem;
+				if (c.getSource().equals(connector.getSource()) &&
+						c.getTarget().equals(connector.getTarget())) {
+					doNotAdd = true;
+				}
+			}
+		}
+		if (!doNotAdd) {
+			this.getElements().put(connector.getId(), connector);
+		
+			String outString = "Generating Connector between " + 
+				connector.getSource().getName() + " and " 
+				+ connector.getTarget().getName();
+		
+			if (connector.getConditionString() != null) {
+				outString = outString + " [condition: " + connector.getConditionString() + "]";
+			}
+		
+			System.out.println(outString);
+		}
+	}
 }

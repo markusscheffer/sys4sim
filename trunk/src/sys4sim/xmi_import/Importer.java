@@ -64,6 +64,8 @@ public class Importer extends DefaultHandler{
 	    return getModel();
 	}
 	
+	private static ArrayList<Connector> queueConnectors = new ArrayList<Connector>();
+	
 	public static void generateModel (
 			UmlClass system, 
 			Activity first, 
@@ -98,38 +100,44 @@ public class Importer extends DefaultHandler{
 						if (connector.getTarget() instanceof Process) {
 							Process process = (Process) connector.getTarget();
 							if (processQueues.get(process) != null) {
-								Queue queue = new Queue();
-								queue.setName("q" + queueCounter++);
-								connector.setTarget(queue);
+								boolean exists = false;
+
 								Connector connector2 = new Connector();
-								connector2.setSource(queue);
-								connector2.setTarget(process);
-								connector2.getSource().getOut().add(connector);
-								connector2.getTarget().getIn().add(connector);
-								connector2.setId("connector_" + connectorCounter++);
-								model.getElements().put(connector2.getId(), connector);
-								System.out.println("Generating Connector between " + 
-										connector2.getSource().getName() + " and " 
-										+ connector2.getTarget().getName());
+								Queue queue = new Queue();
+								
+								for (Connector queueConnector : queueConnectors) {
+									if (queueConnector.getTarget().equals(process)) {
+										exists = true;
+										connector2 = queueConnector;
+										queue = (Queue) connector2.getSource();
+										connector.setTarget(queue);
+										queue.getIn().add(connector);
+									}
+								}
+								if (!exists) {
+									queueConnectors.add(connector2);
+									queue.setName("q" + queueCounter++);
+									connector.setTarget(queue);
+									queue.getIn().add(connector);
+									connector2.setSource(queue);
+									connector2.setTarget(process);
+									connector2.getSource().getOut().add(connector2);
+									connector2.getTarget().getIn().add(connector2);
+									connector2.setId("connector_" + connectorCounter++);
+									model.addConnector(connector2);
+								}
 							}
 						}
 
 						if (edge.getGuard() != null) {
 							connector.setConditionString(edge.getGuard());
-							System.out.println("Generating Connector between " + 
-									connector.getSource().getName() + " and " + 
-									connector.getTarget().getName() +
-									" [condition: " + connector.getConditionString() + "]");
-						} else {
-							System.out.println("Generating Connector between " + 
-								connector.getSource().getName() + " and " 
-								+ connector.getTarget().getName());
+							
 						}
 						
 						connector.getSource().getOut().add(connector);
 						connector.getTarget().getIn().add(connector);
 						
-						model.getElements().put(connector.getId(), connector);
+						model.addConnector(connector);
 					}
 				}
 			}
