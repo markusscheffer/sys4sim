@@ -32,68 +32,17 @@ public class Exporter implements ExportInterface {
 	
 		
 		
-	//Modell abändern	
-	
+	//Modell abänder wenn Protectiomode	
+	if (set.getPortChoice()==4)
+    ChangeModelforProtectiomode (model,set); 
 	if (set.getPortChoice()==3)
-	{
-		
-		//Erzeuege Eingangsbuffer
-	     int zsourcebuffer =0;	
-	     //Model model2 = new Model();
-		 Hashtable <String, ModelElement> tableElem = new Hashtable<String, ModelElement>();
-	     tableElem = model.getElements();
-	     	    		 
-		 Hashtable<String, ModelElement> tempTable = new Hashtable<String, ModelElement>();
-		 
-		 for (ModelElement element : model.getElements().values()) 
-	        {
-			 if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Source"))
-				{
-				 
-				    ArrayList<Connector> outList = new ArrayList<Connector>();
-					outList = ((ModelBlock)element).getOut();
-					 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
-				     {
-						    //erzeuge Buffer
-						    zsourcebuffer+=1;
-						    sys4sim.internal_model.Queue queue = new sys4sim.internal_model.Queue();
-							queue.setCapacity(10000);
-							queue.setName("sourcebuffer"+String.valueOf(zsourcebuffer));
-							tempTable.put("sourcebuffer"+String.valueOf(zsourcebuffer), queue);
-				 	        // Connector abändern
-							Connector s = i.next();
-							ModelBlock z = s.getTarget();
-							z.getIn().remove(s);
-				 	        s.setTarget(queue);
-				 	        s.setTargetName(queue.getName());
-				 	        //neuen Connector zwischen Buffer und Elziel erzeugen
-				 	       sys4sim.internal_model.Connector con = new sys4sim.internal_model.Connector();
-				 	       con.setSource(queue);
-				 	       con.setSourceName(queue.getName());
-				 	       con.setTarget(z);
-				 	       con.setTargetName(z.getName());
-				 	       z.getIn().add(con);
-				 	      tempTable.put("Con"+String.valueOf(zsourcebuffer), con);
-				 	       //neues Teil in Buffer get.out schreiben
-				 	       queue.getOut().add(con);
-				        }					
-				}			    
-	        }
-	 
-	 
-		 for(String s : tempTable.keySet()){
-		 ModelElement m = tempTable.get(s);
-		 tableElem.put(s, m);}
-		 model.setElements(tableElem);
+    {
+	ChangeModelforProtectiomode2part2 (model,set);
+    ChangeModelforProtectiomode2 (model,set);    
+    }
+	// Erzeuge Outputsplits
 	
-	 //erzeuge On Exit Code
-		 
-		 for (ModelElement element : model.getElements().values()) 
-	        {
-               CreateFunction(element);
-	        
-	        }
-	} 
+	CreateOutputs(model);
 	
 		
 	 // Wurzelelement erzeugen
@@ -174,9 +123,7 @@ public class Exporter implements ExportInterface {
         for (ModelElement element : model.getElements().values()) 
         {
         	element.setId(IDErzeugen(8,9));
-        	System.out.println("--------------");
-        	System.out.println(element.getName());
-        	System.out.println(element.getId());
+        	
         }
         
        //weise den Eleementen Koordinaten zu
@@ -185,7 +132,8 @@ public class Exporter implements ExportInterface {
         model.getEntities().get(0).getSource().setY(Y);
         CreateXYrekursiv(model.getEntities().get(0).getSource(),X,Y);       
            
-        //erzeugen der Connectoren zu den ResourcePools
+        //erzeugen der Connectoren zu den ResourcePools wenn kein Delaymode
+        
         if (!set.getDelayMode())
         {
         int zaehlerConnectorPool =0;
@@ -207,15 +155,26 @@ public class Exporter implements ExportInterface {
 			}
 		}
         }
+        
 	   //FOR für die Erzeugung der Connectoren	
-        int zaehlerConnector =0;
+        int zaehlerConnector =0;boolean zaehlerbool = false;
 		for (ModelElement element : model.getElements().values()) 
 		{
 			
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
 			{
 				zaehlerConnector = zaehlerConnector+1;
-				CreateConnector(Connectors,(Connector)element,zaehlerConnector);	
+				if (((Connector)element).getSource().getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Outputer"))
+					{ if (zaehlerbool == false)zaehlerbool = true;
+					  else zaehlerbool = false;
+					if (zaehlerbool == true)
+					{CreateConnectorForOutputT(Connectors,(Connector)element,zaehlerConnector);
+					}
+					else
+					{CreateConnectorForOutputF(Connectors,(Connector)element,zaehlerConnector);
+					}
+					}
+				else CreateConnector(Connectors,(Connector)element,zaehlerConnector);	
 			}
 		}
 		
@@ -224,8 +183,10 @@ public class Exporter implements ExportInterface {
         
        //FOR für die Erzeugung der Elemente	
         int zaehlerSink = 0;int zaehlerSource = 0;int zaehlerMachine = 0;int zaehlerQueue = 0;
-		for (ModelElement element : model.getElements().values()) 
+		int zaehlerOutputer=0;int zaehlerHold=0;
+        for (ModelElement element : model.getElements().values()) 
 		{   
+        	
 			
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Sink"))
 				{
@@ -236,7 +197,20 @@ public class Exporter implements ExportInterface {
 				{
 				zaehlerSource=zaehlerSource+1;
 				CreateSource(EmbeddedObjects,element,zaehlerSource);
+				
 				}
+			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Outputer"))
+				{
+				zaehlerOutputer=zaehlerOutputer+1;
+				CreateSelectOutput(EmbeddedObjects,element,zaehlerOutputer,set);
+				
+				}
+			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Hold"))
+			{
+		    zaehlerHold=zaehlerHold+1;
+			CreateHold(EmbeddedObjects,element,zaehlerHold);
+			
+			}
 			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
 				{
 				zaehlerMachine=zaehlerMachine+1;
@@ -259,79 +233,11 @@ public class Exporter implements ExportInterface {
 		
 		//FOR für die Erzeugung der RessourcePools	///verschiedene resourcepools brauchen verschiedene Namen dann hier testen ob schon gebaut
 		if (!set.getDelayMode())
-		{
-		int zaehlerMachinePool =0;int zaehlerWorkerPool =0;int zaehlerTransporterPool =0;
-		for (ModelElement element : model.getElements().values()) 
-		{
-			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
-				
-				if (!((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
-			       { 
-					 Hashtable<ResourcePool, Integer> tablePools = new Hashtable<ResourcePool, Integer>();
-					 tablePools = ((sys4sim.internal_model.Process)element).getResourcePools();
-					 
-					 
-					 for(ResourcePool t : tablePools.keySet())
-					 {
-						 if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.MachinePool"))
-							{
-							zaehlerMachinePool = zaehlerMachinePool+1;
-							String name = "MachinePool";
-							int resourcesInPool=(((sys4sim.internal_model.MachinePool)t).getElements().size());
-							int needResources=(tablePools.get(t));
-							//create ID for ResourcePool
-							///((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
-							//create x and y value for ResourcePool
-							if (t.getX()==0&&t.getY()==0)
-						    {
-								t.setX(element.getX()+10);
-								t.setY(element.getY()+50);
-						    }
-							//create element 
-							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerMachinePool,name,resourcesInPool,set);
-						    }
-						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.TransporterPool"))
-						{
-							zaehlerTransporterPool = zaehlerTransporterPool+1;
-							String name = "TransporterPool";
-							int resourcesInPool=(((sys4sim.internal_model.TransporterPool)t).getElements().size());
-							int needResources=(tablePools.get(t));
-							//create ID for ResourcePool
-							///((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
-							//create x and y value for ResourcePool
-							if (element.getX()==0&&element.getY()==0)
-						    {
-								t.setX(element.getX()+10);
-								t.setY(element.getY()+50);
-						    }
-							//create element
-							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerTransporterPool,name,resourcesInPool,set);
-					    }
-						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.WorkerPool"))
-						{
-							zaehlerWorkerPool = zaehlerWorkerPool+1;
-							String name = "WorkerPool";
-							int resourcesInPool=(((sys4sim.internal_model.WorkerPool)t).getElements().size());
-							int needResources=(tablePools.get(t));
-							//create ID for ResourcePool
-							///((sys4sim.internal_model.ModelElement)t).setId(IDErzeugen(8,9));
-							//create x and y value for ResourcePool
-							if (element.getX()==0&&element.getY()==0)
-						    {
-								t.setX(element.getX()+10);
-								t.setY(element.getY()+50);
-						    }
-							//create element
-							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerWorkerPool,name,resourcesInPool,set);
-						}
-						else System.out.println("Error: no valid RessourcePool");
-					 }
-					 
-			       }
-		}
-		}
+			CreateRessourcepoolsNoDelayMode (EmbeddedObjects, model, set);
+		
 	
 	// erzeugen des Experiments
+		
 		
 		Element Experiments = new Element("Experiments");
 	    Model.addContent(Experiments);
@@ -577,7 +483,7 @@ public class Exporter implements ExportInterface {
    	 catch (IOException e) {
    		 
    	 }
-   	 
+   	 // Sonderzeichen eleminieren
    	 String file2 = file.toString();
    	 Sonderzeichen(file2);
 			 
@@ -619,6 +525,75 @@ public class Exporter implements ExportInterface {
         return Connectors;		
 	}
 	
+	private static Element CreateConnectorForOutputT(Element Connectors, Connector element,int zaehlerConnector) 
+	{ 
+		String zname = "connector"+String.valueOf(zaehlerConnector);
+		String name = "<![CDATA["+zname+"]]>";
+		String name2= "<![CDATA["+element.getName()+"]]>";
+		String ID = element.getId();
+		String sourceID = element.getSource().getId().toString();
+		String targetID = element.getTarget().getId().toString();
+		
+		//element.getTarget();
+		
+		Element Connector = new Element("Connector");
+        Connectors.addContent(Connector);
+        Connector
+        .addContent(new Element("Id").setText(ID))//
+        .addContent(new Element("Name").setText(name))//
+        .addContent(new Element("ExcludeFromBuild").setText("false"))
+        .addContent(new Element("X").setText("170"))//Koordinaten
+        .addContent(new Element("Y").setText("150"))                
+        .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))// bea ob das so geht
+        .addContent(new Element("PublicFlag").setText("false"))
+        .addContent(new Element("PresentationFlag").setText("true"))
+        .addContent(new Element("ShowLabel").setText("false"))
+        .addContent(new Element("SourceEmbeddedObject").setText(sourceID))//
+        .addContent(new Element("SourceConnectableName").setText("outT"))//mal gucken ob funzt alle in  bzw. out
+        .addContent(new Element("TargetEmbeddedObject").setText(targetID))//
+        .addContent(new Element("TargetConnectableName").setText("in"));
+        Element Points = new Element("Points");
+        Connector.addContent(Points);
+          Points
+          .addContent(new Element("Point").setText("<X>0</X><Y>0</Y>"))    //bea
+          .addContent(new Element("Point").setText("<X>30</X><Y>0</Y>"));   //bea
+        return Connectors;		
+	}
+	
+	private static Element CreateConnectorForOutputF(Element Connectors, Connector element,int zaehlerConnector) 
+	{ 
+		String zname = "connector"+String.valueOf(zaehlerConnector);
+		String name = "<![CDATA["+zname+"]]>";
+		String name2= "<![CDATA["+element.getName()+"]]>";
+		String ID = element.getId();
+		String sourceID = element.getSource().getId().toString();
+		String targetID = element.getTarget().getId().toString();
+		
+		//element.getTarget();
+		
+		Element Connector = new Element("Connector");
+        Connectors.addContent(Connector);
+        Connector
+        .addContent(new Element("Id").setText(ID))//
+        .addContent(new Element("Name").setText(name))//
+        .addContent(new Element("ExcludeFromBuild").setText("false"))
+        .addContent(new Element("X").setText("170"))//Koordinaten
+        .addContent(new Element("Y").setText("150"))                
+        .addContent(new Element("Label").setText("<X>10</X><Y>0</Y>"))// bea ob das so geht
+        .addContent(new Element("PublicFlag").setText("false"))
+        .addContent(new Element("PresentationFlag").setText("true"))
+        .addContent(new Element("ShowLabel").setText("false"))
+        .addContent(new Element("SourceEmbeddedObject").setText(sourceID))//
+        .addContent(new Element("SourceConnectableName").setText("outF"))//mal gucken ob funzt alle in  bzw. out
+        .addContent(new Element("TargetEmbeddedObject").setText(targetID))//
+        .addContent(new Element("TargetConnectableName").setText("in"));
+        Element Points = new Element("Points");
+        Connector.addContent(Points);
+          Points
+          .addContent(new Element("Point").setText("<X>0</X><Y>0</Y>"))    //bea
+          .addContent(new Element("Point").setText("<X>30</X><Y>0</Y>"));   //bea
+        return Connectors;		
+	}
 	
 	private static Element CreateConnectorForResourcePool(Element Connectors, ModelElement element,ResourcePool pool,int zaehlerConnector) 
 	{ 
@@ -663,9 +638,7 @@ public class Exporter implements ExportInterface {
 		String ID = element.getId();
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()); 
-		System.out.println(X);
-		System.out.println(Y);
-		System.out.println("--sink");
+		System.out.println("create sink");
 		
 		Element EmbeddedObject = new Element("EmbeddedObject");
 		EmbeddedObjects.addContent(EmbeddedObject);
@@ -697,6 +670,51 @@ public class Exporter implements ExportInterface {
 		
 	}
 	
+	private static Element CreateHold(Element EmbeddedObjects, ModelElement element,int zaehlerElement) 
+	{
+		String zname = "hold"+String.valueOf(zaehlerElement);
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
+		String ID = element.getId();
+		String X = String.valueOf(element.getX()); 
+		String Y = String.valueOf(element.getY()); 
+		System.out.println("create hold");
+		
+		Element EmbeddedObject = new Element("EmbeddedObject");
+		EmbeddedObjects.addContent(EmbeddedObject);
+			EmbeddedObject
+			.addContent(new Element("Id").setText(ID))//
+			.addContent(new Element("Name").setText(name))//
+			.addContent(new Element("ExcludeFromBuild").setText("false"))
+			.addContent(new Element("X").setText(X))//bea nebeneinander Koordinaten
+			.addContent(new Element("Y").setText(Y))
+			.addContent(new Element("Label").setText("<X>10</X><Y>-20</Y>"))//bea wieder gucken Schachtelung
+			.addContent(new Element("PublicFlag").setText("false"))
+			.addContent(new Element("PresentationFlag").setText("true"))
+			.addContent(new Element("ShowLabel").setText("true"));
+			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
+			EmbeddedObject.addContent(ActiveObjectClass2);
+				ActiveObjectClass2
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[Hold]]>"));//bea name des Objekts in der Bibliothek
+			EmbeddedObject
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[Entity]]>"));//ba
+			Element Parameters = new Element("Parameters"); 
+			EmbeddedObject.addContent(Parameters);
+				Element Parameter = new Element("Parameter"); 
+				Parameters.addContent(Parameter);
+				Parameter
+				.addContent(new Element("Name").setText("<![CDATA[onEnter]]>"))//bei jeden Element anders für vollständigkeit müssen elemente der Bibliothek angeguckt werden
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				Element Parameter2 = new Element("Parameter"); 
+				Parameters.addContent(Parameter2);
+				Parameter2
+				.addContent(new Element("Name").setText("<![CDATA[initiallyBlocked]]>"))//wenn on enter code da ist
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+			return EmbeddedObjects;
+		
+	}
+	
 	//Methode zur Erzeugung der einzelnen 
 	private static Element CreateSource(Element EmbeddedObjects, ModelElement element,int zaehlerElement)
 	{
@@ -720,9 +738,8 @@ public class Exporter implements ExportInterface {
 			 distribution=CreateDistributionForSource(rate);
 		 }
 		if (distribution=="") System.out.println("Error no distribution, look at function CreateSource.");
-		System.out.println(X);
-		System.out.println(Y);
-		System.out.println("--source");
+		
+		System.out.println("create source");
 		
     	
 		Element EmbeddedObject = new Element("EmbeddedObject");
@@ -832,9 +849,7 @@ public class Exporter implements ExportInterface {
 
 		
 		String onExit = "<![CDATA["+((ModelBlock)element).getOnExit()+"]]>";
-		System.out.println(X);
-		System.out.println(Y);
-		System.out.println("--process");
+		System.out.println("create delay");
 		
 		
 		Element EmbeddedObject = new Element("EmbeddedObject");
@@ -916,6 +931,87 @@ public class Exporter implements ExportInterface {
 		return EmbeddedObjects;
 	}
 	
+	private static Element CreateSelectOutput(Element EmbeddedObjects, ModelElement element,int zaehlerElement,Settings set)
+	{
+		String zname = "delay"+String.valueOf(zaehlerElement);
+		String name2 = "<![CDATA["+zname+"]]>";
+		String name= "<![CDATA["+element.getName()+"]]>";
+		String ID = element.getId();
+		String X = String.valueOf(element.getX()); 
+		String Y = String.valueOf(element.getY()); 
+		
+		// Wahrscheinlichkeiten an Entscheidungen aufbereiten
+		String probability = CreateProbability (element);
+	    
+	    probability = "<![CDATA["+probability+"]]>";
+	    //String onExit = "<![CDATA["+((ModelBlock)element).getOnExit()+"]]>";
+				
+		
+		Element EmbeddedObject = new Element("EmbeddedObject");
+		EmbeddedObjects.addContent(EmbeddedObject);
+			EmbeddedObject
+			.addContent(new Element("Id").setText(ID))//
+			.addContent(new Element("Name").setText(name))//
+			.addContent(new Element("ExcludeFromBuild").setText("false"))
+			.addContent(new Element("X").setText(X))//
+			.addContent(new Element("Y").setText(Y))//
+			.addContent(new Element("Label").setText("<X>10</X><Y>-20</Y>"))//
+			.addContent(new Element("PublicFlag").setText("false"))
+			.addContent(new Element("PresentationFlag").setText("true"))
+			.addContent(new Element("ShowLabel").setText("true"));
+			Element ActiveObjectClass2 = new Element("ActiveObjectClass"); /// ActiveObjectClass2 da ohne 2 schon gibt
+			EmbeddedObject.addContent(ActiveObjectClass2);
+				ActiveObjectClass2
+				.addContent(new Element("PackageName").setText("<![CDATA[com.xj.anylogic.libraries.enterprise]]>"))//
+				.addContent(new Element("ClassName").setText("<![CDATA[SelectOutput]]>"));//
+			EmbeddedObject
+			.addContent(new Element("GenericParametersSubstitute").setText("<![CDATA[Entity]]>"));//
+			Element Parameters = new Element("Parameters"); 
+			EmbeddedObject.addContent(Parameters);
+				Element Parameter = new Element("Parameter"); 
+				Parameters.addContent(Parameter);
+				Parameter
+				.addContent(new Element("Name").setText("<![CDATA[arrivalType]]>"))//muss dann gemacht werden aus dem modell
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));//gleiches
+				Element Parameter2 = new Element("Parameter"); 
+				Parameters.addContent(Parameter2);
+				Parameter2
+				.addContent(new Element("Name").setText("<![CDATA[rate]]>"))//muss dann gemacht werden
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));//wenn on enter code da ist jetzt bsp
+				Element Parameter3 = new Element("Parameter"); 
+				Parameters.addContent(Parameter3);
+				Parameter3
+				.addContent(new Element("Name").setText("<![CDATA[conditionIsProbabilistic]]>"))//bleibt aussen vor
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				Element Parameter4 = new Element("Parameter"); 
+				Parameters.addContent(Parameter4);
+				Parameter4
+				.addContent(new Element("Name").setText("<![CDATA[condition]]>"))//muss dann gemacht werden
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				Element Parameter5 = new Element("Parameter"); 
+				Parameters.addContent(Parameter5);
+				Parameter5
+				.addContent(new Element("Name").setText("<![CDATA[probability]]>"))//dann wenn modell
+				.addContent(new Element("Value").setText(probability));
+				Element Parameter6 = new Element("Parameter"); 
+				Parameters.addContent(Parameter6);
+				Parameter6
+				.addContent(new Element("Name").setText("<![CDATA[onEnter]]>"))//dann wenn modell
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));//
+				Element Parameter7 = new Element("Parameter"); 
+				Parameters.addContent(Parameter7);
+				Parameter7
+				.addContent(new Element("Name").setText("<![CDATA[onExitTrue]]>"))//dann wenn modell
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				Element Parameter8 = new Element("Parameter"); 
+				Parameters.addContent(Parameter8);
+				Parameter8
+				.addContent(new Element("Name").setText("<![CDATA[onExitFalse]]>"))//bleibt aussen vor 
+				.addContent(new Element("Value").setText("<![CDATA[]]>"));
+				
+		return EmbeddedObjects;
+	}
+	
 	private static Element CreateProcess(Element EmbeddedObjects, ModelElement element,int zaehlerElement,Settings set)
 	{
 		//initialize of the name, x-value, y-value, id, capayity of inputbuffer and distribution
@@ -926,8 +1022,9 @@ public class Exporter implements ExportInterface {
 		String X = String.valueOf(element.getX()); 
 		String Y = String.valueOf(element.getY()-20); 
 		int capacityValue = ((sys4sim.internal_model.Process) element).getCapacity();
-		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
 		if (capacityValue==0) capacityValue=1;
+		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
+		System.out.println("create process");
 		if (set.getPortChoice()==2) capacity = "<![CDATA["+String.valueOf(10000)+"]]>";
 		String distribution = CreateDistribution(element);
 		
@@ -1096,9 +1193,7 @@ public class Exporter implements ExportInterface {
 		String Y = String.valueOf(element.getY()); 
 		String resourcesInPool = "<![CDATA["+zResourcesInPool+"]]>";
 		
-		System.out.println(X);
-		System.out.println(Y);
-		System.out.println("--resourcePool");
+		System.out.println("create resourcePool");
 		
 		Element EmbeddedObject = new Element("EmbeddedObject");
 		EmbeddedObjects.addContent(EmbeddedObject);
@@ -1222,9 +1317,7 @@ public class Exporter implements ExportInterface {
 		if (capacityValue==0) capacityValue=100;
 		String capacity = "<![CDATA["+String.valueOf(capacityValue)+"]]>";
 		if (set.getPortChoice()==2) capacity = "<![CDATA["+String.valueOf(10000)+"]]>";
-		System.out.println(X);
-		System.out.println(Y);
-		System.out.println("--queue");
+		System.out.println("create queue");
 		
 		
 		Element EmbeddedObject = new Element("EmbeddedObject");
@@ -1329,12 +1422,14 @@ public class Exporter implements ExportInterface {
 	//Methode zur Erzeugung der einzelnen 
 	private static Element CreateWorker(Element EmbeddedObjects, ModelElement element)
 	{
+		System.out.println("create worker");
 		return(EmbeddedObjects);
 	}
 	
 	//Methode zur Erzeugung der einzelnen 
 	private static Element CreateTransporter(Element EmbeddedObjects, ModelElement element)
 	{
+		System.out.println("create transporter");
 		return(EmbeddedObjects);
 	}
 	
@@ -1434,41 +1529,35 @@ public class Exporter implements ExportInterface {
      		X=X+80;Y=Y+60;int Y2=Y-120;int Z=0;
      		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
     			Z=1;
-     		System.out.println("Target");
-    		System.out.println(s.getTarget().getName());
-    		System.out.println(X);
-    		System.out.println(Y);
+     		
     		if (Z==1) {
      		s.getTarget().setX(X);
      		s.getTarget().setY(Y);
+     		
      		CreateXYrekursiv(s.getTarget(),X,Y);}
      		s = i.next();
      		Z=0;
      		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
     			Z=1;
-     		System.out.println("Target");
-    		System.out.println(s.getTarget().getName());
-    		System.out.println(X);
-    		System.out.println(Y);
+     		
     		if (Z==1) {
     		s.getTarget().setX(X);
      		s.getTarget().setY(Y2);
+     		
      		CreateXYrekursiv(s.getTarget(),X,Y2);}
      		
      	}
      	else
      	{
      		X=X+80;
-     		System.out.println("Target");
-    		System.out.println(s.getTarget().getName());
-    		System.out.println(X);
-    		System.out.println(Y);
+     		
      		int Z=0;
      		if (s.getTarget().getX()==0&&s.getTarget().getY()==0)
     			Z=1;
      		if (Z==1) {
      		s.getTarget().setX(X);
      		s.getTarget().setY(Y);
+     		
      		CreateXYrekursiv(s.getTarget(),X,Y);}
      		
      	}
@@ -1479,7 +1568,7 @@ public class Exporter implements ExportInterface {
     private static String CreateDistribution(ModelElement element)
     {
     	String distribution;
-    	//System.out.println(((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString());
+    	
 		if (((sys4sim.internal_model.Process) element).getProcessingRate().getClass().toString().equalsIgnoreCase("class sys4sim.internal_model.ConstantRate"))
 		{
 			sys4sim.internal_model.Rate zw=((sys4sim.internal_model.Process) element).getProcessingRate();
@@ -1523,6 +1612,100 @@ public class Exporter implements ExportInterface {
 		}
 		else {distribution = "<![CDATA[1]]>";}
 		return distribution;
+    }
+    
+    private static String CreateProbability (ModelElement element)
+    {
+    	String probability1=""; 
+		String probability2="";
+		ArrayList<Connector> outList = new ArrayList<Connector>();
+	    outList = ((ModelBlock)element).getOut();
+	    int zz=0;
+	    for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+    	{
+	    	zz =zz+1;
+    		Connector s = i.next();	
+    		if (zz==1)
+    		probability1 = s.getConditionString();
+    		else probability2 = s.getConditionString();
+    	}
+	    
+	    char test = probability2.charAt(0); double prob1; double prob2;
+	    if (test == 101 )
+	    {	   
+	      char first = probability1.charAt(0);
+	      if ( first == 101) System.out.println("Error: double else by probability");
+	      else if ( probability1.length()==2) 
+	    	{
+	    	char chars[] = new char[1];
+	    	probability1.getChars(0, 0 + 1, chars, 0 );
+	    	probability1=String.valueOf(chars);
+	    	
+	    	}	    
+	      else if ( probability1.length()==3) 
+	      {
+    	  char chars[] = new char[2];
+    	  probability1.getChars(0, 0 + 2, chars, 0 );
+    	  probability1=String.valueOf(chars);
+    	  
+    	  }	  
+	      else if ( probability1.length()==4) 
+	      {
+    	  char chars[] = new char[3];
+    	  probability1.getChars(0, 0 + 3, chars, 0 );
+    	  probability1=String.valueOf(chars);
+    	  
+    	  }	  
+	      else if ( probability1.length()>4) 
+	      System.out.println("Error: no probability by output connector");
+	      
+	      //prob1 = Integer.parseInt(probability1);
+	      prob1 = Double.valueOf(probability1);
+	      prob2 = 100-prob1;
+	      prob2 = prob2/100;
+	      prob1 = prob1/100;
+	      probability1=String.valueOf(prob1);
+	      probability2=String.valueOf(prob2);
+	     
+	    }
+	    else
+	    {
+	    	  char first = probability2.charAt(0);
+		      if ( first == 101) System.out.println("Error: double else by probability");
+		      else if ( probability2.length()==2) 
+		    	{
+		    	char chars[] = new char[1];
+		    	probability2.getChars(0, 0 + 1, chars, 0 );
+		    	probability2=String.valueOf(chars);
+		    	
+		    	}	    
+		      else if ( probability2.length()==3) 
+		      {
+	    	  char chars[] = new char[2];
+	    	  probability2.getChars(0, 0 + 2, chars, 0 );
+	    	  probability2=String.valueOf(chars);
+	    	  
+	    	  }	  
+		      else if ( probability2.length()==4) 
+		      {
+	    	  char chars[] = new char[3];
+	    	  probability2.getChars(0, 0 + 3, chars, 0 );
+	    	  probability2=String.valueOf(chars);
+	    	  
+	    	  }	  
+		      else if ( probability2.length()>4) 
+		      System.out.println("Error: no probability by output connector");
+		      
+		      //prob1 = Integer.parseInt(probability1);
+		      prob2 = Double.valueOf(probability2);
+		      prob1 = 100-prob2;
+		      prob1 = prob1/100;
+		      prob2 = prob2/100;
+		      probability1=String.valueOf(prob1);
+		      probability2=String.valueOf(prob2);
+		     
+	    }
+	    return probability2;
     }
     
     private static String CreateDistributionForSource(Rate rate)
@@ -1573,6 +1756,529 @@ public class Exporter implements ExportInterface {
 		else {distribution = "<![CDATA[1]]>";}
 		return distribution;
     }
+    
+    private static void CreateOutputs(Model model)
+    {
+    	
+    	int zaehlerOutputer=0;
+    	Hashtable<String, ModelElement> tempTable = new Hashtable<String, ModelElement>();
+    	for (ModelElement element : model.getElements().values()) 
+		{
+    		if (!element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
+    		{
+    			ArrayList<Connector> outList = new ArrayList<Connector>();
+			    outList = ((ModelBlock)element).getOut();
+			    if (outList.size()==2)
+			    {
+			    	zaehlerOutputer=zaehlerOutputer+1; 
+			    	sys4sim.internal_model.Outputer outputer = new sys4sim.internal_model.Outputer();
+			    	outputer.setName("outputer"+String.valueOf(zaehlerOutputer));
+			    	outputer.setId(IDErzeugen(8,9));			    	
+					tempTable.put("outputer"+String.valueOf(zaehlerOutputer), outputer);
+			    	
+					Hashtable<String, ModelElement> tempTable2 = new Hashtable<String, ModelElement>();
+			    	int zz=0;
+					for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+			    	{
+			    		zz=zz+1;
+			    		Connector s = i.next();		
+			   
+			    		tempTable2.put("connector"+String.valueOf(zz), s);
+			    		
+						outputer.getOut().add(s);
+						s.setSource(outputer);
+			 	        s.setSourceName(outputer.getName());
+			 	       
+			 	       		    		
+			    	}
+			    	//((ModelBlock)element).getOut().remove(s); da in iterator fehler
+			    	for(String s : tempTable2.keySet()){
+			       		ModelElement m = tempTable2.get(s);
+			       		if (((ModelBlock)element).getOut().remove(m)); }
+			    	//neuen Connektor erzeugen zwischen Element(out) und Outpurt(in)
+			    	sys4sim.internal_model.Connector con = new sys4sim.internal_model.Connector();
+			 	    con.setSource((ModelBlock)element);
+			 	    con.setSourceName(element.getName());
+			 	    con.setTarget((ModelBlock)outputer);
+			 	    con.setTargetName(outputer.getName());
+			 	    outputer.getIn().add(con);
+			 	    ((ModelBlock)element).getOut().add(con);
+			 	   tempTable.put("connectorout"+String.valueOf(zaehlerOutputer), con);
+    		    }
+    		}
+    	}
+    	for(String s : tempTable.keySet()){
+   		ModelElement m = tempTable.get(s);
+    	model.getElements().put(s,m);} 
+    	
+    	    	
+    }
+    
+    private static Element CreateRessourcepoolsNoDelayMode (Element EmbeddedObjects, Model model, Settings set)
+    {
+    	int zaehlerMachinePool =0;int zaehlerWorkerPool =0;int zaehlerTransporterPool =0;
+		for (ModelElement element : model.getElements().values()) 
+		{
+			if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+				
+				if (!((sys4sim.internal_model.Process)element).getResourcePools().isEmpty())
+			       { 
+					 Hashtable<ResourcePool, Integer> tablePools = new Hashtable<ResourcePool, Integer>();
+					 tablePools = ((sys4sim.internal_model.Process)element).getResourcePools();
+					 
+					 
+					 for(ResourcePool t : tablePools.keySet())
+					 {
+						 if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.MachinePool"))
+							{
+							zaehlerMachinePool = zaehlerMachinePool+1;
+							String name = "MachinePool";
+							int resourcesInPool=(((sys4sim.internal_model.MachinePool)t).getElements().size());
+							int needResources=(tablePools.get(t));
+							
+							if (t.getX()==0&&t.getY()==0)
+						    {
+								t.setX(element.getX()+10);
+								t.setY(element.getY()+50);
+						    }
+							
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerMachinePool,name,resourcesInPool,set);
+						    }
+						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.TransporterPool"))
+						{
+							zaehlerTransporterPool = zaehlerTransporterPool+1;
+							String name = "TransporterPool";
+							int resourcesInPool=(((sys4sim.internal_model.TransporterPool)t).getElements().size());
+							int needResources=(tablePools.get(t));
+							
+							if (element.getX()==0&&element.getY()==0)
+						    {
+								t.setX(element.getX()+10);
+								t.setY(element.getY()+50);
+						    }
+							
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerTransporterPool,name,resourcesInPool,set);
+					    }
+						else if (t.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.WorkerPool"))
+						{
+							zaehlerWorkerPool = zaehlerWorkerPool+1;
+							String name = "WorkerPool";
+							int resourcesInPool=(((sys4sim.internal_model.WorkerPool)t).getElements().size());
+							int needResources=(tablePools.get(t));
+							
+							if (element.getX()==0&&element.getY()==0)
+						    {
+								t.setX(element.getX()+10);
+								t.setY(element.getY()+50);
+						    }
+							
+							CreateResourcePool(EmbeddedObjects,(sys4sim.internal_model.ModelElement)t,zaehlerWorkerPool,name,resourcesInPool,set);
+						}
+						else System.out.println("Error: no valid RessourcePool");
+					 }
+					 
+			       }
+		}
+		return EmbeddedObjects;
+    }
+    
+    private static void ChangeModelforProtectiomode (Model model,Settings set)
+    {
+
+    	 
+    	 
+    	 
+		//Erzeuege Eingangsbuffer
+	     int zsourcebuffer =0;	
+	     //Model model2 = new Model();
+		 Hashtable <String, ModelElement> tableElem = new Hashtable<String, ModelElement>();
+	     tableElem = model.getElements();
+	     	    		 
+		 Hashtable<String, ModelElement> tempTable = new Hashtable<String, ModelElement>();
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+			 if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Source"))
+				{
+				 
+				    ArrayList<Connector> outList = new ArrayList<Connector>();
+					outList = ((ModelBlock)element).getOut();
+					 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+				     {
+						    //erzeuge Buffer
+						    zsourcebuffer+=1;
+						    sys4sim.internal_model.Queue queue = new sys4sim.internal_model.Queue();
+							queue.setCapacity(10000);
+							queue.setName("sourcebuffer"+String.valueOf(zsourcebuffer));
+							tempTable.put("sourcebuffer"+String.valueOf(zsourcebuffer), queue);
+				 	        // Connector abändern
+							Connector s = i.next();
+							ModelBlock z = s.getTarget();
+							z.getIn().remove(s);
+				 	        s.setTarget(queue);
+				 	        s.setTargetName(queue.getName());
+				 	        //neuen Connector zwischen Buffer und Elziel erzeugen
+				 	       sys4sim.internal_model.Connector con = new sys4sim.internal_model.Connector();
+				 	       con.setSource(queue);
+				 	       con.setSourceName(queue.getName());
+				 	       con.setTarget(z);
+				 	       con.setTargetName(z.getName());
+				 	       z.getIn().add(con);
+				 	      tempTable.put("Con"+String.valueOf(zsourcebuffer), con);
+				 	       //neues Teil in Buffer get.out schreiben
+				 	       queue.getOut().add(con);
+				        }					
+				}			    
+	        }
+	 
+	 
+		 for(String s : tempTable.keySet()){
+		 ModelElement m = tempTable.get(s);
+		 tableElem.put(s, m);}
+		 model.setElements(tableElem);
+	
+	 //erzeuge On Exit Code
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+               CreateFunction(element);
+	        
+	        }	
+    }
+    
+    private static void ChangeModelforProtectiomode2 (Model model,Settings set)
+    {
+    	
+    	System.out.println("-------Vorher-------");
+   	 for (ModelElement element : model.getElements().values()) 
+	        {
+   		 if (!element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
+				{
+			 System.out.println("---");
+			 System.out.println(element.getClass().getName());
+			 ArrayList<Connector> outList = new ArrayList<Connector>();
+			 outList = ((ModelBlock)element).getOut();
+			 int zz=0;
+			 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+		     {
+				 Connector con = i.next();
+				 System.out.println("Nr:"+zz+":"+con.getTarget().getClass().getName());
+		     }
+			 System.out.println("---");
+	         }}
+   	   System.out.println("-------Nachher-------");
+   	   
+  	
+   	   
+	     int zaehler =1;	int zaehlerqueue=0;
+	     
+		 Hashtable <String, ModelElement> tableElem = new Hashtable<String, ModelElement>();
+	     tableElem = model.getElements();
+	     
+	     	     	    		 
+		 Hashtable<String, ModelElement> tempTable = new Hashtable<String, ModelElement>();
+		 
+		 Hashtable<String, ModelElement> tempTableConnector = new Hashtable<String, ModelElement>();
+		 
+		 Hashtable<String, ModelElement> tempTableConnectorEntferntElement = new Hashtable<String, ModelElement>();
+		 
+		 Hashtable<String, ModelElement> tempTableElem = new Hashtable<String, ModelElement>();
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+			 if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+				{
+				    zaehlerqueue+=1;
+				    tempTableElem.put(element.getId(),element);
+				    ArrayList<Connector> outList = new ArrayList<Connector>();
+					outList = ((ModelBlock)element).getOut();
+										
+					//erzeuge Queue
+				    zaehler+=1;
+				    sys4sim.internal_model.Queue queue = new sys4sim.internal_model.Queue();
+					queue.setCapacity(1);
+					queue.setName("protectqueue"+String.valueOf(zaehlerqueue));
+					
+					 
+					
+					//Connectoren von Nachfolgeelemeneten versetzen, 
+					//Anfang Queue setzen Ende bleibt das selbe, weiterhin speichern der Connectoren um sie aus den Process zu nehmen
+					for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+				     {		zaehler+=1;
+						    Connector connector = i.next();
+						    connector.setSource(queue);
+							connector.setSourceName(queue.getName());
+							queue.getOut().add(connector);
+							tempTableConnector.put("ConZ"+String.valueOf(zaehler),connector);						    
+						    
+				     }
+					tempTable.put("protectqueuez"+String.valueOf(zaehler), queue);
+					
+					//Zwischenelemente in Liste zum löschen Einlagern
+					System.out.println("Halllllllo--------------------");
+					ModelElement zwischenelement = element;	
+					System.out.println("Elementname: "+element.getName());
+					for(String s : tempTableConnector.keySet())
+					{
+					
+					ModelElement m = tempTableConnector.get(s);
+					System.out.println(((Connector)m).getTarget().getName());
+					((ModelBlock)zwischenelement).getOut().remove(m);
+					
+					System.out.println("Halllllllo");
+					}
+					
+					
+					 ArrayList<Connector> outList2 = new ArrayList<Connector>();
+					 outList2 = ((ModelBlock)zwischenelement).getOut();
+					 int zz=0;
+					 for ( Iterator<Connector> i = outList2.iterator(); i.hasNext(); )
+				     {
+						 zz+=1;
+						 
+						 Connector con = i.next();
+						 System.out.println("Nr:"+zz+":"+con.getTarget().getClass().getName());
+						 System.out.println("Name: "+con.getTarget().getName());
+				     }
+					 
+					tempTableConnectorEntferntElement.put(zwischenelement.getId(),zwischenelement);
+					
+					
+					//erzeuge Connector von der Maschine zur Queue
+					sys4sim.internal_model.Connector con = new sys4sim.internal_model.Connector();
+					con.setSource((ModelBlock)element);
+			 	    con.setSourceName(element.getName());
+			 	    con.setTarget(queue);
+			 	    con.setTargetName(queue.getName());
+			 	    queue.getIn().add(con);
+			 	    if (((ModelBlock)element).getOut().add(con)) System.out.println("YOOOO");
+			 	    else System.out.println("NOOOOOOOO");
+			 	    tempTable.put("ConZZ"+String.valueOf(zaehler), con);
+			 	    
+			
+				}	
+						    
+	        }
+		 
+		 
+		 System.out.println("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	     for(String s : tableElem.keySet()){
+			 ModelElement m = tableElem.get(s);
+			 System.out.println(m.getClass().getName());}
+	     System.out.println("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	 
+		 for(String s : tempTable.keySet()){
+		 ModelElement m = tempTable.get(s);
+		 tableElem.put(s, m);}
+		 System.out.println("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	     for(String s : tableElem.keySet()){
+			 ModelElement m = tableElem.get(s);
+			 System.out.println(m.getClass().getName());}
+	     System.out.println("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		 model.setElements(tableElem);
+		 
+		 for (ModelElement element2 : model.getElements().values()) 
+	     {
+		 if (element2.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Hold"))
+				{
+			 System.out.println("Er ist da hilfe er ist da!!!!!!!!!!!!!!!!!!!");
+				}
+	     }
+		 
+		 for(String s : tempTableElem.keySet()){
+	     ModelElement m = tempTableElem.get(s);
+		 model.getElements().remove(s);}		 
+		 
+		 for(String s : tempTableConnectorEntferntElement.keySet()){
+		 ModelElement m = tempTableConnectorEntferntElement.get(s);
+		 model.getElements().put(s,m);} 
+		 
+		
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+			 if (!element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
+			 {
+			 System.out.println("---");
+			 System.out.println(element.getClass().getName());
+			 System.out.println("Name: "+element.getName());
+			 ArrayList<Connector> outList = new ArrayList<Connector>();
+			 outList = ((ModelBlock)element).getOut();
+			 int zz=0;
+			 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+		     {
+				 Connector con = i.next();
+				 System.out.println("Nr:"+zz+":"+con.getTarget().getClass().getName());
+				 System.out.println("Name: "+con.getTarget().getName());
+		     }
+			 System.out.println("---");
+	         }}
+	         
+	
+	 //erzeuge On Exit Code
+		 
+		 /*for (ModelElement element : model.getElements().values()) 
+	        {
+               CreateFunction(element);
+	        
+	        }	*/
+    }
+    
+    
+    private static void ChangeModelforProtectiomode2part2 (Model model,Settings set)
+    {
+    	
+    	System.out.println("-------Vorher-------");
+   	 for (ModelElement element : model.getElements().values()) 
+	        {
+   		 if (!element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
+				{
+			 System.out.println("---");
+			 System.out.println(element.getClass().getName());
+			 ArrayList<Connector> outList = new ArrayList<Connector>();
+			 outList = ((ModelBlock)element).getOut();
+			 int zz=0;
+			 for ( Iterator<Connector> i = outList.iterator(); i.hasNext(); )
+		     {
+				 Connector con = i.next();
+				 System.out.println("Nr:"+zz+":"+con.getTarget().getClass().getName());
+		     }
+			 System.out.println("---");
+	         }}
+   	   System.out.println("-------Nachher-------");
+   	   
+   	   
+	     int zaehler =0;	int zaehlerhold =0;
+	     
+		 Hashtable <String, ModelElement> tableElem2 = new Hashtable<String, ModelElement>();
+	     tableElem2 = model.getElements();
+	     	    		 
+		 Hashtable<String, ModelElement> tempTable2 = new Hashtable<String, ModelElement>();
+		 
+		 Hashtable<String, ModelElement> tempTableConnector2 = new Hashtable<String, ModelElement>();
+		 
+		 Hashtable<String, ModelElement> tempTableConnectorEntferntElement2 = new Hashtable<String, ModelElement>();
+		 
+		 Hashtable<String, ModelElement> tempTableElem2 = new Hashtable<String, ModelElement>();
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+			 if (element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Process"))
+				{
+				 
+				    tempTableElem2.put(element.getId(),element);
+				    ArrayList<Connector> inList = new ArrayList<Connector>();
+					inList = ((ModelBlock)element).getIn();
+										
+					//erzeuge Queue
+				    zaehler+=1;
+				    zaehlerhold+=1;
+				    sys4sim.internal_model.Hold hold = new sys4sim.internal_model.Hold();
+					hold.setName("protecthold"+String.valueOf(zaehlerhold));
+					
+					//Connectoren von Nachfolgeelemeneten versetzen, 
+					//Anfang Queue setzen Ende bleibt das selbe, weiterhin speichern der Connectoren um sie aus den Process zu nehmen
+					for ( Iterator<Connector> i = inList.iterator(); i.hasNext(); )
+				     {		zaehler+=1;
+						    Connector connector = i.next();
+						    connector.setTarget(hold);
+							connector.setTargetName(hold.getName());
+							hold.getIn().add(connector);
+							tempTableConnector2.put("Con"+String.valueOf(zaehler),connector);						    
+						    
+				     }
+					tempTable2.put("protectqueue"+String.valueOf(zaehler), hold);
+					
+					//Zwischenelemente in Liste zum löschen Einlagern
+					System.out.println("Halllllllo--------------------");
+					ModelElement zwischenelement = element;	
+					System.out.println("Elementname: "+element.getName());
+					for(String s : tempTableConnector2.keySet())
+					{
+					
+					ModelElement m = tempTableConnector2.get(s);
+					System.out.println(((Connector)m).getSource().getName());
+					((ModelBlock)zwischenelement).getIn().remove(m);
+					
+					System.out.println("Halllllllo");
+					}
+					
+					
+					 ArrayList<Connector> inList2 = new ArrayList<Connector>();
+					 inList2 = ((ModelBlock)zwischenelement).getIn();
+					 int zz=0;
+					 for ( Iterator<Connector> i = inList2.iterator(); i.hasNext(); )
+				     {
+						 zz+=1;
+						 
+						 Connector con = i.next();
+						 System.out.println("Nr:"+zz+":"+con.getSource().getClass().getName());
+						 System.out.println("Name: "+con.getSource().getName());
+				     }
+					 
+					tempTableConnectorEntferntElement2.put(zwischenelement.getId(),zwischenelement);
+					
+					
+					//erzeuge Connector von Hold zur Maschine
+					sys4sim.internal_model.Connector con = new sys4sim.internal_model.Connector();
+					con.setTarget((ModelBlock)element);
+			 	    con.setTargetName(element.getName());
+			 	    con.setSource(hold);
+			 	    con.setSourceName(hold.getName());
+			 	    hold.getOut().add(con);
+			 	    if (((ModelBlock)element).getIn().add(con)) System.out.println("YOOOO");
+			 	    else System.out.println("NOOOOOOOO");
+			 	    tempTable2.put("Con"+String.valueOf(zaehler), con);
+			 	    
+			
+				}	
+						    
+	        }
+	 
+	 
+		 for(String s : tempTable2.keySet()){
+		 ModelElement m = tempTable2.get(s);
+		 tableElem2.put(s, m);}
+		 model.setElements(tableElem2);
+		 
+		 
+		 for(String s : tempTableElem2.keySet()){
+	     ModelElement m = tempTableElem2.get(s);
+		 model.getElements().remove(s);}		 
+		 
+		 for(String s : tempTableConnectorEntferntElement2.keySet()){
+		 ModelElement m = tempTableConnectorEntferntElement2.get(s);
+		 model.getElements().put(s,m);} 
+		 
+		 for (ModelElement element : model.getElements().values()) 
+	        {
+			 if (!element.getClass().getName().equalsIgnoreCase("sys4sim.internal_model.Connector"))
+			 {
+			 System.out.println("---");
+			 System.out.println(element.getClass().getName());
+			 System.out.println("Name: "+element.getName());
+			 ArrayList<Connector> inList = new ArrayList<Connector>();
+			 inList = ((ModelBlock)element).getOut();
+			 int zz=0;
+			 for ( Iterator<Connector> i = inList.iterator(); i.hasNext(); )
+		     {
+				 Connector con = i.next();
+				 System.out.println("Nr:"+zz+":"+con.getTarget().getClass().getName());
+				 System.out.println("Name: "+con.getTarget().getName());
+		     }
+			 System.out.println("---");
+	         }}
+	         
+	
+	 //erzeuge On Exit Code
+		 
+		 /*for (ModelElement element : model.getElements().values()) 
+	        {
+               CreateFunction(element);
+	        
+	        }	*/
+    }
+    
     
     private static String readFileContent (File oldFile) {
 	    StringBuilder sb = new StringBuilder();
