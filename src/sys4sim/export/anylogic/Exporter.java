@@ -486,7 +486,6 @@ public class Exporter implements ExportInterface {
    	 // Sonderzeichen eleminieren
    	 String file2 = file.toString();
    	 Sonderzeichen(file2);
-			 
 	}
 	
 	//Methode zur Erzeugung der einzelnen Konnektoren
@@ -1453,7 +1452,7 @@ public class Exporter implements ExportInterface {
     {
     	try
 		 {
-			File oldFile = new File("C:/Dokumente und Einstellungen/Administrator/workspace/sys4sim/test.xml");
+			File oldFile = new File("/Users/einbecker/Documents/workspace/sys4sim/test.xml");
 		    File newFile = new File(file);
 		    newFile.createNewFile();
 		    String sb =readFileContent(oldFile);
@@ -1629,7 +1628,7 @@ public class Exporter implements ExportInterface {
     		probability1 = s.getConditionString();
     		else probability2 = s.getConditionString();
     	}
-	    
+	    // TODO An dieser Stelle ist probability2 unbesetzt
 	    char test = probability2.charAt(0); double prob1; double prob2;
 	    if (test == 101 )
 	    {	   
