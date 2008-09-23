@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 
@@ -94,6 +95,25 @@ public class Importer extends DefaultHandler{
 						}
 					}
 					if (add) {
+						if (connector.getTarget() instanceof Process) {
+							Process process = (Process) connector.getTarget();
+							if (processQueues.get(process) != null) {
+								Queue queue = new Queue();
+								queue.setName("q" + queueCounter++);
+								connector.setTarget(queue);
+								Connector connector2 = new Connector();
+								connector2.setSource(queue);
+								connector2.setTarget(process);
+								connector2.getSource().getOut().add(connector);
+								connector2.getTarget().getIn().add(connector);
+								connector2.setId("connector_" + connectorCounter++);
+								model.getElements().put(connector2.getId(), connector);
+								System.out.println("Generating Connector between " + 
+										connector2.getSource().getName() + " and " 
+										+ connector2.getTarget().getName());
+							}
+						}
+
 						if (edge.getGuard() != null) {
 							connector.setConditionString(edge.getGuard());
 							System.out.println("Generating Connector between " + 
@@ -105,6 +125,7 @@ public class Importer extends DefaultHandler{
 								connector.getSource().getName() + " and " 
 								+ connector.getTarget().getName());
 						}
+						
 						connector.getSource().getOut().add(connector);
 						connector.getTarget().getIn().add(connector);
 						
@@ -219,6 +240,9 @@ public class Importer extends DefaultHandler{
 	}
 	
 	private static int poolCounter = 0;
+	private static int queueCounter = 0;
+	
+	private static Hashtable<Process, Queue> processQueues = new Hashtable<Process, Queue>();
 	
 	private static void generateResourcePool(Process process,
 			OwnedAttribute attribute) {
@@ -241,7 +265,9 @@ public class Importer extends DefaultHandler{
 			if (att.getType() == null) {
 				
 			} else if (att.getType().isSubclassOf("SimulationQueue")) {
-				// TODO
+				Queue queue = new Queue();
+				processQueues.put(process, queue);
+				System.out.println("Adding Queue to following Process. ");
 			} else {
 				Resource resource = addAttribute(process, att);
 				addToPools(resource, mp, tp, wp);
