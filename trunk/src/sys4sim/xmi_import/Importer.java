@@ -117,6 +117,7 @@ public class Importer extends DefaultHandler{
 								if (!exists) {
 									queueConnectors.add(connector2);
 									queue.setName("q" + queueCounter++);
+									queue.setId(queue.getName());
 									connector.setTarget(queue);
 									queue.getIn().add(connector);
 									connector2.setSource(queue);
