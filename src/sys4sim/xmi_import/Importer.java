@@ -140,10 +140,6 @@ public class Importer extends DefaultHandler{
 		InitialNode initial = expandActivities(first);
 		ArrayList<Edge> edges = initial.getEdges(new ArrayList<Edge>(), new ArrayList<GeneralNode>());
 		
-		for (Edge edge : edges) {
-			System.out.println("Edge: " + edge.getXmiID());
-		}
-		
 		rates = Rate.expandRates(rates, edges);
 		
 		System.out.println("rates: "+ rates.size());
@@ -188,6 +184,7 @@ public class Importer extends DefaultHandler{
 					block.setResourcePools(ps.getResourcePools());
 					int idNr =  processSystemInstanceCounter.get(ps.getName());
 					block.setName(ps.getName() + "_" + idNr);
+					block.setId(ps.getId() + "_" + idNr);
 					processSystemInstanceCounter.put(ps.getName(), idNr + 1);
 					//TODO block.setName("");
 					model.getElements().put(idOfOwner, block);
@@ -285,7 +282,14 @@ public class Importer extends DefaultHandler{
 			
 			if (connector.getTarget() instanceof Process) {
 				Process process = (Process) connector.getTarget();
-				if (processQueues.get(process) != null) {
+				boolean contains = false;
+				
+				for (String string : processQueues) {
+					if (process.getId().contains(string)) {
+						contains = true;
+					}
+				}
+				if (contains) {
 					boolean exists = false;
 
 					Connector connector2 = new Connector();
@@ -515,7 +519,7 @@ public class Importer extends DefaultHandler{
 					cleanEdges.add(newEdge);
 				}
 			} else if (edge.getTarget() == null) {
-				System.out.println("foo");
+				//System.out.println("foo");
 			} else if (edge.getTarget().getClass().equals(ForkNode.class)) {
 				ArrayList<Edge> newEdges = new ArrayList<Edge>();
 				for (Edge outgoing : ((ForkNode) edge.getTarget()).getOutgoing()) {
@@ -567,7 +571,7 @@ public class Importer extends DefaultHandler{
 	private static int poolCounter = 0;
 	private static int queueCounter = 0;
 	
-	private static Hashtable<ProcessSystem, Queue> processQueues = new Hashtable<ProcessSystem, Queue>();
+	private static ArrayList<String> processQueues = new ArrayList<String>();
 	
 	private static void generateResourcePool(ProcessSystem process,
 			OwnedAttribute attribute) {
@@ -588,8 +592,8 @@ public class Importer extends DefaultHandler{
 				
 			} else if (att.getType().isSubclassOf("SimulationQueue")) {
 				Queue queue = new Queue();
-				processQueues.put(process, queue);
-				System.out.println("Adding Queue to following Process. ");
+				processQueues.add(process.getId());
+				System.out.println("Adding Queue to system: " + process.getName());
 			} else {
 				Resource resource = addAttribute(process, att);
 				addToPools(resource, mp, tp, wp);
@@ -607,7 +611,7 @@ public class Importer extends DefaultHandler{
 			process.getResourcePools().put(tp, tp.getElements().size());
 			//model.getElements().put(tp.getId(), tp);
 		}
-		System.out.println("foo");
+		
 	}
 
 

@@ -111,7 +111,7 @@ public class Edge extends XmiObjectWithName implements java.lang.Cloneable {
 		if (Importer.readElements.contains(newID)) {
 			return (Edge) Importer.getElement(newID);
 		} else {
-			System.out.println("Expanding edge: " + newID);
+			//System.out.println("Expanding edge: " + newID);
 			Edge edge = this.clone();
 			edge.setXmiID(newID);
 			Importer.addElement(edge);
