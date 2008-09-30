@@ -2,7 +2,7 @@ package sys4sim.xmi_import;
 
 import java.util.Hashtable;
 
-public class Edge extends XmiObjectWithName {
+public class Edge extends XmiObjectWithName implements java.lang.Cloneable {
 	private String xmiType;
 	private String visibility;
 	private String sourceString;
@@ -90,5 +90,37 @@ public class Edge extends XmiObjectWithName {
 	}
 	public void setInPartition(ActivityPartition inPartition) {
 		this.inPartition = inPartition;
+	}
+	
+	public Edge clone() {
+		Edge toReturn = null;
+		try {
+			toReturn = (Edge) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		return toReturn;
+	}
+	
+	public Edge expand(int expandID) {
+		String newID = this.getXmiID() + "_" + expandID;
+		if (Importer.readElements.contains(newID)) {
+			return (Edge) Importer.getElement(newID);
+		} else {
+			System.out.println("Expanding edge: " + newID);
+			Edge edge = this.clone();
+			edge.setXmiID(newID);
+			Importer.addElement(edge);
+			edge.setTarget(edge.getTarget().expand(expandID));
+			
+		//	((Node)edge.getTarget()).getIncoming().remove(this);
+		//	((Node)edge.getTarget()).getIncoming().add(edge);
+			
+			return edge;
+		}
 	}
 }

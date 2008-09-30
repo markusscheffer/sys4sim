@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Package xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.1.0/UML" xmi:id="f16dbb37-b452-49fc-bb88-5f3da70b1196" name="images">
+  <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="23b79ecb-0e13-4f7e-9ff5-cd4a7840dc75" source="crossContainmentOwner">
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="c6751496-369e-4d5f-8d7c-ee7f70405732" key="parentResourceUri" value="platform:/resource/sys4sim/src/model.auml"/>
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="4f67e910-0048-4dd2-bea9-a0d625f92a4d" key="parentId" value="6d429e79-6e02-42bf-8839-078237fe7046"/>
+  </eAnnotations>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="78a0b0e3-e517-4113-89c7-c2adf07f295f">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="544b2f32-47dd-4977-80b1-e3f75c80daf8" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_H_ZGcB5CEduWqeK3CXfnzA"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_3xRZYR4-EduWqeK3CXfnzA"/>
+  </profileApplication>
+</uml:Package>

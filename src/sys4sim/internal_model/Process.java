@@ -24,6 +24,9 @@ public class Process extends ModelBlock {
 	public Hashtable<ResourcePool, Integer> getResourcePools() {
 		return resourcePools;
 	}
+	public void setResourcePools(Hashtable<ResourcePool, Integer> pools) {
+		 resourcePools = pools;
+	}
 	public int getCapacity() {
 		return capacity;
 	}

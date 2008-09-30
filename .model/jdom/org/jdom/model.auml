@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Package xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.1.0/UML" xmi:id="79d142f5-fe3a-42b8-a881-f24351dffa7e" name="jdom">
+  <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="b7e3844d-243a-4c17-9afe-c003191aabd3" source="crossContainmentOwner">
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="b2d34ab8-79bb-43d5-ab3e-f3dc9494469a" key="parentResourceUri" value="platform:/resource/sys4sim/.model/jdom/org/model.auml"/>
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="b5cf28b7-8de1-4cac-9d0e-f2a1c2d673b0" key="parentId" value="af75051a-2207-4fa4-add3-a9230df1f414"/>
+  </eAnnotations>
+  <packagedElement xmi:type="uml:Class" xmi:id="9562f750-7f48-4190-ae8a-e276a184399c" name="Attribute"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="85883b19-9692-4970-a74f-3a3ea35ba700" name="AttributeList" visibility="package"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="48d53f71-1b83-43f6-bc6a-9e400d0e9dc1" name="CDATA"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="8e80db93-7bea-4441-afc8-5ac427c21b49" name="Comment"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="f36177e8-3503-4b35-b6ab-fe92041cb8d3" name="Content" isAbstract="true"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="ac1a42b0-3c2c-4943-aed9-499e8ae2c018" name="ContentList" visibility="package" isLeaf="true">
+    <nestedClassifier xmi:type="uml:Class" xmi:id="12b87e0b-502c-4063-9e20-b09d903ac9ad" name="FilterListIterator" visibility="package"/>
+    <nestedClassifier xmi:type="uml:Class" xmi:id="2bb53787-4f63-4e5e-9853-133884e82d38" name="FilterList" visibility="package"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="db2a0514-1856-4895-80b2-825d229b4d39" name="DataConversionException"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="3a695a80-dca7-42c5-bd8a-512fb24fb583" name="DefaultJDOMFactory"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="6a3cbb94-3881-4d61-8e4d-2162eff4c00a" name="DescendantIterator" visibility="package"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="f76f8cdf-baf7-4346-965a-20fc5a29a1c6" name="DocType"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="cad40ad3-aa44-4859-973b-2f32d7f8a744" name="Document"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="f2b01abc-87b5-4376-9eaa-85007010cbd7" name="Element"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="b777ce62-c028-49c4-8c30-445aa49a2a3b" name="EntityRef"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="595d52bc-91c2-4896-877d-c2fe63bc5f9c" name="FilterIterator" visibility="package"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="eb0fd58a-68ec-4ca5-a7cf-b56d06c19056" name="IllegalAddException"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="8fbf2037-27a2-4b02-8bf4-07cbc8f1b99c" name="IllegalDataException"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="fd4da812-1270-46d0-94cd-c56f477b2429" name="IllegalNameException"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="e1045c3c-5ca3-4df6-83eb-8bd301612f1b" name="IllegalTargetException"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="8d859814-331a-4594-bc09-0c2db7248417" name="JDOMException"/>
+  <packagedElement xmi:type="uml:Interface" xmi:id="f29808b3-7916-4e97-bee5-45457284cdb3" name="JDOMFactory" isAbstract="true"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="998c60ec-862c-4d37-a578-c17ee644ea54" name="Namespace" isLeaf="true"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="1df5e758-2343-469f-a7f2-fb71e810ce18" name="NamespaceKey" visibility="package" isLeaf="true"/>
+  <packagedElement xmi:type="uml:Interface" xmi:id="ad50c509-b5d6-4a86-926b-1219a14ab126" name="Parent" isAbstract="true"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="c52befd7-f11c-4f2c-93e3-e83f286ee8e2" name="ProcessingInstruction"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="3d6d1c18-8e9c-4f76-b031-d8d67e642fdb" name="Text"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="cba3c408-3183-4c47-b203-d04426f1fa41" name="UncheckedJDOMFactory"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="06260331-642b-42ee-b919-3ee93660bb79" name="Verifier" isLeaf="true"/>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="6493181d-e1d9-4f37-a6a6-b9123c300de2">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="aa480419-65ae-455f-ae3f-6e6cffe4c78b" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_H_ZGcB5CEduWqeK3CXfnzA"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_3xRZYR4-EduWqeK3CXfnzA"/>
+  </profileApplication>
+</uml:Package>

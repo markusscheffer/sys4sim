@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Package xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.1.0/UML" xmi:id="e2d1efee-d71e-4f68-a146-b9a0a548e2e5" name="sys4sim">
+  <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="9a35951b-8537-4efc-b2af-eb42bb88ed97" source="crossContainmentOwner">
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="027e9746-c80a-439e-a334-691839294917" key="parentResourceUri" value="platform:/resource/sys4sim/src/model.auml"/>
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="e6d6825d-c1aa-4e79-a088-2efd629e287f" key="parentId" value="6d429e79-6e02-42bf-8839-078237fe7046"/>
+  </eAnnotations>
+  <packagedElement xmi:type="uml:Package" href="internal_model/model.auml#92389490-6ce6-4e21-88b1-eb4fbcc43c78"/>
+  <packagedElement xmi:type="uml:Package" href="export/model.auml#5e418a5b-c5a2-413e-b2fb-2de5844cca3e"/>
+  <packagedElement xmi:type="uml:Package" href="gui/model.auml#a917b62f-acc0-4255-a7ac-20b4b9628c51"/>
+  <packagedElement xmi:type="uml:Package" href="xmi_import/model.auml#578c6126-9d67-45a1-a5b3-eb9046f824fd"/>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="c3923470-02dd-4618-885f-31dcb342b827">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="05055b40-6745-411e-99c8-146d62b645ea" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_H_ZGcB5CEduWqeK3CXfnzA"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_3xRZYR4-EduWqeK3CXfnzA"/>
+  </profileApplication>
+</uml:Package>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Package xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.1.0/UML" xmi:id="5e418a5b-c5a2-413e-b2fb-2de5844cca3e" name="export">
+  <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="19c0ff51-195d-4cca-abce-3c24122e36fc" source="crossContainmentOwner">
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="d2cde829-323b-4d60-9fd3-34e058ae1d61" key="parentResourceUri" value="platform:/resource/sys4sim/src/sys4sim/model.auml"/>
+    <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="20ff8901-6a03-4fc8-bfe1-2cfe8646454e" key="parentId" value="e2d1efee-d71e-4f68-a146-b9a0a548e2e5"/>
+  </eAnnotations>
+  <packagedElement xmi:type="uml:Package" href="anylogic/model.auml#5acd8392-5be1-4892-b57d-ab4b62891df1"/>
+  <packagedElement xmi:type="uml:Package" href="simcron/model.auml#d6f81e0e-03f6-4461-804c-4301c2e25048"/>
+  <packagedElement xmi:type="uml:Interface" xmi:id="c55efd65-2469-4141-8e5d-152ec0248457" name="ExportInterface">
+    <ownedOperation xmi:type="uml:Operation" xmi:id="836d8709-212e-4fab-82cb-df585d001b54" name="writeFile" visibility="public" isAbstract="true">
+      <ownedParameter xmi:type="uml:Parameter" xmi:id="73c52630-132f-42cf-8126-b4091e33ebc5" name="model">
+        <type xmi:type="uml:Class" href="../internal_model/model.auml#a8baa430-3fd7-4978-8f6c-4621d4cfa5e4"/>
+      </ownedParameter>
+      <ownedParameter xmi:type="uml:Parameter" xmi:id="f0c1cc0b-47cc-4ee7-9abc-c201e414a4c1" name="file">
+        <type xmi:type="uml:Class" href="../../../../../plugin/com.gentleware.uml2.jre50/model/allJarsFlat/java/io/model.auml#io.[C]File"/>
+      </ownedParameter>
+    </ownedOperation>
+  </packagedElement>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="248435ce-4621-4aa3-b514-43b7da6640ce">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="2855f8b7-f847-4b1e-94f5-86e68c4091b5" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_H_ZGcB5CEduWqeK3CXfnzA"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_3xRZYR4-EduWqeK3CXfnzA"/>
+  </profileApplication>
+</uml:Package>

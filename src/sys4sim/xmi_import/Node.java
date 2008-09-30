@@ -89,4 +89,6 @@ public class Node extends GeneralNode {
 	public void setResult(Result result) {
 		this.result = result;
 	}
+	
+
 }

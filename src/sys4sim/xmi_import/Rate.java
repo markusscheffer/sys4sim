@@ -1,5 +1,6 @@
 package sys4sim.xmi_import;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,11 +11,42 @@ import sys4sim.internal_model.NormalDistribution;
 import sys4sim.internal_model.PoissonDistribution;
 import sys4sim.internal_model.TriangularDistribution;
 
-public class Rate extends XmiObject {
+public class Rate extends XmiObject implements java.lang.Cloneable {
 	String baseActivityEdgeString;
 	Edge baseActivityEdge;
 	sys4sim.internal_model.Rate rate;
-	
+		
+	public Rate clone() {
+		Rate toReturn = null;
+		try {
+			toReturn = (Rate) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return toReturn;
+	}
+		
+	public static ArrayList<Rate> expandRates (ArrayList<Rate> oldRates, ArrayList<Edge> edges) {
+		ArrayList<Rate> rates = new ArrayList<Rate>();
+		for (Rate rate : oldRates) {
+			for (Edge edge : edges) {
+				if (edge.getXmiID().contains(rate.getBaseActivityEdge().getXmiID())) {
+					Rate newRate = rate.clone();
+					newRate.setXmiID(rate.getXmiID() + "_" + edge.getXmiID().substring(12));
+					//System.out.println("Cloning Rate: " + rate.getXmiID());
+					rates.add(newRate);
+					
+				} else {
+					//System.out.println("Edge ID    : " + edge.getXmiID());
+					//System.out.println("Rate - Edge: " + rate.getBaseActivityEdge().getXmiID());
+				}
+			}
+		}
+			
+		return rates;
+	}
+		
 	public void unstringRelations(Hashtable<String, XmiObject> hash) {
 		baseActivityEdge = (Edge) hash.get(baseActivityEdgeString);
 	}

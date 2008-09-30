@@ -16,4 +16,9 @@ public class Transporter extends Resource {
 	public void setSpeed(double speed) {
 		this.speed = speed;
 	}
+	
+	
+	public String toString() {
+		return "Transporter (" + this.getName() + ")";
+	}
 }

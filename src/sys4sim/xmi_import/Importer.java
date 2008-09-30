@@ -26,6 +26,8 @@ public class Importer extends DefaultHandler{
 	private GUI gui;
 	private static Model model;
 	
+	private static Hashtable<String, ProcessSystem> processSystems = new Hashtable<String, ProcessSystem>();
+	
 	public static Model getModel() {
 		return model;
 	}
@@ -64,6 +66,67 @@ public class Importer extends DefaultHandler{
 	    return getModel();
 	}
 	
+	public static ArrayList<String> readElements = new ArrayList<String>();
+	
+	static int expandID = 0;
+	
+	public static InitialNode expandActivities(Activity activity) {
+		System.out.println("Expanding activity (level " + expandID + "): " + activity.getName());
+		InitialNode initial = activity.getFirst();
+		initial =  (InitialNode) initial.expand(expandID++);
+		//System.out.println("Finished expanding activity: " + activity.getName());
+		return initial;
+	}
+	
+	public static ArrayList<ActivityFinalNode> expandSubActivities(Activity activity, GeneralNode node, int superID) {
+		System.out.println("Expanding activity (level " + expandID + "): " + activity.getName());
+		InitialNode initial = activity.getFirst();
+
+		initial =  (InitialNode) initial.expand(expandID++);
+
+
+		//System.out.println("Finished expanding activity: " + activity.getName());
+		return initial.getAFNs(new ArrayList<Object>());
+	}
+
+	public static ArrayList<XmiObject> elements = new ArrayList<XmiObject>();
+	
+	public static XmiObject getElement(String id) {
+		for (XmiObject object : elements) {
+				if (object.getXmiID().equals(id)) {
+					return object;
+				}
+			}
+		return null;
+	}
+	
+	public static void addElement(XmiObject object) {
+		// TODO Auto-generated method stub
+		elements.add(object);
+		readElements.add(object.getXmiID());
+	}
+	
+	private static ArrayList<Edge> connect(GeneralNode source, ArrayList<Edge> outgoing) {
+		ArrayList<Edge> edges = new ArrayList<Edge>();
+		
+		for (Edge edge : outgoing) {
+			Edge newEdge = connect(source, edge.getTarget());
+			newEdge.setGuard(edge.getGuard());
+			newEdge.setInPartition(edge.getInPartition());
+			edges.add(newEdge);
+		}
+
+		return edges;
+	}
+
+	private static Edge connect(GeneralNode source, GeneralNode target) {
+		Edge edge = new Edge();
+		edge.setSource(source);
+		edge.setTarget(target);
+		edge.setXmiType("uml:ControlFlow");
+		return edge;
+	}
+
 	private static ArrayList<Connector> queueConnectors = new ArrayList<Connector>();
 	
 	public static void generateModel (
@@ -73,6 +136,16 @@ public class Importer extends DefaultHandler{
 			ArrayList<Association> associations) {
 		model = new Model();
 		model.setName(system.getName());
+
+		InitialNode initial = expandActivities(first);
+		ArrayList<Edge> edges = initial.getEdges(new ArrayList<Edge>(), new ArrayList<GeneralNode>());
+		
+		for (Edge edge : edges) {
+			System.out.println("Edge: " + edge.getXmiID());
+		}
+		
+		rates = Rate.expandRates(rates, edges);
+		
 		System.out.println("rates: "+ rates.size());
 		System.out.println("attributes: " + system.getAttributes().size());
 		for (OwnedAttribute attribute : system.getAttributes()) {
@@ -81,68 +154,22 @@ public class Importer extends DefaultHandler{
 		for (Association association : associations) {
 			addIfEntityDescription(model, association);
 		}
+		addRates(model, rates);
+
+		addEdges(model, edges);
+		Model model2 = model;
+		System.out.println("");
+	}
+	
+	private static Hashtable<String, Integer> processSystemInstanceCounter = new Hashtable<String, Integer>();
+
+	private static void addRates(Model model, ArrayList<Rate> rates) {
 		
-		ArrayList<Edge> edges = eliminateForkNodes(first.getEdges());
-		for (Edge edge : edges) {
-			if (edge.getXmiType().equals("uml:ControlFlow")) {
-				Connector connector = connect(edge.getSource(), edge.getTarget(), model);
-				if (!connector.getName().equals("void")) {
-					boolean add = true;
-					for (ModelElement con : model.getElements().values()) {
-						if (con.getClass().equals(Connector.class)) {
-							if (((Connector)con).getSource().equals(connector.getSource()) &&
-									((Connector)con).getTarget().equals(connector.getTarget())) {
-								add = false;
-							}
-						}
-					}
-					if (add) {
-						if (connector.getTarget() instanceof Process) {
-							Process process = (Process) connector.getTarget();
-							if (processQueues.get(process) != null) {
-								boolean exists = false;
+		for (ProcessSystem ps : processSystems.values()) {
+			processSystemInstanceCounter.put(ps.getName(), 0);
 
-								Connector connector2 = new Connector();
-								Queue queue = new Queue();
-								
-								for (Connector queueConnector : queueConnectors) {
-									if (queueConnector.getTarget().equals(process)) {
-										exists = true;
-										connector2 = queueConnector;
-										queue = (Queue) connector2.getSource();
-										connector.setTarget(queue);
-										queue.getIn().add(connector);
-									}
-								}
-								if (!exists) {
-									queueConnectors.add(connector2);
-									queue.setName("q" + queueCounter++);
-									queue.setId(queue.getName());
-									connector.setTarget(queue);
-									queue.getIn().add(connector);
-									connector2.setSource(queue);
-									connector2.setTarget(process);
-									connector2.getSource().getOut().add(connector2);
-									connector2.getTarget().getIn().add(connector2);
-									connector2.setId("connector_" + connectorCounter++);
-									model.addConnector(connector2);
-								}
-							}
-						}
-
-						if (edge.getGuard() != null) {
-							connector.setConditionString(edge.getGuard());
-							
-						}
-						
-						connector.getSource().getOut().add(connector);
-						connector.getTarget().getIn().add(connector);
-						
-						model.addConnector(connector);
-					}
-				}
-			}
 		}
+		
 		for (Rate rate : rates) {
 			Node source = (Node) rate.getBaseActivityEdge().getSource();
 			
@@ -151,27 +178,312 @@ public class Importer extends DefaultHandler{
 				//TODO: Hack - why first?
 				source = (Node) source.getIncoming().get(0).getSource();
 			}
-			
-			String idOfOwner = source.getInPartition().getRepresents().getXmiID();
-			ModelBlock block = (ModelBlock) model.getElements().get(idOfOwner);
-			if (block.getClass().equals(Process.class)) {
-				((Process)block).setProcessingRate(rate.getRate());
-			} else if (block.getClass().equals(Source.class)) {
-				Entity entity = new Entity();
-				//TODO: Check for entity types
-				((Source)block).getEntities().put(entity, rate.getRate());
+			if (source instanceof DecisionNode) {
+			} else {
+				String idOfOwner = source.getInPartition().getRepresents().getXmiID();
+				if (processSystems.containsKey(idOfOwner)) {
+					ProcessSystem ps = processSystems.get(idOfOwner);
+					Process block = new Process();
+					block.setProcessingRate(rate.getRate());
+					block.setResourcePools(ps.getResourcePools());
+					int idNr =  processSystemInstanceCounter.get(ps.getName());
+					block.setName(ps.getName() + "_" + idNr);
+					processSystemInstanceCounter.put(ps.getName(), idNr + 1);
+					//TODO block.setName("");
+					model.getElements().put(idOfOwner, block);
+					System.out.println("Setting Rate of " + block.getName() + " to: " +
+							rate.getRate().toString());
+				} else {
+				
+					ModelBlock block = (ModelBlock) model.getElements().get(idOfOwner);
+					if (block instanceof Process) {
+						((Process)block).setProcessingRate(rate.getRate());
+					} else if (block instanceof Source) {
+						Entity entity = new Entity();
+						//TODO: Check for entity types
+						((Source)block).getEntities().put(entity, rate.getRate());
+					} else {
+					
+						System.out.println("Rate cannot be set...");
+					}
+					System.out.println("Setting Rate of " + block.getName() + " to: " +
+							rate.getRate().toString());
+				}
 			}
-			System.out.println("Setting Rate of " + block.getName() + " to: " +
-					rate.getRate().toString());
 		}
 	}
+	
+	private static int edgeCloneCounter = 0;
+	
+	private static void addEdges (Model model, ArrayList<Edge> edges) {
+		ArrayList<Connector> connectors = new ArrayList<Connector>();
+		ArrayList<Edge> realEdges = new ArrayList<Edge>();
+		ArrayList<Edge> forkEdges = new ArrayList<Edge>();
+		ArrayList<Edge> decisionEdges = new ArrayList<Edge>();
+		ArrayList<Edge> possibleEdges = new ArrayList<Edge>();
 
+		for (Edge edge : edges) {
+			if (edge.getSource() instanceof ForkNode) {
+				forkEdges.add(edge);
+			} else if (edge.getSource() instanceof DecisionNode) {
+				decisionEdges.add(edge);
+			} else if (edge.getSource() instanceof CallBehaviorAction) {
+				possibleEdges.add(edge);
+			}
+		}
+		while (possibleEdges.size() > 0) {
+			Edge edge = possibleEdges.get(0);
+			possibleEdges.remove(edge);
+				
+				if (edge.getTarget() instanceof CallBehaviorAction) {
+					if (((Node)edge.getSource()).getInPartition().getRepresents().equals(
+							((Node)edge.getTarget()).getInPartition().getRepresents())) {
+						//Start and End are in same partition
+						continue;
+					} else {
+						//Start and End are in other partitions
+						realEdges.add(edge);
+						continue;
+					}
+				}
+				if (edge.getTarget() instanceof ForkNode) {
+					for (Edge edge2 : forkEdges) {
+						if (edge.getTarget().getXmiID().contains(edge2.getSource().getXmiID())) {
+							Edge edge3 = edge2.clone();
+							edge3.setXmiID(edge2.getXmiID() + "_e" + edgeCloneCounter++);
+							edge3.setSource(edge.getSource());
+							possibleEdges.add(edge3);
+						}
+					}
+				}
+				if (edge.getTarget() instanceof DecisionNode) {
+					for (Edge edge2 : decisionEdges) {
+						if (edge.getTarget().getXmiID().contains(edge2.getSource().getXmiID())) {
+							Edge edge3 = edge2.clone();
+							edge3.setXmiID(edge2.getXmiID() + "_e" + edgeCloneCounter++);
+							edge3.setSource(edge.getSource());
+							possibleEdges.add(edge3);
+						}
+					}
+				}
+				
+				
+			} 
+	addEdgesToModel(model, realEdges);
+	}
+	
+	
+	private static void addEdgesToModel(Model model, ArrayList<Edge> edges) {
+	
+		for (Edge edge : edges) {
+			Node sourceNode = ((Node)edge.getSource());
+			Node targetNode = ((Node)edge.getTarget());
+			Connector connector = connect(sourceNode, targetNode, model);
+			
+			
+			connector.setConditionString(edge.getGuard());
+			
+			if (connector.getTarget() instanceof Process) {
+				Process process = (Process) connector.getTarget();
+				if (processQueues.get(process) != null) {
+					boolean exists = false;
+
+					Connector connector2 = new Connector();
+					Queue queue = new Queue();
+					
+					for (Connector queueConnector : queueConnectors) {
+						if (queueConnector.getTarget().equals(process)) {
+							exists = true;
+							connector2 = queueConnector;
+							queue = (Queue) connector2.getSource();
+							connector.setTarget(queue);
+							queue.getIn().add(connector);
+						}
+					}
+
+					if (!exists) {
+						queueConnectors.add(connector2);
+						queue.setName("q" + queueCounter++);
+						queue.setId(queue.getName());
+						connector.setTarget(queue);
+						queue.getIn().add(connector);
+						connector2.setSource(queue);
+						connector2.setTarget(process);
+						connector2.getSource().getOut().add(connector2);
+						connector2.getTarget().getIn().add(connector2);
+						connector2.setId("connector_" + connectorCounter++);
+						model.addConnector(connector2);
+					}
+				}
+			}
+
+
+			if (edge.getGuard() != null) {
+				connector.setConditionString(edge.getGuard());
+				
+			}
+			
+			connector.getSource().getOut().add(connector);
+			connector.getTarget().getIn().add(connector);
+			
+			model.addConnector(connector);
+		}
+	
+	}
+
+		/*
+		for (Edge edge : edges) {
+	
+			if (edge.getXmiType().equals("uml:ControlFlow")) {
+				
+				Node sourceNode = ((Node)edge.getSource());
+				Node targetNode = ((Node)edge.getTarget());
+				
+				while (targetNode instanceof ForkNode) {
+					targetNode = (Node) targetNode.getOutgoing().get(0).getTarget();
+				}
+				
+				if (sourceNode instanceof ForkNode) {
+					break;
+				}
+				
+				OwnedAttribute source = sourceNode.getInPartition().getRepresents();
+				OwnedAttribute target = targetNode.getInPartition().getRepresents();
+				
+				while (target.equals(source)) {
+					targetNode = (Node) targetNode.getOutgoing().get(0).getTarget();
+					target = targetNode.getInPartition().getRepresents();
+				}
+				Connector connector = connect(sourceNode, targetNode, model);
+				boolean add = true;
+				for (ModelElement con : model.getElements().values()) {
+					if (con instanceof Connector) {
+						if (((Connector)con).getSource().equals(connector.getSource()) &&
+								((Connector)con).getTarget().equals(connector.getTarget())) {
+							add = false;
+						}
+					}
+				}
+				if (add) {
+					if (edge.getGuard() != null) {
+						connector.setConditionString(edge.getGuard());
+						System.out.println("Generating Connector between " + 
+								connector.getSource().getName() + " and " + 
+								connector.getTarget().getName() +
+								" [condition: " + connector.getConditionString() + "]");
+					} else {
+						System.out.println("Generating Connector between " + 
+							connector.getSource().getName() + " and " 
+							+ connector.getTarget().getName());
+					}
+					connector.getSource().getOut().add(connector);
+					connector.getTarget().getIn().add(connector);
+					
+					model.getElements().put(connector.getId(), connector);
+				}
+
+			}
+		}
+			
+	}
+	//edges = eliminateForkNodes(edges);
+	/*for (Edge edge : edges) {
+		if (edge.getXmiType().equals("uml:ControlFlow")) {
+			Connector connector = connect(edge.getSource(), edge.getTarget(), model);
+			if (!connector.getName().equals("void")) {
+				boolean add = true;
+				for (ModelElement con : model.getElements().values()) {
+					if (con.getClass().equals(Connector.class)) {
+						if (((Connector)con).getSource().equals(connector.getSource()) &&
+								((Connector)con).getTarget().equals(connector.getTarget())) {
+							add = false;
+						}
+					}
+				}
+				if (add) {
+					if (connector.getTarget() instanceof Process) {
+						Process process = (Process) connector.getTarget();
+						if (processQueues.get(process) != null) {
+							boolean exists = false;
+
+							Connector connector2 = new Connector();
+							Queue queue = new Queue();
+							
+							for (Connector queueConnector : queueConnectors) {
+								if (queueConnector.getTarget().equals(process)) {
+									exists = true;
+									connector2 = queueConnector;
+									queue = (Queue) connector2.getSource();
+									queue.setId(queue.getName());
+									connector.setTarget(queue);
+									queue.getIn().add(connector);
+								}
+							}
+							if (!exists) {
+								queueConnectors.add(connector2);
+								queue.setName("q" + queueCounter++);
+								connector.setTarget(queue);
+								queue.getIn().add(connector);
+								connector2.setSource(queue);
+								connector2.setTarget(process);
+								connector2.getSource().getOut().add(connector2);
+								connector2.getTarget().getIn().add(connector2);
+								connector2.setId("connector_" + connectorCounter++);
+								model.addConnector(connector2);
+							}
+						}
+					}
+
+					if (edge.getGuard() != null) {
+						connector.setConditionString(edge.getGuard());
+						
+					}
+					
+					connector.getSource().getOut().add(connector);
+					connector.getTarget().getIn().add(connector);
+					
+					model.addConnector(connector);
+				}
+			}
+		}*/
+
+	private static int i = 0;
 	private static int connectorCounter = 0;
 
 	public static Connector connect (GeneralNode source, GeneralNode target, Model model){
 		
-		OwnedAttribute sourceAtt = ((Node) source).getInPartition().getRepresents();
-		OwnedAttribute targetAtt = ((Node) target).getInPartition().getRepresents();
+		OwnedAttribute sourceAtt;
+		
+		if (source instanceof DecisionNode) {
+			sourceAtt = null;
+		} else {
+			sourceAtt = ((Node) source).getInPartition().getRepresents();
+		}
+		OwnedAttribute targetAtt;
+		if ((target instanceof DecisionNode)) { // || (target instanceof ActivityFinalNode)) {
+			targetAtt = null;
+		} else {
+			 targetAtt = ((Node) target).getInPartition().getRepresents();
+		}
+		
+		if (targetAtt == null && sourceAtt == null) {
+			if (source.getXmiID().equals(target.getXmiID())) {
+				Connector connector = new Connector();
+				connector.setName("void");
+				return connector;
+			}
+			else {
+				System.out.println("Connector error! This should not happen, but it should be ok for now.");
+				Connector connector = new Connector();
+				connector.setName("void");
+				return connector;
+			}
+		} else if (sourceAtt == null) {
+			sourceAtt = targetAtt;
+		} else if (targetAtt == null) {
+			targetAtt = sourceAtt;
+		}
+		
 		
 		if (!sourceAtt.equals(targetAtt)) {
 			Connector connector = new Connector();
@@ -236,8 +548,12 @@ public class Importer extends DefaultHandler{
 			block = new Source();
 			((Source) block).setTypeID(classOfAtt.getXmiID());
 		} else if (classOfAtt.isSubclassOf("SimulationSingleProcess")){
-			block = new Process();
-			generateResourcePool((Process) block, attribute);
+			ProcessSystem ps = new ProcessSystem(id);
+			ps.setName(attribute.getName());
+			generateResourcePool(ps, attribute);
+			System.out.println("Generating Processing System (" + attribute.getName() + ")");
+			processSystems.put(id, ps);
+			return;
 		} else {
 			block = new ModelBlock();
 			System.out.println("Suitable ModelBlock not found: " + classOfAtt.getName());
@@ -251,9 +567,9 @@ public class Importer extends DefaultHandler{
 	private static int poolCounter = 0;
 	private static int queueCounter = 0;
 	
-	private static Hashtable<Process, Queue> processQueues = new Hashtable<Process, Queue>();
+	private static Hashtable<ProcessSystem, Queue> processQueues = new Hashtable<ProcessSystem, Queue>();
 	
-	private static void generateResourcePool(Process process,
+	private static void generateResourcePool(ProcessSystem process,
 			OwnedAttribute attribute) {
 		MachinePool mp = new MachinePool();
 		mp.setId("mp" + poolCounter);
@@ -315,7 +631,7 @@ public class Importer extends DefaultHandler{
 	}
 	
 
-	private static Resource addAttribute(Process process, OwnedAttribute att) {
+	private static Resource addAttribute(ProcessSystem process, OwnedAttribute att) {
 		if (att.getType().isSubclassOf("SimulationMachine")) {
 			Machine machine = new Machine();
 			setName(machine, att);
@@ -383,4 +699,6 @@ public class Importer extends DefaultHandler{
 		return null;
 
 	}
+
+
 }

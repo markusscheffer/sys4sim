@@ -10,4 +10,8 @@ public class Worker extends Resource {
 	public void setSpeed(double speed) {
 		this.speed = speed;
 	}
+	
+	public String toString() {
+		return "Worker (" + this.getName() + ")";
+	}
 }
