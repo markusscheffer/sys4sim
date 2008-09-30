@@ -22,16 +22,10 @@ public class GeneralNode extends XmiObjectWithName implements java.lang.Cloneabl
 		if (Importer.readElements.contains(newID)) {
 			return (GeneralNode) Importer.getElement(newID);
 		} else {
-			/*
-			ArrayList<Edge> edges = (ArrayList<Edge>) ((Node)node).getIncoming().clone();
 			
-			for (Edge edge : edges) {
-				((Node)node).getIncoming().remove(edge);
-				((Node)node).getIncoming().add(Importer.getElement(edge.getXmiID() + "_" + ))
-			}*/
 			GeneralNode node = this.clone();
-			System.out.println("Expanding node: " + node.getName() + 
-					" (" + node.getClass().getSimpleName() + ", "+ newID + ")");
+		//	System.out.println("Expanding node: " + node.getName() + 
+		//			" (" + node.getClass().getSimpleName() + ", "+ newID + ")");
 			node.setXmiID(node.getXmiID() + "_" + expandID);
 			Importer.addElement(node);
 			
