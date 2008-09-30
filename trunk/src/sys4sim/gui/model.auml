@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:java_profile="http:///schemas/java_profile/0" xmlns:uml="http://www.eclipse.org/uml2/2.1.0/UML" xsi:schemaLocation="http:///schemas/java_profile/0 pathmap://GW_JAVA_PROFILES/Java.profile.uml#_H_ZGcB5CEduWqeK3CXfnzA">
+  <uml:Package xmi:id="a917b62f-acc0-4255-a7ac-20b4b9628c51" name="gui">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="f7c6595e-7bf5-46e8-a2cb-5a1161d24d00" source="crossContainmentOwner">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="fa30eaad-56cf-45bc-99ee-99829375a79d" key="parentResourceUri" value="platform:/resource/sys4sim/src/sys4sim/model.auml"/>
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="4a89780c-d9f9-4a47-b50e-4389548082d9" key="parentId" value="e2d1efee-d71e-4f68-a146-b9a0a548e2e5"/>
+    </eAnnotations>
+    <packagedElement xmi:type="uml:Class" xmi:id="31554132-1714-40a8-a728-69840dc80053" name="Main">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="8974fde1-342a-4196-b721-bed3bf06655d" name="gui" visibility="private" isStatic="true" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="ac65b973-3446-401d-9c9f-79ea7dcc2d8d"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="4b6f5044-d687-495b-88b6-6e693dd27963" name="main" visibility="public" isStatic="true">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="d25f06f9-b83c-412c-9e1b-a42d2103b986" name="args">
+          <type xmi:type="uml:Class" href="../../../../../plugin/com.gentleware.uml2.jre50/model/allJarsFlat/java/lang/model.auml#lang.[C]String"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" value="*"/>
+          <lowerValue xmi:type="uml:LiteralInteger"/>
+        </ownedParameter>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="a30ad3bc-a245-47ee-9858-e7645bcbe07a" name="setGui" visibility="public" isStatic="true">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="f8bf964d-87ca-4846-84cb-71b6923c2b81" name="gui" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="b98f93c3-a5b8-4f65-a63d-953893ab6d4d" name="getGui" visibility="public" isStatic="true">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="b6093f58-bae5-4f8b-8e70-7175be7be305" name="return" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" name="GUI">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="0e7130c5-fdf0-4631-8b82-dd8a86c29a6e" name="display" visibility="private" association="466bd42d-1620-4428-b6f0-f7d891e7c8b3">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#8491c4c6-ce15-4a6e-b91b-e56ce3305c8d"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="c5d33d01-cbb9-4094-8a58-74aa3378811e" name="shell" visibility="private" association="f66deb4f-4a97-46a3-a847-44d6cb85a03d">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#45b0a826-4ee3-4dfc-849b-bb4b64e3605f"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="9bab1b6d-4ac7-4bdc-80c1-8eb58b2d3881" name="messageLabel" visibility="private" association="c7177312-8bb9-485f-9d67-ac387a2bab16">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#d06a2949-c214-4871-98c3-dbad623f50ee"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="d042e0c8-02b1-42d0-96b0-fd1bd7b7e069" name="importButton" visibility="private" association="e604f095-cdbd-4d1c-90c7-50657df6a1dc">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#a1e5caa0-f29f-4d05-a1a3-e63a3993f1b2"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="54a2ab12-c209-4688-b8f0-50e05e97c444" name="anylogicExportButton" visibility="private" association="587e958c-9084-4cd0-8196-e6703facf5c4">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#a1e5caa0-f29f-4d05-a1a3-e63a3993f1b2"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="b1d5c62e-3c6d-4dc5-9bd6-237fcdace499" name="importFileDialog" visibility="private" association="efc4f168-ca53-4f42-9e61-e4e9a8b0b185">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#73bf5384-73a4-49e9-980b-a4cfe95d7cf4"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="0b8ea461-f9a8-4392-8dc2-80614b754c12" name="importer" visibility="private" association="90e1488b-fa7b-4afe-8118-68497143e293">
+        <type xmi:type="uml:Class" href="../xmi_import/model.auml#15547e99-337a-4012-a673-d9531eafa2b1"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="90931890-0d71-4156-937e-7617a700ae3e" name="model" visibility="private" association="6085442d-1a25-4c16-9e19-3154f3419b17">
+        <type xmi:type="uml:Class" href="../internal_model/model.auml#a8baa430-3fd7-4978-8f6c-4621d4cfa5e4"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="5ef3f7f8-2cc3-4008-bf55-1810390c043c" name="anylogicExportFileDialog" visibility="private" association="dd6c4fa3-f943-46dc-bd9f-585d0f0051dc">
+        <type xmi:type="uml:Class" href="../../../../swt-3/.model/swt/org/eclipse/swt/widgets/model.auml#73bf5384-73a4-49e9-980b-a4cfe95d7cf4"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="1c528a87-1e0b-4b72-95bd-b758db4e6a09" name="anylogicExporter" visibility="private" association="c0570350-4813-417d-84cb-de2b463b3881">
+        <type xmi:type="uml:Class" href="../export/anylogic/model.auml#48a8c043-bb17-4311-aca8-667d5567907e"/>
+      </ownedAttribute>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="e38489e0-8e8b-4651-b09e-e8b416d741eb" name="GUI" visibility="public">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="b650e509-cdda-454d-8180-e045be7a7c4e" name="return" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="24b06a53-d4c6-449f-9458-a89409aff903" name="message" visibility="public">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="99cb151f-e240-4791-9600-3cb6f385a14e" name="messageString">
+          <type xmi:type="uml:Class" href="../../../../../plugin/com.gentleware.uml2.jre50/model/allJarsFlat/java/lang/model.auml#lang.[C]String"/>
+        </ownedParameter>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="c4c24ae3-9166-41e2-9323-a23a8ee80d74" name="setImporter" visibility="public">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="9c4e122b-0fc4-46a5-b31c-a1dedc01e7f6" name="importer">
+          <type xmi:type="uml:Class" href="../xmi_import/model.auml#15547e99-337a-4012-a673-d9531eafa2b1"/>
+        </ownedParameter>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="693b05b5-858d-415c-ba4b-86bc305aa97d" name="importSysML" visibility="public">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="02906d37-97d5-4dc3-b1b9-5f80ba9bf4c3" name="filepath">
+          <type xmi:type="uml:Class" href="../../../../../plugin/com.gentleware.uml2.jre50/model/allJarsFlat/java/io/model.auml#io.[C]File"/>
+        </ownedParameter>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="c8631cd2-3705-4367-8124-9d08945620a2" name="exportAnylogic" visibility="public">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="a1fe505f-6e0a-495b-870c-949f1b7b65d4" name="filepath">
+          <type xmi:type="uml:Class" href="../../../../../plugin/com.gentleware.uml2.jre50/model/allJarsFlat/java/io/model.auml#io.[C]File"/>
+        </ownedParameter>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="ac65b973-3446-401d-9c9f-79ea7dcc2d8d" name="Main.gui_Ass" memberEnd="bda1a7cb-f553-40d5-9555-d563d4fb946e 8974fde1-342a-4196-b721-bed3bf06655d">
+      <ownedEnd xmi:type="uml:Property" xmi:id="bda1a7cb-f553-40d5-9555-d563d4fb946e" name="gui;default" type="31554132-1714-40a8-a728-69840dc80053" association="ac65b973-3446-401d-9c9f-79ea7dcc2d8d"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="466bd42d-1620-4428-b6f0-f7d891e7c8b3" name="GUI.display_Ass" memberEnd="0ffbcaae-9289-436a-b1ef-25fc5b17ec48 0e7130c5-fdf0-4631-8b82-dd8a86c29a6e">
+      <ownedEnd xmi:type="uml:Property" xmi:id="0ffbcaae-9289-436a-b1ef-25fc5b17ec48" name="display;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="466bd42d-1620-4428-b6f0-f7d891e7c8b3"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="f66deb4f-4a97-46a3-a847-44d6cb85a03d" name="GUI.shell_Ass" memberEnd="1c515f0e-67ba-4253-9e6f-447cf57ee929 c5d33d01-cbb9-4094-8a58-74aa3378811e">
+      <ownedEnd xmi:type="uml:Property" xmi:id="1c515f0e-67ba-4253-9e6f-447cf57ee929" name="shell;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="f66deb4f-4a97-46a3-a847-44d6cb85a03d"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="c7177312-8bb9-485f-9d67-ac387a2bab16" name="GUI.messageLabel_Ass" memberEnd="9c2d9d4e-be9f-4886-8d51-35ff51edcdfa 9bab1b6d-4ac7-4bdc-80c1-8eb58b2d3881">
+      <ownedEnd xmi:type="uml:Property" xmi:id="9c2d9d4e-be9f-4886-8d51-35ff51edcdfa" name="messageLabel;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="c7177312-8bb9-485f-9d67-ac387a2bab16"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="e604f095-cdbd-4d1c-90c7-50657df6a1dc" name="GUI.importButton_Ass" memberEnd="4941fe33-4d36-4223-9093-a5cb08b2f40f d042e0c8-02b1-42d0-96b0-fd1bd7b7e069">
+      <ownedEnd xmi:type="uml:Property" xmi:id="4941fe33-4d36-4223-9093-a5cb08b2f40f" name="importButton;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="e604f095-cdbd-4d1c-90c7-50657df6a1dc"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="587e958c-9084-4cd0-8196-e6703facf5c4" name="GUI.anylogicExportButton_Ass" memberEnd="40934bd3-f801-437a-865a-ca88fe311460 54a2ab12-c209-4688-b8f0-50e05e97c444">
+      <ownedEnd xmi:type="uml:Property" xmi:id="40934bd3-f801-437a-865a-ca88fe311460" name="anylogicExportButton;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="587e958c-9084-4cd0-8196-e6703facf5c4"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="efc4f168-ca53-4f42-9e61-e4e9a8b0b185" name="GUI.importFileDialog_Ass" memberEnd="8a63d83f-4d86-4da8-be00-00e73763aa13 b1d5c62e-3c6d-4dc5-9bd6-237fcdace499">
+      <ownedEnd xmi:type="uml:Property" xmi:id="8a63d83f-4d86-4da8-be00-00e73763aa13" name="importFileDialog;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="efc4f168-ca53-4f42-9e61-e4e9a8b0b185"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="90e1488b-fa7b-4afe-8118-68497143e293" name="GUI.importer_Ass" memberEnd="42a9521b-5b9f-45dc-bc47-3ce1da6d32c0 0b8ea461-f9a8-4392-8dc2-80614b754c12">
+      <ownedEnd xmi:type="uml:Property" xmi:id="42a9521b-5b9f-45dc-bc47-3ce1da6d32c0" name="importer;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="90e1488b-fa7b-4afe-8118-68497143e293"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="6085442d-1a25-4c16-9e19-3154f3419b17" name="GUI.model_Ass" memberEnd="c0df3dca-4e7a-4b3c-a62a-cab1fd16d3bb 90931890-0d71-4156-937e-7617a700ae3e">
+      <ownedEnd xmi:type="uml:Property" xmi:id="c0df3dca-4e7a-4b3c-a62a-cab1fd16d3bb" name="model;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="6085442d-1a25-4c16-9e19-3154f3419b17"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="dd6c4fa3-f943-46dc-bd9f-585d0f0051dc" name="GUI.anylogicExportFileDialog_Ass" memberEnd="8a4c420c-6851-4bb6-a09f-a9bad927e8a9 5ef3f7f8-2cc3-4008-bf55-1810390c043c">
+      <ownedEnd xmi:type="uml:Property" xmi:id="8a4c420c-6851-4bb6-a09f-a9bad927e8a9" name="anylogicExportFileDialog;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="dd6c4fa3-f943-46dc-bd9f-585d0f0051dc"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="c0570350-4813-417d-84cb-de2b463b3881" name="GUI.anylogicExporter_Ass" memberEnd="bc3bbffe-4666-4cd6-a9da-bcaa5cd349cd 1c528a87-1e0b-4b72-95bd-b758db4e6a09">
+      <ownedEnd xmi:type="uml:Property" xmi:id="bc3bbffe-4666-4cd6-a9da-bcaa5cd349cd" name="anylogicExporter;default" type="b03d3103-80aa-4806-91c5-60f7fdd0b2a5" association="c0570350-4813-417d-84cb-de2b463b3881"/>
+    </packagedElement>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="2884dce2-07fc-46ba-ba64-768359b79d9c">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="ae3197ab-2356-474e-8ebc-c933d8705a83" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_H_ZGcB5CEduWqeK3CXfnzA"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="pathmap://GW_JAVA_PROFILES/Java.profile.uml#_3xRZYR4-EduWqeK3CXfnzA"/>
+    </profileApplication>
+  </uml:Package>
+  <java_profile:create xmi:id="798f8d36-f5a9-47f0-aafc-5d83fac43a76" base_Operation="e38489e0-8e8b-4651-b09e-e8b416d741eb"/>
+</xmi:XMI>

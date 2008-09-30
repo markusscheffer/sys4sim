@@ -80,4 +80,25 @@ public class Activity extends PackagedElement {
 		
 	}
 	
+	public InitialNode getFirst() {
+		InitialNode in = new InitialNode();
+		for (Node node : this.getNodes()) {
+			if (node instanceof InitialNode) {
+				in = (InitialNode) node;
+				break;
+			}
+		}
+		return in;
+	}
+
+	public ArrayList<ActivityFinalNode> getAFN() {
+		ArrayList<ActivityFinalNode> afn = new ArrayList<ActivityFinalNode>();
+		for (GeneralNode node : this.getNodes()) {
+			if (node instanceof ActivityFinalNode) {
+				afn.add((ActivityFinalNode)node);
+			}
+		}
+		return afn;
+	}
+	
 }

@@ -36,7 +36,6 @@ public class ParsingHandler extends DefaultHandler {
 		ArrayList<Association> associations = new ArrayList<Association>();
 		
 		System.out.println("Finished reading of file.");
-	
 		for (XmiObject obj : objectHash.values()) {
 			
 			// turn string-ids into objects
@@ -60,6 +59,7 @@ public class ParsingHandler extends DefaultHandler {
 			// collect all Associations
 			if (obj instanceof Association) {
 				associations.add((Association) obj);
+			
 			}
 		}
 		System.out.println("Parsed all Classes and Activities.");
@@ -374,7 +374,11 @@ public void characters (char ch[], int start, int length) {
   }
   
   public CallBehaviorAction callBehaviorAction (Attributes atts) {
-	  return new CallBehaviorAction();
+	  CallBehaviorAction cba = new CallBehaviorAction();
+	  if (atts.getValue("behavior") != null) {
+		  cba.setBehaviorString(atts.getValue("behavior"));
+	  }
+	  return cba;
   }
   
   public ActivityFinalNode activityFinalNode (Attributes atts) {
@@ -478,7 +482,11 @@ public void characters (char ch[], int start, int length) {
 		  ap.setVisibility(atts.getValue("visibility"));
 		  ap.setNodeStrings(splitMultiple(atts.getValue("node")));
 		  ap.setRepresentsString(atts.getValue("represents"));
-		  ap.setEdgeStrings(splitMultiple(atts.getValue("edge")));
+		  if (atts.getValue("edge") != null) {
+			  ap.setEdgeStrings(splitMultiple(atts.getValue("edge")));
+		  } else {
+			  ap.setEdgeStrings(new ArrayList<String>());
+		  }
 		  return ap;
 	  } else {
 		  System.out.println("Group type not known: " + xmiType);
