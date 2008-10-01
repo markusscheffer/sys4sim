@@ -59,4 +59,13 @@ public class Model {
 			System.out.println(outString);
 		}
 	}
+	
+	public ModelBlock getElement(String xmiID) {
+		for (ModelElement element : this.getElements().values()) {
+			if (element.getId().contains(xmiID)) {
+				return (ModelBlock) element;
+			}
+		}
+		return null;
+	}
 }
