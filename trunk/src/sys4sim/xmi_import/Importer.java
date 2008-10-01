@@ -186,8 +186,7 @@ public class Importer extends DefaultHandler{
 					block.setName(ps.getName() + "_" + idNr);
 					block.setId(ps.getId() + "_" + idNr);
 					processSystemInstanceCounter.put(ps.getName(), idNr + 1);
-					//TODO block.setName("");
-					model.getElements().put(idOfOwner, block);
+					model.getElements().put(idOfOwner + "_" + idNr, block);
 					System.out.println("Setting Rate of " + block.getName() + " to: " +
 							rate.getRate().toString());
 				} else {
@@ -335,164 +334,17 @@ public class Importer extends DefaultHandler{
 	
 	}
 
-		/*
-		for (Edge edge : edges) {
-	
-			if (edge.getXmiType().equals("uml:ControlFlow")) {
-				
-				Node sourceNode = ((Node)edge.getSource());
-				Node targetNode = ((Node)edge.getTarget());
-				
-				while (targetNode instanceof ForkNode) {
-					targetNode = (Node) targetNode.getOutgoing().get(0).getTarget();
-				}
-				
-				if (sourceNode instanceof ForkNode) {
-					break;
-				}
-				
-				OwnedAttribute source = sourceNode.getInPartition().getRepresents();
-				OwnedAttribute target = targetNode.getInPartition().getRepresents();
-				
-				while (target.equals(source)) {
-					targetNode = (Node) targetNode.getOutgoing().get(0).getTarget();
-					target = targetNode.getInPartition().getRepresents();
-				}
-				Connector connector = connect(sourceNode, targetNode, model);
-				boolean add = true;
-				for (ModelElement con : model.getElements().values()) {
-					if (con instanceof Connector) {
-						if (((Connector)con).getSource().equals(connector.getSource()) &&
-								((Connector)con).getTarget().equals(connector.getTarget())) {
-							add = false;
-						}
-					}
-				}
-				if (add) {
-					if (edge.getGuard() != null) {
-						connector.setConditionString(edge.getGuard());
-						System.out.println("Generating Connector between " + 
-								connector.getSource().getName() + " and " + 
-								connector.getTarget().getName() +
-								" [condition: " + connector.getConditionString() + "]");
-					} else {
-						System.out.println("Generating Connector between " + 
-							connector.getSource().getName() + " and " 
-							+ connector.getTarget().getName());
-					}
-					connector.getSource().getOut().add(connector);
-					connector.getTarget().getIn().add(connector);
-					
-					model.getElements().put(connector.getId(), connector);
-				}
-
-			}
-		}
-			
-	}
-	//edges = eliminateForkNodes(edges);
-	/*for (Edge edge : edges) {
-		if (edge.getXmiType().equals("uml:ControlFlow")) {
-			Connector connector = connect(edge.getSource(), edge.getTarget(), model);
-			if (!connector.getName().equals("void")) {
-				boolean add = true;
-				for (ModelElement con : model.getElements().values()) {
-					if (con.getClass().equals(Connector.class)) {
-						if (((Connector)con).getSource().equals(connector.getSource()) &&
-								((Connector)con).getTarget().equals(connector.getTarget())) {
-							add = false;
-						}
-					}
-				}
-				if (add) {
-					if (connector.getTarget() instanceof Process) {
-						Process process = (Process) connector.getTarget();
-						if (processQueues.get(process) != null) {
-							boolean exists = false;
-
-							Connector connector2 = new Connector();
-							Queue queue = new Queue();
-							
-							for (Connector queueConnector : queueConnectors) {
-								if (queueConnector.getTarget().equals(process)) {
-									exists = true;
-									connector2 = queueConnector;
-									queue = (Queue) connector2.getSource();
-									queue.setId(queue.getName());
-									connector.setTarget(queue);
-									queue.getIn().add(connector);
-								}
-							}
-							if (!exists) {
-								queueConnectors.add(connector2);
-								queue.setName("q" + queueCounter++);
-								connector.setTarget(queue);
-								queue.getIn().add(connector);
-								connector2.setSource(queue);
-								connector2.setTarget(process);
-								connector2.getSource().getOut().add(connector2);
-								connector2.getTarget().getIn().add(connector2);
-								connector2.setId("connector_" + connectorCounter++);
-								model.addConnector(connector2);
-							}
-						}
-					}
-
-					if (edge.getGuard() != null) {
-						connector.setConditionString(edge.getGuard());
-						
-					}
-					
-					connector.getSource().getOut().add(connector);
-					connector.getTarget().getIn().add(connector);
-					
-					model.addConnector(connector);
-				}
-			}
-		}*/
-
-	private static int i = 0;
 	private static int connectorCounter = 0;
 
 	public static Connector connect (GeneralNode source, GeneralNode target, Model model){
 		
-		OwnedAttribute sourceAtt;
-		
-		if (source instanceof DecisionNode) {
-			sourceAtt = null;
-		} else {
-			sourceAtt = ((Node) source).getInPartition().getRepresents();
-		}
-		OwnedAttribute targetAtt;
-		if ((target instanceof DecisionNode)) { // || (target instanceof ActivityFinalNode)) {
-			targetAtt = null;
-		} else {
-			 targetAtt = ((Node) target).getInPartition().getRepresents();
-		}
-		
-		if (targetAtt == null && sourceAtt == null) {
-			if (source.getXmiID().equals(target.getXmiID())) {
-				Connector connector = new Connector();
-				connector.setName("void");
-				return connector;
-			}
-			else {
-				System.out.println("Connector error! This should not happen, but it should be ok for now.");
-				Connector connector = new Connector();
-				connector.setName("void");
-				return connector;
-			}
-		} else if (sourceAtt == null) {
-			sourceAtt = targetAtt;
-		} else if (targetAtt == null) {
-			targetAtt = sourceAtt;
-		}
-		
+		OwnedAttribute sourceAtt = ((Node) source).getInPartition().getRepresents();
+		OwnedAttribute targetAtt = ((Node) target).getInPartition().getRepresents();
 		
 		if (!sourceAtt.equals(targetAtt)) {
 			Connector connector = new Connector();
-			connector.setSource((ModelBlock)model.getElements().get(sourceAtt.getXmiID()));
-			connector.setTarget((ModelBlock)model.getElements().get(targetAtt.getXmiID()));
+			connector.setSource((ModelBlock)model.getElement(sourceAtt.getXmiID()));
+			connector.setTarget((ModelBlock)model.getElement(targetAtt.getXmiID()));
 			connector.setId("connector_" + connectorCounter);
 			connectorCounter++;
 			return connector;
