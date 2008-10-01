@@ -32,12 +32,16 @@ public class GUI {
 	 private Button anylogicChoiceButton2;
 	 private Button anylogicChoiceButton3;
 	 private Button anylogicDelayButton;
+	 private Button simcronExportButton;
 	 private Settings set = new Settings();
 	 private FileDialog importFileDialog;
 	 private Importer importer;
 	 private Model model;
 	 private FileDialog anylogicExportFileDialog;
+	 private FileDialog simcronExportFileDialog;
 	 private sys4sim.export.anylogic.Exporter anylogicExporter = new sys4sim.export.anylogic.Exporter();
+	 
+	 private sys4sim.export.simcron.ExportToSimcron simcronExporter = new sys4sim.export.simcron.ExportToSimcron();
 	 
 	 public GUI(){
 		 display = new Display();
@@ -48,7 +52,9 @@ public class GUI {
 		 importFileDialog = new FileDialog(shell, SWT.OPEN);
 		 importButton = new Button(shell, SWT.PUSH);
 		 anylogicExportButton = new Button(shell, SWT.PUSH);
+		 simcronExportButton = new Button(shell, SWT.PUSH);
 		 anylogicExportFileDialog = new FileDialog(shell, SWT.SAVE);
+		 simcronExportFileDialog = new FileDialog(shell, SWT.SAVE);
 		 
 		 
 		 anylogicChoiceButton = new Button(shell, SWT.CHECK);
@@ -70,7 +76,7 @@ public class GUI {
 
 		 importButton.setText("SysML-Modell importieren...");
 		 importButton.setSize(220,30);
-		 importButton.setLocation(50, 100);
+		 importButton.setLocation(200, 50);
 		 importButton.addSelectionListener(new SelectionAdapter() { 
 			  public void widgetSelected(SelectionEvent e) { 
 				   importSysML(new File(importFileDialog.open())); 
@@ -83,6 +89,15 @@ public class GUI {
 		 anylogicExportButton.addSelectionListener(new SelectionAdapter() { 
 			  public void widgetSelected(SelectionEvent e) { 
 				   exportAnylogic(new File(anylogicExportFileDialog.open())); 
+				  }
+		 });
+		 
+		 simcronExportButton.setText("Simcron exportieren...");
+		 simcronExportButton.setSize(220,30);
+		 simcronExportButton.setLocation(50, 100);
+		 simcronExportButton.addSelectionListener(new SelectionAdapter() { 
+			  public void widgetSelected(SelectionEvent e) { 
+				   exportSimcron(new File(simcronExportFileDialog.open())); 
 				  }
 		 });
 		 
@@ -150,6 +165,12 @@ public class GUI {
 	public void exportAnylogic(File filepath) {
 		
 		anylogicExporter.writeFile(model, filepath, set);
+	}
+	
+	
+    public void exportSimcron(File filepath) {
+		
+		simcronExporter.writeFile(model, filepath, set);
 	}
 	
 	public void anylogicChoiceSet(int choice) {
