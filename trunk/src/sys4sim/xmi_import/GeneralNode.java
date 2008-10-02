@@ -4,10 +4,17 @@ import java.util.ArrayList;
 
 public class GeneralNode extends XmiObjectWithName implements java.lang.Cloneable {
 
+	@SuppressWarnings("unchecked")
 	public GeneralNode clone() {
 		GeneralNode toReturn = null;
 		try {
 			toReturn = (GeneralNode) super.clone();
+			if (toReturn instanceof Node) {
+				Node node = (Node) toReturn;
+				node.setIncoming((ArrayList<Edge>)node.getIncoming().clone());
+				node.setOutgoing((ArrayList<Edge>)node.getOutgoing().clone());
+				toReturn = (GeneralNode) node;
+			}
 		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -18,6 +25,8 @@ public class GeneralNode extends XmiObjectWithName implements java.lang.Cloneabl
 	}
 	
 	public GeneralNode expand(int expandID) {
+		System.out.println("Expanding node: " + this.getName() + "(" + this.getXmiID() + 
+				", " + this.getClass().getSimpleName() + ")");
 		String newID = this.getXmiID() + "_" + expandID;
 		if (Importer.readElements.contains(newID)) {
 			return (GeneralNode) Importer.getElement(newID);
@@ -34,47 +43,33 @@ public class GeneralNode extends XmiObjectWithName implements java.lang.Cloneabl
 				Activity sub = ((CallBehaviorAction)node).getBehavior();
 				ArrayList<ActivityFinalNode> afns = Importer.expandSubActivities(sub, node, expandID);
 				int i = 0;
+				
 				for (Edge outerEdge : ((Node)node).getOutgoing()) {
-					i++;
-					((Node)node).getOutgoing().remove(outerEdge);
 					for (ActivityFinalNode afn : afns) {
-						i++;
-						for (Edge innerEdge : afn.getIncoming()) {
-							i++;
-							afn.getIncoming().remove(innerEdge);
-							Edge newEdge = new Edge();
-							newEdge.setXmiID(innerEdge.getXmiID() + "_" + i);
-							newEdge.setSource(innerEdge.getSource());
-							newEdge.setTarget(outerEdge.getTarget());
-							if (outerEdge.getGuard() != null) {
-								newEdge.setGuard(outerEdge.getGuard());
-							}
-							newEdge.setXmiType(outerEdge.getXmiType());
-							((Node)node).getOutgoing().add(newEdge);
-							afn.getIncoming().add(newEdge);
-							//System.out.println("Expanding over boundaries.");
-						}
+						Edge edge = new Edge(); //outerEdge.clone();
+						
+						Node nodeBefore = (Node) afn.getIncoming().get(0).getSource();
+						edge.setSource(nodeBefore);
+						nodeBefore.getOutgoing().clear();
+						nodeBefore.getOutgoing().add(edge);
+						
+						Node nodeAfter = (Node) outerEdge.getTarget();
+						edge.setTarget(nodeAfter);
+						edge.expand(expandID, nodeBefore);
+						//nodeAfter.getIncoming().clear();
+						//nodeAfter.getIncoming().add(edge);
+						
 						
 					}
 				}
-				
-				ArrayList<Edge> edges = new ArrayList<Edge>();
-				
-				if (this instanceof Node) {
-					for (Edge edge : ((Node)node).getOutgoing()) {
-						edges.add(edge.expand(expandID));
-					}
-					((Node)node).setOutgoing(edges);
-				}
 				return sub.getFirst();
 			}
-			
-			
+		
 			ArrayList<Edge> edges = new ArrayList<Edge>();
 		
 			if (this instanceof Node) {
 				for (Edge edge : ((Node)node).getOutgoing()) {
-					edges.add(edge.expand(expandID));
+					edges.add(edge.expand(expandID, (Node) node));
 				}
 				((Node)node).setOutgoing(edges);
 			}
