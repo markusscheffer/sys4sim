@@ -184,6 +184,16 @@ public class Importer extends DefaultHandler{
 				source = (Node) source.getIncoming().get(0).getSource();
 			}
 			if (source instanceof DecisionNode) {
+				ModelBlock block = (ModelBlock) model.getElement(
+					((Node)((Node)rate.getBaseActivityEdge().getTarget()).getOutgoing().get(1).getTarget()).getInPartition().getRepresents().getXmiID());
+				
+				
+					
+					Entity entity = new Entity();
+					//TODO: Check for entity types
+					((Source)block).getEntities().put(entity, rate.getRate());
+					System.out.println("Setting Rate of " + block.getName() + " to: " +
+							rate.getRate().toString());
 			} else {
 				String idOfOwner = source.getInPartition().getRepresents().getXmiID();
 				if (processSystems.containsKey(idOfOwner)) {
