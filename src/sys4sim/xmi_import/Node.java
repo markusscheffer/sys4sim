@@ -3,6 +3,8 @@ package sys4sim.xmi_import;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import sys4sim.internal_model.Process;
+
 public class Node extends GeneralNode {
 	private String xmiType;
 	private String visibility;
@@ -14,7 +16,16 @@ public class Node extends GeneralNode {
 	private ArrayList<Edge> outgoing = new ArrayList<Edge>();
 	private ArrayList<Edge> incoming = new ArrayList<Edge>();
 	private ActivityPartition inPartition;
+	private Process process;
 	
+	public Process getProcess() {
+		return process;
+	}
+
+	public void setProcess(Process block) {
+		this.process = block;
+	}
+
 	public void unstringRelations (Hashtable<String, XmiObject> hash) {
 		for (String outgoingString : outgoingStrings) {
 			Edge edge = (Edge) hash.get(outgoingString);

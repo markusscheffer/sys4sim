@@ -34,6 +34,7 @@ public class Rate extends XmiObject implements java.lang.Cloneable {
 				if (edge.getXmiID().contains(rate.getBaseActivityEdge().getXmiID())) {
 					Rate newRate = rate.clone();
 					newRate.setXmiID(rate.getXmiID() + "_" + edge.getXmiID().substring(12));
+					newRate.setBaseActivityEdge(edge);
 					//System.out.println("Cloning Rate: " + rate.getXmiID());
 					rates.add(newRate);
 					

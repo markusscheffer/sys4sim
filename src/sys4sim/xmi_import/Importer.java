@@ -20,7 +20,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import sys4sim.gui.GUI;
 import sys4sim.internal_model.*;
 import sys4sim.internal_model.Process;
-
+import java.util.Stack;
 
 public class Importer extends DefaultHandler{
 	private GUI gui;
@@ -84,6 +84,11 @@ public class Importer extends DefaultHandler{
 
 		initial =  (InitialNode) initial.expand(expandID++);
 
+		Edge edge = ((Node)node).getIncoming().get(0);
+		Node target = ((Node)initial.getOutgoing().get(0).getTarget());
+		edge.setTarget(target);
+		target.getIncoming().clear();
+		target.getIncoming().add(edge);
 
 		//System.out.println("Finished expanding activity: " + activity.getName());
 		return initial.getAFNs(new ArrayList<Object>());
@@ -140,6 +145,8 @@ public class Importer extends DefaultHandler{
 		InitialNode initial = expandActivities(first);
 		ArrayList<Edge> edges = initial.getEdges(new ArrayList<Edge>(), new ArrayList<GeneralNode>());
 		
+
+		
 		rates = Rate.expandRates(rates, edges);
 		
 		System.out.println("rates: "+ rates.size());
@@ -159,6 +166,8 @@ public class Importer extends DefaultHandler{
 	
 	private static Hashtable<String, Integer> processSystemInstanceCounter = new Hashtable<String, Integer>();
 
+	//private static Hashtable<String, Process> processes = new Hashtable<String, Process>();
+	
 	private static void addRates(Model model, ArrayList<Rate> rates) {
 		
 		for (ProcessSystem ps : processSystems.values()) {
@@ -180,6 +189,7 @@ public class Importer extends DefaultHandler{
 				if (processSystems.containsKey(idOfOwner)) {
 					ProcessSystem ps = processSystems.get(idOfOwner);
 					Process block = new Process();
+					source.setProcess(block);
 					block.setProcessingRate(rate.getRate());
 					block.setResourcePools(ps.getResourcePools());
 					int idNr =  processSystemInstanceCounter.get(ps.getName());
@@ -343,8 +353,17 @@ public class Importer extends DefaultHandler{
 		
 		if (!sourceAtt.equals(targetAtt)) {
 			Connector connector = new Connector();
-			connector.setSource((ModelBlock)model.getElement(sourceAtt.getXmiID()));
-			connector.setTarget((ModelBlock)model.getElement(targetAtt.getXmiID()));
+			if (((Node) source).getProcess() != null) {
+				connector.setSource(((Node)source).getProcess());
+			} else {
+				connector.setSource((ModelBlock)model.getElement(sourceAtt.getXmiID()));
+			}
+			if (((Node) target).getProcess() != null) {
+				connector.setTarget(((Node)target).getProcess());
+			} else {
+				connector.setTarget((ModelBlock)model.getElement(targetAtt.getXmiID()));
+			}
+			
 			connector.setId("connector_" + connectorCounter);
 			connectorCounter++;
 			return connector;

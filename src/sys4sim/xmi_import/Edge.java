@@ -106,7 +106,9 @@ public class Edge extends XmiObjectWithName implements java.lang.Cloneable {
 		return toReturn;
 	}
 	
-	public Edge expand(int expandID) {
+	public Edge expand(int expandID, Node node) {
+		System.out.println("Expanding Edge between " + this.getSource().getClass().getSimpleName() + " and " +
+				this.getTarget().getClass().getSimpleName());
 		String newID = this.getXmiID() + "_" + expandID;
 		if (Importer.readElements.contains(newID)) {
 			return (Edge) Importer.getElement(newID);
@@ -115,6 +117,7 @@ public class Edge extends XmiObjectWithName implements java.lang.Cloneable {
 			Edge edge = this.clone();
 			edge.setXmiID(newID);
 			Importer.addElement(edge);
+			edge.setSource(node);
 			edge.setTarget(edge.getTarget().expand(expandID));
 			
 		//	((Node)edge.getTarget()).getIncoming().remove(this);
