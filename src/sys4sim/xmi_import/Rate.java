@@ -43,6 +43,7 @@ public class Rate extends XmiObject implements java.lang.Cloneable {
 					//System.out.println("Rate - Edge: " + rate.getBaseActivityEdge().getXmiID());
 				}
 			}
+			
 		}
 			
 		return rates;
