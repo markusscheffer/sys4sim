@@ -510,7 +510,8 @@ public class Importer extends DefaultHandler{
 		} else if (resource instanceof Transporter) {
 			tp.add((Transporter) resource);
 		} else if (resource instanceof Worker) {
-			wp.add((Worker) resource);
+			// TODO: This is removed for easier examples.
+			// wp.add((Worker) resource);
 		} else {
 			System.out.println("Sorry: Do not know the correct resource.");
 		}
