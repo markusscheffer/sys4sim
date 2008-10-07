@@ -288,7 +288,6 @@ public class Importer extends DefaultHandler{
 	addEdgesToModel(model, realEdges);
 	}
 	
-	private static int newQueueCounter = 0;
 	
 	private static void addEdgesToModel(Model model, ArrayList<Edge> edges) {
 	
@@ -314,7 +313,6 @@ public class Importer extends DefaultHandler{
 
 					Connector connector2 = new Connector();
 					Queue queue = new Queue();
-					queue.setId("gen_q_" + newQueueCounter++);
 					
 					for (Connector queueConnector : queueConnectors) {
 						if (queueConnector.getTarget().equals(process)) {
