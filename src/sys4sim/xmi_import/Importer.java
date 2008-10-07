@@ -323,8 +323,6 @@ public class Importer extends DefaultHandler{
 							queue = (Queue) connector2.getSource();
 							connector.setTarget(queue);
 							queue.getIn().add(connector);
-							model.addConnector(connector2);
-							model.getElements().put(queue.getId(), queue);
 						}
 					}
 
@@ -340,6 +338,7 @@ public class Importer extends DefaultHandler{
 						connector2.getTarget().getIn().add(connector2);
 						connector2.setId("connector_" + connectorCounter++);
 						model.addConnector(connector2);
+						model.getElements().put(queue.getId(), queue);
 					}
 				}
 			}
